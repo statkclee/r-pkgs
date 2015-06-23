@@ -7,7 +7,10 @@
 \usepackage{fontspec}
 \usepackage{xltxtra,xunicode}
 \defaultfontfeatures{Mapping=tex-text,Scale=MatchLowercase}
-\setmonofont[Mapping=tex-ansi]{Inconsolata}
+%\usepackage[hangul]{kotex}
+%\kscntformat{chapter}{}{~장}
+%\setmonofont[Mapping=tex-ansi]{Inconsolata}
+\usepackage{zi4}
 
 % Taken from pandoc x.md -o test.tex --standalone
 \usepackage{color}
@@ -69,27 +72,27 @@
 
 % \listoffigures
 % \listoftables
-\tableofcontents
+% \tableofcontents
 
 \mainmatter
 
-\part{Getting started}
+%\part{Getting started}
 \include{intro}
-\include{package}
-\part{Package components}
-\include{r}
-\include{description}
-\include{man}
-\include{vignettes}
-\include{tests}
-\include{namespace}
-\include{data}
-\include{src}
-\include{inst}
-\include{misc}
-\part{Best practices}
-\include{git}
-\include{check}
-\include{release}
+%\include{package}
+%\part{Package components}
+%\include{r}
+%\include{description}
+%\include{man}
+%\include{vignettes}
+%\include{tests}
+%\include{namespace}
+%\include{data}
+%\include{src}
+%\include{inst}
+%\include{misc}
+%\part{Best practices}
+%\include{git}
+%\include{check}
+%\include{release}
 
 \end{document}
