@@ -4,51 +4,58 @@ title: Introduction
 output: bookdown::html_chapter
 ---
 
-# Hi, 한글 Introduction {#intro-why}
+# 들어가며 {#intro-why}
 
-In R, the fundamental unit of shareable code is the package. A package bundles together code, data, documentation, and tests, and is easy to share with others. As of January 2015, there were over 6,000 packages available on the **C**omprehensive **R** **A**rchive **N**etwork, or CRAN, the public clearing house for R packages. This huge variety of packages is one of the reasons that R is so successful: the chances are that someone has already solved a problem that you're working on, and you can benefit from their work by downloading their package.
+R에서 공유 코드의 기본 단위가 팩키지(package)다. 
+패키지(Package)는 코드, 데이터, 문서, 테스트를 묶어 포함하고 있으며, 다른 사람과 공유하기 쉽다.
+2015년 1월 기준, R 팩키지를 위한 공공정보센터인 CRAN (**C**omprehensive **R** **A**rchive **N**etwork)에 6,000 개가 넘는 팩키지가 있다. 다양하고 엄청난 팩키지 숫자가 R이 성공한 요인 중 하나다: 누군가 여러분이 작업하고 있는 문제를 이미 해결했고, 따라서 해답이 담겨있는 팩키지를 다운로드 함으로써 작업에 혜택을 받을 수 있어서일 것이다.
 
-If you're reading this book, you already know how to use packages:
 
-* You install them from CRAN with `install.packages("x")`.
-* You use them in R with `library("x")`.
-* You get help on them with `package?x` and `help(package = "x")`.
+만약 이 책을 읽고 있다면, 이미 팩키지 사용법을 알고 있다:
 
-The goal of this book is to teach you how to develop packages so that you can write your own, not just use other people's. Why write a package? One compelling reason is that you have code that you want to share with others. Bundling your code into a package makes it easy for other people to use it, because like you, they already know how to use packages. If your code is in a package, any R user can easily download it, install it and learn how to use it.
+* `install.packages("x")` 명령어로 CRAN에서 팩키지를 설치한다.
+* `library("x")` 명령어로 R에서 사용한다.
+* `package?x` 와 `help(package = "x")` 명령어로 도움말을 얻는다.
 
-But packages are useful even if you never share your code. As Hilary Parker says in her [introduction to packages](http://hilaryparker.com/2014/04/29/writing-an-r-package-from-scratch/): "Seriously, it doesn't have to be about sharing your code (although that is an added benefit!). It is about saving yourself time." Organising code in a package makes your life easier because packages come with conventions. For example, you put R code in `R/`, you put tests in `tests/` and you put data in `data/`. These conventions are helpful because:
+이 책의 목적은 팩키지 개발하는 방법을 가르치는 것이다. 따라서 다른 사람이 작성한 팩키지를 사용하지만 말고 본인 스스로 팩키지를 작성할 수 있다.
+그럼 왜 팩키지를 작성할까? 한가지 설득력있는 이유는 다른 사람과 공유하고 싶은 코드를 만들었기 때문이다.
+코드를 팩키지에 넣어 번들링(bundling)하게 되면 다른 사람도 사용하기가 쉽다. 왜냐하면, 여러분처럼 다른 사람도 이미 팩키지 사용법을 알고 있기 때문이다.
+만약 코드가 팩키지에 담겨있다면, 어떤 R 사용자도 쉽게 다운로드받아, 설치하고, 사용법을 배울 수 있다.
 
-* They save you time --- you don't need to think about the best way to organise
-  a project, you can just follow a template.
+하지만, 코드를 공유하지 않을 때 조차도 팩키지는 유용하다.
+Hilary Parker가 [팩키지 소개(introduction to packages)](http://hilaryparker.com/2014/04/29/writing-an-r-package-from-scratch/) 언급했듯이 "심각하게 생각하면 (설사 부가적 혜택이 있을지라도) 코드를 공유에 관한 것이 될 필요는 없고, 여러분의 시간을 절약하는 것에 관한 것이다."
+팩키지로 코드를 조직화해서 관리하면 삶이 더 쉬워진다. 왜냐하면 팩키지가 관례(convention)와 함께 오기 때문이다. 예를 들어, R 코드를 `R/` 디렉토리에 넣고, 테스트를 `tests/` 디렉토리에, 데이터를  `data/` 디렉토리에 넣는다.
+이러한 관례가 도움이 된다. 왜냐하면:
+
+* 여러분의 시간을 절약해주기 때문이다 --- 프로젝트를 조직화하고 구조화하는 가장 최선의 방법을 찾는 생각을 할 필요가 없고, 단지 템플릿(template)만 쫓아가면 된다.
+
+* 표준화된 관례는 표준화된 도구로 이끈다 (Standardised conventions lead to standardised tools) --- 만약 R 팩키지 관례를 도입하기로 결정하면, 무료로 많은 도구가 생긴다. 
+
+팩키지를 사용해서 데이터 분석업무를 구조화하는 것도 가능하다. 이 방법에 대한 자세한 내용은 Robert M Flight의 [블로그 포스트](http://rmflight.github.io/posts/2014/07/analyses_as_packages.html)를 참조한다.
+
+## 철학 {#intro-phil}
+
+이 책에는 팩키지 개발에 대한 Hadley Wickham 철학이 담겨있다: 자동화될 수 있는 것은 자동화 되어야 한다(anything that can be automated, should be automated). 수작업은 가능하면 적게한다. 함수(function)로 가능하면 많은 작업을 한다. 팩키지 구조의 자세한 사항에 대해 많이 생각하기보다는 작성한 팩키지가 수행할 수 있는 것에 관한 생각에 더 많은 시간을 사용하는 것이 목표다. 
+
+이 철학은 주로 Hadley Wickham이 일반 개발작업 자동화 목적으로 작성한 `devtools` 팩키지를 통해서 구현된다. `devtools` 개발목표는 팩키지 개발과정을 가능하면 덜 고통스럽게 만드는 것이다. 수년동안 Hadley Wickham이 배운 팩키지 개발과정의 모든 모범사례(best practice)를 캡슐화해서 가능하게 했다. `devtools`를 통해서 수많은 잠재적 실수로부터 여러분을 지켜준다. 그렇게 함으로써 팩키지 개발보다는 관심가지고 풀고자하는 문제에 집중하게 한다. 
+
+`devtools`는 RStudio와 손에 손잡고 함께 가는데, Hadley Wickham 생각과 번역자도 동의하는 부분이지만, 대부분의 R 사용자에게 가장 최상의 개발환경을 제공한다. 거의 유일한 경쟁자는 [ESS(emacs speaks statistics)](http://ess.r-project.org/)로 만약 이맥스를 학습하고 필요에 맞출 수 있다면 상응하는 노력에 대한 보상을 줄 수 있는 개발환경이다. 이맥스의 역사(R보다도 오래됨)는 20년 이상 거슬러 올라간다. 하지만, 여전히 활발하게 개발이 진행되고 있고, 이 책에 기술된 많은 워크플로우는 이맥스에도 적용된다.
+
+`devtools`와 `RStudio`가 팩키지 개발 방법에 대한 저수준 상세함으로부터 여러분을 격리시켜 준다.
+좀더 많은 팩키지를 개발할 때, 저수준 상세함에 관심을 가지고 더 학습하길 강력히 추천한다.
+팩키지 개발을 위한 공신력 있는 상세 정보에 대한 최고 출처는 [R 확장자 작성(writing R extensions)][r-ext] 매뉴얼이다. 하지만, 만약 팩키지 기본에 아직 친숙하지 않다면, 이해하기 어려운 것이 이 매뉴얼이기도 하다. 또한, 이 책에서처럼 가장 많이 사용하고 유용한 구성요소에 집중하기 보다, 모든 가능한 팩키지 구성요소를 철저히 다루고 있다. 기초를 충분히 익히고, 내부 동작원리를 알고자 하면 [R 확장자 작성(writing R extensions)][r-ext] 매뉴얼이 유용한 정보원천이 된다.  
+
+## 이 책에 대해서 {#intro-outline}
+
+[R packages](#package-structure)에서 기본 팩키지 구조와 형태에 대해 학습을 시작한다. 그리고 나서, 다음 책 10장은 각 구성요소에 대한 상세부분으로 들어간다. 대략 중요도에 따라 다음과 같이 구성된다.
+
+
+* [R code](#r): 가장 중요한 디렉토리는 `R/`이고, 여기에 R 코드가 살아 있다.
+단지 이 디렉토리만 갖는 팩키지도 여전히 유용한 팩키지다. (사실, 만약 이 장만 읽고 책읽기를 멈춘다고 하더라도, 여전히 앞으로도 유용한 신규기술을 배울 필요가 있다.)
   
-* Standardised conventions lead to standardised tools --- if you buy into
-  R's package conventions, you get many tools for free.
-
-It's even possible to use packages to structure your data analyses, as Robert M Flight discusses in a [series of blog posts](http://rmflight.github.io/posts/2014/07/analyses_as_packages.html). 
-
-## Philosophy {#intro-phil}
-
-This book espouses my philosophy of package development: anything that can be automated, should be automated. Do as little as possible by hand. Do as much as possible with functions. The goal is to spend your time thinking about what you want your package to do rather than thinking about the minutiae of package structure.
-
-This philosophy is realised primarily through the devtools package, a suite of R functions that I wrote to automate common development tasks. The goal of devtools is to make package development as painless as possible. It does this by encapsulating all of the best practices of package development that I've learned over the years. Devtools protects you from many potential mistakes, so you can focus on the problem you're interested in, not on developing a package.
-
-Devtools works hand-in-hand with RStudio, which I believe is the best development environment for most R users. The only real competitor is [ESS](http://ess.r-project.org/), emacs speaks statistics, which is a rewarding environment if you're willing to put in the time to learn emacs and customise it to your needs. The history of ESS stretches back over 20 years (predating R!), but it's still actively developed and many of the workflows described in this book are also available there.
-
-Together, devtools and RStudio insulate you from the low-level details of how packages are built.  As you start to develop more packages, I highly recommend that you learn more about those details. The best resource for the official details of package development is always the official [writing R extensions][r-ext] manual. However, this manual can be hard to understand if you're not already familiar with the basics of packages. It's also exhaustive, covering every possible package component, rather than focussing on the most common and useful components, as this book does. Writing R extensions is a useful resource once you've mastered the basics and want to learn what's going on under the hood.
-
-## In this book {#intro-outline}
-
-You'll start by learning about the basic structure of a package, and the forms it can take, in [R packages](#package-structure). Then each of the next ten chapters of the book goes into more details about each component. They're roughly organised in order of importance:
-
-* [R code](#r): the most important directory is `R/`, where your R code lives. 
-  A package with just this directory is still a useful package. (And indeed,
-  if you stop reading the book after this chapter, you'll have still learned
-  some useful new skills.)
-  
-* [Package metadata](#description): the `DESCRIPTION` lets you describe 
-  what your package needs to work. If you're sharing your package, you'll also 
-  use the `DESCRIPTION` to describe what it does, who can use it 
-  (the license) and who to contact if things go wrong.
+* [Package metadata](#description): `DESCRIPTION`에는 작성한 팩키지가 무슨 작업을 수행하는지 기술한다. 
+  만약 팩키지를 공유하려고 한다면, `DESCRIPTION`을 사용해서 팩키지가 무엇을 수행하고, 누가 사용권한(license)을 갖는지,
+  그리고 만약 뭔가 잘못 동작하면 누구에게 연락해야 하는지 기술한다.
 
 * [Documentation](#man): if you want other people (including future-you!) to
   understand how to use the functions in your package, you'll need to document
