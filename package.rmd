@@ -4,54 +4,63 @@ title: Package structure
 output: bookdown::html_chapter
 ---
 
-# Package structure {#package-structure}
+# 팩키지 구조 {#package-structure}
 
-This chapter will start you on the road to package development by showing you how to create your first package. You'll also learn about the various states a package can be in, including what happens when you install a package. Finally, you'll learn about the difference between a package and a library and why you should care.
+이번 장은 첫번째 팩키지를 생성함으로써 여러분을 팩키지 개발을 시작한다. 또한, 팩키지를 설치할 때 발생하는 것을 포함하여 팩키지가 있을 수 있는 다양한 상태에 관해서도 학습할 것이다. 마지막으로, 팩키지(package)와 라이브러리(library) 차이점, 그리고 왜 이러한 차이점에 주목하는지도 배울 것이다.
 
-## Naming your package {#naming}
 
+## 팩키지 작명 (Naming package) {#naming}
+
+> "컴퓨터 과학에서 두가지 어려운 것이 있다: 작명(naming)과 캐쉬 무효화(cache invalidation)"
 > "There are only two hard things in Computer Science: cache invalidation and 
 > naming things." 
 >
 > --- Phil Karlton
 
-Before you can create your first package, you need to come up with a name for it. I think this is the hardest part of creating a package! (Not least because devtools can't automate it for you.)
+첫번째 팩키지를 생성하기 전에, 팩키지에 대한 이름을 제시할 필요가 있다.
+개인적으로 팩키지 생성에 가장 어려운 부분이라고 생각한다! (`devtools`가 여러분을 위해 자동화를 수행할 수 없기 때문에 그런 것은 최소한 아니다.)
 
-### Requirements for a name
 
-There are three formal requirements: the name can only consist of letters, numbers and periods, i.e., `.`; it must start with a letter; and it cannot end with a period. Unfortunately, this means you can't use either hyphens or underscores, i.e., `-` or `_`, in your package name. I recommend against using periods in package names because it has confusing connotations (i.e., file extension or S3 method).
+### 명칭에 대한 요구사항 
 
-### Strategies for creating a name
+세가지 형식 요건이 있다: 명칭은 문자, 숫자, 그리고 `.` 즉, 마침표으로만 구성될 수 있고; 문자로 시작되어야 하고; 마침표로 끝날 수 없다.
+불행하게도, 이것이 의미하는 바는 팩키지 명칭으로 하이픈(`-`)과 밑줄(`_`) 어떤 것도 사용할 수 없다는 것이다.
+팩키지 명칭에는 마침표를 사용하지 않는 것을 추천하는데 사유는 혼란을 줄 수 있는 의미를 내포하기 때문이다. (즉, 파일 확장자 혹은 S3 메쏘드)
 
-If you're planning on releasing your package, I think it's worth spending a few minutes to come up with a good name. Here are some recommendations for how to go about it:
 
-* Pick a unique name you can easily Google. This makes it easy for potential users to  
-  find your package (and associated resources) and for you to see who's using it. 
-  You can also check if a name is already used on CRAN by loading <http://cran.r-project.org/web/packages/[PACKAGE_NAME]>.
+### 작명 전략
 
-* Avoid using both upper and lower case letters: doing so makes the package name
-  hard to type and even harder to remember. For example, I can never remember if it's
-  Rgtk2 or RGTK2 or RGtk2.
+만약 팩키지 출시 계획을 가지고 있다면, 최소 몇분 정도 시간을 갖고 좋은 명칭을 생각해 보는 것이 좋다.
+다음에 작명하는 방법에 대한 몇가지 추천사항이 있다:
 
-* Find a word that evokes the problem and modify it so that it's unique:
+* 쉽게 인터넷 검색(구글링, 네이버 검색)할 수 있는 유일한 이름을 선정한다.
+  이렇게 함으로써 잠재적 사용자가 개발한 팩키지와 연관된 정보를 쉽게 찾게 하고, 개발자는 누가 팩키지를 사용하는지 쉽게 알 수 있게 한다.
+  <http://cran.r-project.org/web/packages/[PACKAGE_NAME]>을 통해서 이름이 이미 CRAN에 점유되었는지도 확인할 수 있다.
 
-    * plyr is generalisation of the apply family, and evokes pliers.
-    * lubridate makes dates and times easier.
-    * knitr (knit + r) is "neater" than sweave (s + weave).
-    * testdat tests that data has the correct format.
+* 대문자와 소문자를 함께 사용하는 것은 피한다: 대소문자를 섞게하면 팩키지 명칭을 타이핑하기 어렵게 하고 기억하는 것조차도 더 어렵다.
+  예를 들어, Rgtk2 혹은 RGTK2 혹은 RGtk2 인지 절대로 기억할 수 없다.
 
-* Use abbreviations: 
+* 문제를 야기할 수 있는 단어를 찾아서 변형해서 유일하게 만든다: 
 
-    * Rcpp = R + C++ (plus plus)
-    * lvplot = letter value plots. 
+    * `plyr`은 apply 패밀리의 일반화이며 pliers를 떠올리게 한다.
+    * `lubridate`는 날짜와 시간을 더 쉽게 만든다.
+    * `knitr` (knit + r) 은 `sweave` (s + weave) 보다 더 "단아(neater)"하다.
+    * `testdat`는 데이터가 올바른 형식인지 테스트한다.
 
-* Add an extra R: 
+* 축약을 사용한다: 
 
-    * stringr provides string tools.
-    * tourr implements grand tours (a visualisation method).
-    * gistr lets you programmatically create and modify GitHub gists.
+    * `Rcpp` = R + C++ (plus plus)
+    * `lvplot` = letter value plots. 
 
-If you're creating a package that talks to a commercial service, make sure you check the branding guidelines to avoid problems down the line. For example, rDrop isn't called rDropbox because Dropbox prohibits any applications from using the full trademarked name.
+* 추가로 R을 더한다:
+
+    * `stringr`은 문자열 도구다.
+    * `tourr`은 시각화 메쏘드로 두루 보여준다.
+    * `gistr`은 GitHub gists 서비스를 프로그램적으로 생성하고 변형하게 한다.
+
+상업 서비스로 연결되는 팩키지를 생성한다면, 이후로 발생할 문제를 회피하고자 브랜딩 지침을 확실히 점검한다.
+예를 들어 `rDrop`은 `rDropbox`로 불릴 수 없는데 이유는 Dropbox가 어떤 응용프로그램도 전체 상표이름을 사용하지 못하게 금하고 있기 때문이다.
+
 
 ## Creating a package {#getting-started}
 
