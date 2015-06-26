@@ -173,110 +173,150 @@ bookdown::embed_png("screenshots/project-options-2.png", dpi = 220)
 
 ### 번들(Bundled) 팩키지
 
-__번들(bundled)__
+__번들(bundled)__ 팩키지는 압축해서 단일 파일로 만든 팩키지다. (리눅스) 관례에 따라서, R에 팩키지 번들은 확장자가 `.tar.gz`이다.
+`.tar.gz` 확장자가 의미하는 바는 단일 파일(`.tar`)로 줄이고 나서 gzip(`.gz`)을 사용해서 압축했다는 것이다.
+번들 팩키지 그 자체로 그다지 유용하지는 않지만, 다른 상태 사이에 유용한 매개체가 된다.
+번들 팩키지가 필요한 드문 경우로, `devtools::build()`을 호출해서 팩키지를 만든다.
 
-A  package is a package that's been compressed into a single file. By convention (from Linux), package bundles in R use the extension `.tar.gz`. This means that multiple files have been reduced to a single file (`.tar`) and then compressed using gzip (`.gz`). While a bundle is not that useful on its own, it's a useful intermediary between the other states. In the rare case that you do need a bundle, call `devtools::build()` to make it. 
+만약 번들 팩키지 압축을 풀게 된다면, 거의 소스코드 팩키지와 같다는 것을 알게 된다.
+압축을 푼 번들 팩키지와 소스코드 팩키지 간에 주된 차이는 다음과 같다:
 
-If you decompress a bundle, you'll see it looks almost the same as your source package. The main differences between an uncompressed bundle and a source package are:
 
-* Vignettes are built so that you get HTML and PDF output instead of 
-  Markdown or LaTeX input.
+* 소품문(Vignettes)이 빌드되어서 마크다운 혹은 LaTeX 입력 파일 대신에 HTML과 PDF 출력 결과가 있다.
 
-* Your source package might contain temporary files used to save time during
-  development, like compilation artefacts in `src/`. These are never found in 
-  a bundle.
+* 소스코드 팩키지에는 `src/` 디렉토리 내부에 컴파일된 산출물같은 개발하는 동안 시간을 절약해주는데 사용되는 임시 파일이 포함될 수 있다.
+
+* `.Rbuildignore` 파일 목록에 올라간 어떤 파일도 번들 팩키지에는 포함되지 않는다.
   
-* Any files listed in `.Rbuildignore` are not included in the bundle.
 
-`.Rbuildignore` prevents files in the source package from appearing in the bundled package. It allows you to have additional directories in your source package that will not be included in the package bundle. This is particularly useful when you generate package contents (e.g. data) from other files. Those files should be included in the source package, but only the results need to be distributed. This is particularly important for CRAN packages (where the set of allowed top-level directories is fixed). Each line gives a Perl-compatible regular expression that is matched, without regard to case, against the path to each file (i.e. `dir(full.names = TRUE)` run from the package root directory) - if the regular expression matches, the file is excluded. 
+`.Rbuildignore` 파일은 소스코드 팩키지에 파일이 번들 팩키지에 포함되지 못하게 한다.
+따라서 팩키지 번들에 포함되지 않는 소스코드 팩키지에 추가적인 디렉토리를 갖을 수 있다.
+다른 파일에서 팩키지 콘텐츠(예, 데이터)를 생성할 때 특별 유용하다.
+이런 유형의 파일은 소스코드 팩키지에는 포함되어야 하지만, 단지 결과만 배포될 필요가 있다.
+(허가된 최상위 디렉토리가 이미 정해진) CRAN 팩키지에 특히 중요하다.
+각 행은 대소문자 관계없이 경로상 파일에 대해 매칭되는 펄-호환(Perl-compatible) 정규 표현식으로 표현되고
+(즉, `dir(full.names = TRUE)` 명령이 팩키지 루트 디렉토리로부터 실행된다) - 만약 정규 표현식이 매칭되면 파일은 제외된다.
 
-If you wish to exclude a specific file or directory (the most common use case), you __MUST__ anchor the regular expression. For example, to exclude a directory called notes, use `^notes$`. The regular expression `notes` will match any file name containing notes, e.g. `R/notes.R`, `man/important-notes.R`, `data/endnotes.Rdata`, etc. The safest way to exclude a specific file or directory is to use `devtools::use_build_ignore("notes")`, which does the escaping for you.
+만약 가장 흔한 사용사례(use case)로 특정 파일 혹은 디렉토리를 제외하고자 한다면, 정규 표현식을 __고수해야__ 한다.
+예를 들어, notes 디렉토리를 제외하려면, `^notes$` 표현식을 사용한다.
+정규 표현식 `notes`는 notes를 포함하는 어떤 파일이름도 매칭한다. 예를 들어, 
+`R/notes.R`, `man/important-notes.R`, `data/endnotes.Rdata`, 등등이다.
+특정 파일 혹은 디렉토리를 제외하는 가장 안전한 방법은 `devtools::use_build_ignore("notes")`을 사용하는 것인데 개발자를 대신해서 무시작업을 수행한다.
 
-Here's a typical `.Rbuildignore` file from one of my packages:
+다음에 Hadley Wickham이 작성한 팩키지 중 하나에서 나온 전형적인 `.Rbuildignore` 파일 예제가 있다.
 
 ```
-^.*\.Rproj$         # Automatically added by RStudio,
-^\.Rproj\.user$     # used for temporary files. 
-^README\.Rmd$       # An Rmarkdown file used to generate README.md
-^cran-comments\.md$ # Comments for CRAN submission
-^NEWS\.md$          # A news file written in Markdown
-^\.travis\.yml$     # Used for continuous integration testing with travis
+^.*\.Rproj$         # RStudio가 자동으로 추가.
+^\.Rproj\.user$     # 임시파일에 대해 사용.
+^README\.Rmd$       # README.md 파일을 생성하는데 사용되는 마크다운 파일.
+^cran-comments\.md$ # CRAN 제출 위한 주석.
+^NEWS\.md$          # 마크다운으로 작성된 뉴스 파일.
+^\.travis\.yml$     # travis 지속적 통합 테스트로 사용.
 ```
 
-I'll mention when you need to add files to `.Rbuildignore` whenever it's important.
+중요할 때마다 언제 `.Rbuildignore`에 파일을 추가할지 언급할 것이다.
 
-### Binary packages
+### 바이너리 (Binary) 팩키지
 
-If you want to distribute your package to an R user who doesn't have package development tools, you'll need to make a __binary__ package. Like a package bundle, a binary package is a single file. But if you uncompress it, you'll see that the internal structure is rather different from a source package: 
+만약 팩키지 개발 도구가 없는 R 사용자에게 팩키지를 배포하고자 한다면,
+__바이너리(binary)__ 팩키지를 만들 필요가 있다.
+번들 팩키지와 마찬가지로 바이너리 팩키지는 단일 파일이다.
+하지만, 만약 압축을 푼다면, 내부 구조가 소스코드 팩키지와 다소 다른 것을 알게 된다:
 
-* There are no `.R` files in the `R/` directory - instead there are three
-  files that store the parsed functions in an efficient file format. This is
-  basically the result of loading all the R code and then saving the
-  functions with `save()`. (In the process, this adds a little extra metadata to 
-  make things as fast as possible).
+* `R/` 디렉토리에는 어떤 `.R` 파일도 없다 - 대신에 효율적 파일 형식으로 파싱된 함수를 
+  저장하고 있는 파일이 세개 있다. 이것은 기본적으로 모든 R 코드를 로딩하고 나서 
+  `save()` 명령어로 함수를 저장한 결과다. (처리 과정에서 일부 메타데이터가 추가되서
+  최대한 빠르게 만든다).
 
-* A `Meta/` directory contains a number of `Rds` files. These files contain 
-  cached metadata about the package, like what topics the help files cover and
-  parsed versions of the `DESCRIPTION` files. (You can use `readRDS()` to see 
-  exactly what's in those files). These files make package loading faster
-  by caching costly computations.
+* `Meta/` 디렉토리에는 많은 `Rds` 파일이 담겨있다. 해당 파일은 도움말 파일이 무슨 주제를 다루고 있는지와 `DESCRIPTION` 파일의 파싱 버젼같은 팩키지에 관한 
+  캐쉬 메타데이터를 담고 있다.  (`readRDS()` 명령어를 사용해서 정확하게 해당 파일에 담겨 있는 내용을 확인할 수 있다.) 
+  해당 파일은 고비용 연산작업을 캐싱해서 팩키지 로딩을 더 빠르게 만드는 역할을 한다.
 
-* An `html/` directory contains files needed for HTML help.
+* `html/` 디렉토리에는 HTML 도움말에 필요한 파일이 담겨있다.
 
-* If you had any code in the `src/` directory there will now be a `libs/`
-  directory that contains the results of compiling 32 bit (`i386/`) and 64 bit 
-  (`x64/`) code.
-  
-* The contents of `inst/` are moved to the top-level directory.
+* `src/` 디렉토리에 어떤 코드라도 있다면, 32 비트(`i386/`) 코드와 64비트 (`x64/`) 코드를
+  컴파일한 결과가 `libs/` 디렉토리에 담겨진다.
 
-Binary packages are platform specific: you can't install a Windows binary package on a Mac or vice versa. Also, while Mac binary packages end in `.tgz`, Windows binary packages end in `.zip`. You can use `devtools::build(binary = TRUE)` to make a binary package. 
+* `inst/` 콘텐츠는 최상위 디렉토리로 이동된다.
 
-The following diagram summarises the files present in the root directory for source, bundled and binary versions of devtools.
+바이너리 팩키지는 특정 플랫폼에 종속된다: 윈도우 바이너리 팩키지를 맥에 설치할 수 없고 반대 경우로 마찬가지다.
+또한, 맥 바이너터리 팩키지가 `.tgz`으로 끝나는 반면에 윈도우 바이너리 팩키지는 `.zip`으로 끝난다.
+`devtools::build(binary = TRUE)` 명령어를 사용해서 바이너리 팩키지를 생성한다.
+
+다음 다이어그램에 소스코드, 번들, 바이너리 `devtools` 버젼 개발할 때 루트 디렉토리에 나타나는 파일정보가 요약되어 있다.
+
 
 ```{r, echo = FALSE}
 bookdown::embed_png("diagrams/package-files.png")
 ```
 
-### Installed packages {#install}
+### 설치(Installed) 팩키지 {#install}
 
-An __installed__ package is just a binary package that's been decompressed into a package library (described below). The following diagram illustrates the many ways a package can be installed. This diagram is complicated! In an ideal world, installing a package would involve stringing together a set of simple steps: source -> bundle, bundle -> binary, binary -> installed. In the real world, it's not this simple because there are often (faster) shortcuts available.
+__설치(installed)__ 팩키지는 바이너리 팩키지로 (다음에 기술되는) 팩키지 라이브러리 내부에 분해된다.
+다음 다이어그램에는 팩키지가 설치될 수 있는 다양한 방법이 도해로 표현되어 있다.
+해당 다이어그램은 난해하다! 이상적인 세계에서 팩키지 설치는 단순한 절차집합을 쭉 연결한 것일 것이다:
+소스코드 -> 번들, 번들 -> 바이너리, 바이너리 -> 설치. 현실 세계에서는 이렇게 단순하지 않는데 이유는
+종종 (더 빠른) 단축방법이 있기 때문이다.
 
 ```{r, echo = FALSE}
 bookdown::embed_png("diagrams/installation.png")
 ```
 
-The tool that powers all package installation is the command line tool `R CMD INSTALL` - it can install a source, bundle or a binary package. Devtools functions provide wrappers that allow you to access this tool from R rather than from the command line. `devtools::install()` is effectively a wrapper for `R CMD INSTALL`. `devtools::build()` is a wrapper for `R CMD build` that turns source packages into bundles. `devtools::install_github()` downloads a source package from GitHub, runs `build()` to make vignettes, and then uses `R CMD INSTALL` to do the install. `devtools::install_url()`, `devtools::install_gitorious()`, `devtools::install_bitbucket()` work similarly for packages found elsewhere on the internet.
+모든 팩키지 설치에 강력한 힘을 부여하는 도구가 명령라인 도구인 `R CMD INSTALL` 이다 - 이를 통해 소스코드, 번들, 바이너리 팩키지를 설치할 수 있다.
+Devtools 함수는 감싸개(wrapper)를 제공해서 명령라인보다는 R에서 해당 도구에 접근을 가능케 한다.
+`devtools::install()`는 `R CMD INSTALL`에 대한 효과적인 감싸개(wrapper)가 된다.
+`R CMD build`는 `R CMD build`에 대한 감싸개(wrapper)로 소스코드 팩키지를 번들 팩키지로 변환한다.
+`devtools::install_github()`는 GitHub에서 소스코드 팩키지를 다운로드하고, `build()`를 실행해서 소품문(Vignettes)을 만들고 나서,
+`R CMD INSTALL`을 사용해서 설치작업을 수행한다. `devtools::install_url()`, `devtools::install_gitorious()`, `devtools::install_bitbucket()`은 인터넷 어디서나 발견되는 팩키지에 대해 유사한 작업을 수행한다.
 
-`install.packages()` and `devtools::install_github()` allow you to install a remote package. Both work by downloading and then installing the package. This makes installation very speedy. `install.packages()` is used to download and install binary packages built by CRAN. `install_github()` works a little differently - it downloads a source package, builds it and then installs it.
+`install.packages()`와 `devtools::install_github()`는 원격 팩키지(remote package)를 설치할 수 있게 한다.
+둘다 팩키지를 다운로드하고 나서 설치하는 작업을 수행한다.
+이런 방식이 설치를 매우 빠르게 한다.
+`install.packages()`는 CRAN에서 빌드한 바이너리 팩키지를 다운로드하고 설치하는데 사용된다.
+`install_github()`는 다소 다른 방식으로 동작한다 - 소스코드 팩키지를 다운로드하고, 빌드하고나서 설치작업을 진행한다.
 
-You can prevent files in the package bundle from being included in the installed package using `.Rinstignore`. This works the same way as `.Rbuildignore`, described above. It's rarely needed.
+`.Rinstignore`을 사용해서, 팩키지 번들에 포함된 파일이 설치 팩키지에 포함되지 못하게 할 수 있다.
+위에서 기술한 `.Rbuildignore` 와 같은 방식으로 동작한다. 거의 필요하지는 않다.
 
-### In memory packages
 
-To use a package, you must load it into memory. To use it without providing the package name (e.g. `install()` instead of `devtools::install()`), you need to attach it to the search path. R loads packages automatically when you use them. `library()` (and the later discussed `require()`) load, then attach an installed package.
+### 인메모리(In memory) 팩키지
+
+팩키지를 사용하기 위해서, 주기억장치에 팩키지를 올려야한다.
+팩키지 명칭없이 사용하기 위해서는 (예를 들어, `devtools::install()` 대신 `install()`) 검색경로에 팩키지를 배속(attach)시켜야 한다.
+팩키지를 사용할 때 자동으로 R이 팩키지를 로딩한다. 
+`library()`(그리고 나중에 논의될 `require()`)가 로딩되고 나서 설치 팩키지를 배속한다.
 
 ```{r, eval = FALSE}
-# Automatically loads devtools
+# 자동으로 devtools를 로드한다.
 devtools::install()
     
-# Loads and _attaches_ devtools to the search path
+# 검색 경로에 devtools를 로드하고 _배속_한다.
+Loads and _attaches_ devtools to the search path
 library(devtools)
 install()
 ```
 
-The distinction between loading and attaching packages is not important when you're writing scripts, but it's very important when you're writing packages. You'll learn more about the difference and why it's important in [search path](#search-path).
+팩키지를 로딩하고 배속하는 차이는 스크립트를 작성할 때 그다지 중요하지 한다.
+하지만, 패키지를 작성할 때는 매우 중요하다.
+[search path](#search-path)에서 차이점이 무엇이고, 왜 중요한지 더 학습한다.
 
-`library()` is not useful when you're developing a package because you have to install the package first. In future chapters you'll learn about `devtools::load_all()` and RStudio's "Build and reload", which allows you to skip install and load a source package directly into memory:
+`library()`는 팩키지를 개발할 때 유용하지는 않다. 왜냐하면 팩키지를 먼저 설치해야 하기 때문이다.
+다음 장에서 `devtools::load_all()` 와 RStudio "빌드와 재로딩(Build and reload)"을 학습하는데 이를 통해서
+설치를 건너뛰고 소스코드 팩키지를 직접 주기억장치에 로딩한다.
 
 ```{r, echo = FALSE}
 bookdown::embed_png("diagrams/loading.png")
 ```
 
-## What is a library? {#library}
+## 라이브러리(library)는 무엇인가? {#library}
 
-A library is simply a directory containing installed packages. You can have multiple libraries on your computer. In fact, almost every one has at least two: one for packages you’ve installed, and one for the packages that come with every R installation (like base, stats, etc). Normally, the directories with user-installed packages vary based on the version of R that you’re using. That's why it seems like you lose all of your packages when you reinstall R --- they're still on your hard drive, but R can't find them. 
+라이브러리는 단순히 말해 설치 팩키지를 담고 있는 디렉토리다.
+로컬 컴퓨터에 다수 라이브러리를 갖을 수 있다.
+사실 거의 누구나 최소 두 유형의 라이브러리를 갖는다: 사용자가 직접 설치한 팩키지와 R 설치할 때 따라오는 팩키지 (base, stats, 등).
+정상적으로, 사용자 설치 팩키지를 갖는 디렉토리는 R 버젼에 따라 다양한다.
+이런 연유로 인해서 R을 재설치할 때 모든 팩키지가 삭제된 것처럼 보인다 --- 여전히 하드 드라이브에 존재하지만, R이 찾을 수 없다.
 
-You can use `.libPaths()` to see which libraries are currently active. Here are mine:
+`.libPaths()`을 사용해서 어떤 라이브러리가 현재 활성화되었는지 살펴본다. 다음에 저자가 실행한 결과가 있다.
 
 ```{r, eval = FALSE}
 .libPaths()
@@ -299,9 +339,11 @@ lapply(.libPaths(), dir)
 #> [29] "translations" "utils"
 ```
 
-The first lib path is for the packages I've installed (I've installed at lot!). The second is for so-called "recommended" packages that come with every installation of R.
+첫번째 lib 경로는 저자가 설치한 팩키지에 대한 것이다. (내가 엄청 많이 설치했음!).
+두번째는 매번 R을 설치할 때 따라오는 소위 "추천(recommended)" 팩키지다.
 
-When you use `library(pkg)` or `require(pkg)` to load a package, R looks through each path in `.libPaths()` to see if a directory called `pkg` exists. If it doesn't exist, you'll get an error message:
+`library(pkg)` 혹은 `require(pkg)`을 사용해서 팩키지를 로딩할 때, R은 `.libPaths()` 경로를 훑어 `pkg` 디렉토리가 존재하는지 살핀다.
+만약 존재하지 않는다면, 오류 메시지가 출력된다:
 
 ```{r, error = TRUE}
 library(blah)
@@ -309,6 +351,14 @@ library(blah)
 require(blah)
 ```
 
-The main difference between `library()` and `require()` is what happens if a package isn't found. While `library()` throws an error, `require()` prints a warning message and returns FALSE. In practice, this distinction isn't important because when building a package you should __NEVER__ use either inside a package. See [package dependencies](#dependencies) for what you should do instead.
+`library()`와 `require()` 주된 차이는 만약 팩키지가 존재하지 않는다면 발생한다.
+`library()`는 오류를 던지지만, `require()`는 경고 메시지를 출력하고 FALSE를 반환한다.
+실무에서, 이러한 차이점은 중요하지 않는데 이유는 팩키지를 빌딩할 때, 팩키지 내부 어느쪽도 __결코__ 사용하지 말아야 되기 때문이다.
+대신에 해야되는 작업에 대해서 [package dependencies](#dependencies)를 참조한다.
 
-When you start learning R, it's easy to get confused between libraries and packages because you use `library()` function to load a _package_. However, the distinction between the two is important and useful. For example, one important application is packrat, which automates the process of managing project specific libraries. With packrat, when you upgrade a package in one project, it only affects that project, not every project on your computer. This is useful because it allows you to play around with cutting-edge packages without affecting other projects' use of older, more reliable packages. This is also useful when you're both developing and using a package.
+R 학습을 시작할 때, 라이브러리와 팩키지를 혼동하기 쉽다. 왜냐하면, `library()` 함수를 사용해서 _팩키지(package)_를 로딩하기 때문이다.
+하지만, 둘 간의 차이점은 중요하고 유용하다.
+예를 들어, 한 중요한 응용프로그램으로 특정 프로젝트 라이브러리 관리 과정을 자동화하는 `packrat`가 있다.
+한 프로젝트에 특정 팩키지를 갱신할 때, `packrat`를 사용해서 컴퓨터에 모든 프로젝트가 아니고 해당 프로젝트만 영향을 준다.
+이것이 유용한데 이유는 다른 프로젝트의 더 오래되고 더 신뢰성 있는 팩키지에 영향을 전혀 주지 않고 최신 팩키지를 가지고 놀 수 있게 한다.
+팩키지를 개발하고 동시에 사용할 때 또한 요긴하게 사용된다.
