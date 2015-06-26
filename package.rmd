@@ -62,75 +62,79 @@ output: bookdown::html_chapter
 예를 들어 `rDrop`은 `rDropbox`로 불릴 수 없는데 이유는 Dropbox가 어떤 응용프로그램도 전체 상표이름을 사용하지 못하게 금하고 있기 때문이다.
 
 
-## Creating a package {#getting-started}
+## 팩키지 생성하기 {#getting-started}
 
-Once you've come up with a name, there are two ways to create the package. You can use RStudio:
+팩키지 명칭을 정했으면, 팩키지를 생성하는 두가지 방법이 있다.
+RStuio를 사용할 수 있다:
 
-1. Click File | New Project.
+1. `File` | `New Project` 를 클릭한다.
 
-2. Choose "New Directory":
+2. "New Directory" 를 선택한다:
 
     ```{r, echo = FALSE}
     bookdown::embed_png("screenshots/create-1.png", dpi = 220)
     ```
    
-2. Then "R Package":
+2. 그리고 나서 "R Package" 를 선택한다.:
 
     ```{r, echo = FALSE}
     bookdown::embed_png("screenshots/create-2.png", dpi = 220)
     ```
 
-2. Then give your package a name and click "Create Project":
+2. 그리고 나서 팩키지 명칭을 부여하고, "Create Project" 를 클릭한다:
 
     ```{r, echo = FALSE}
     bookdown::embed_png("screenshots/create-3.png", dpi = 220)
     ```
     
-Alternatively, you can create a new package from within R by running
+대안으로, R 내부에서 다음 명령어를 실행해서 신규 팩키지를 생성한다.
 
 ```{r, eval = FALSE}
 devtools::create("path/to/package/pkgname")
 ```
-    
-Either route gets you to the same place: the smallest usable package, one with three components:
 
-1. An `R/` directory, which you'll learn about in [R code](#r).
+어느 경로를 택하든 동일한 장소에 도달한다: 세개 구성요소를 갖는 가장 작은 유용한 팩키지가 생성된다:
 
-1. A basic `DESCRIPTION` file, which you'll learn about in 
-   [package metadata](#description).
 
-1. A basic `NAMESPACE` file, which you'll learn about in 
-   [the namespace](#namespace).
+1. `R/` 디렉토리, [R code](#r) 에서 학습 예정.
 
-It will also include an RStudio project file, `pkgname.Rproj`, that makes your package easy to use with RStudio, as described below.
+1. 기본 `DESCRIPTION` 파일, [package metadata](#description) 에서 학습 예정.
 
-Don't use `package.skeleton()` to create a package. Following that workflow actually creates more work for you because it creates extra files that you'll have to delete or modify before you can have a working package.
+1. 기본 `NAMESPACE` 파일, [the namespace](#namespace) 에서 학습 예정.
 
-## RStudio projects {#projects}
+`pkgname.Rproj` RStudio 프로젝트 파일도 포함되어서 다음에 기술되듯이 RStudio로 팩키지 생성을 쉽게 한다.
 
-To get started with your new package in RStudio, double-click the `pkgname.Rproj` file that `create()` just made. This will open a new RStudio project for your package. Projects are a great way to develop packages because:
+팩키지 생성에 `package.skeleton()`을 사용하지 말라.
+이유는 제안하는 작업흐름(workflow)를 따르게 되면 더 많은 작업이 생성되는데 실제 동작되는 팩키지를 갖기 전에 삭제하거나 변형해야 되는 잉여 파일이 생성되기 때문이다.
 
-*   Each project is isolated; code run in one project does not affect any 
-    other project.
 
-*   You get handy code navigation tools like `F2` to jump to a function
-    definition and `Ctrl + .` to look up functions by name.
+## RStudio 프로젝트 {#projects}
 
-*   You get useful keyboard shortcuts for common package development tasks.
-    You'll learn about them throughout the book. But to see them all, press 
-    Alt + Shift + K or use the Help | Keyboard shortcuts menu.
+RStudio로 신규 팩키지 개발을 시작하기 위해서,
+`create()`가 방금 전에 생성한 `pkgname.Rproj` 파일을 두번 클릭한다.
+팩키지를 개발을 위한 신규 RStudio 프로젝트를 열 것이다.
+프로젝트는 팩키지 개발을 위한 훌륭한 방법인데 이유는 :  
+
+*   각 프로젝트가 격리된다; 한 프로젝트에서 실행된 코드는 다른 어떤 프로젝트도 영향을 미치지 않는다.
+
+*   `F2` 같은 손쉬운 코드 이동 도구로 함수 정의로 바로 찾아 들어갈 수 있고, `Ctrl + .` 단축키를 사용해서 명칭으로 함수를 찾는다.
+
+*   일반적인 팩키지 개발 작업을 위해서 유용한 키보드 단축키를 학습한다. 단축키에 대해서는 이책을 통해서 더 배울 것이다. 하지만, 전체 단축키를 보기 위해서 `Alt + Shift + K`를 누르거나 | 키보드 단축키 메뉴( Help | Keyboard shortcuts)를 사용한다.
     
     ```{r, echo = FALSE}
     bookdown::embed_png("screenshots/keyboard-shortcuts.png")
     ```
-   
-(If you want to learn more RStudio tips and tricks, follow @[rstudiotips](https://twitter.com/rstudiotips) on twitter.)
 
-Both RStudio and `devtools::create()` will make an `.Rproj` file for you. If you have an existing package that doesn't have an `.Rproj` file, you can use `devtools::use_rstudio("path/to/package")` to add it. If you don't use RStudio, you can get many of the benefits by starting a new R session and ensuring the working directory is set to the package directory. 
+(만약 RStudio 비법과 요령에 대해 더 배우고자 한다면, 트위터 @[rstudiotips](https://twitter.com/rstudiotips) 계정을 팔로잉한다.)
 
-### What is an RStudio project file?
+RStudio와 `devtools::create()`이  `.Rproj` 파일을 자동 생성한다.
+`.Rproj`를 갖지 않는 기존 팩키지가 있다면, `devtools::use_rstudio("path/to/package")` 명령어로 추가한다. 만약 RStudio를 사용하지 않는다면, 신규 R 세션을 생성하고 작업 디렉토리가 팩키지 디렉토리에 맞춰졌는지 확실히 하고 개발을 착수한다.
 
-An `.Rproj` file is just a text file. The project file created by devtools looks like this:
+
+### RStudio 프로젝트 파일은 무엇인가?
+
+`.Rproj` 파일은 다를 것 없는 텍스트 파일이다. `devtools`로 생성된 프로젝트 파일은 다음이 생겼다:
+
 
 ```
 Version: 1.0
@@ -151,24 +155,27 @@ PackageInstallArgs: --no-multiarch --with-keep.source
 PackageRoxygenize: rd,collate,namespace
 ```
 
-You don't need to modify this file by hand. Instead, use the friendly project options dialog box, accessible from the projects menu in the top-right corner of RStudio.
+수작업으로 해당 프로젝트 파일을 변경할 필요는 없다. 대신에, RStudio 오른쪽 하단에 프로젝트 메뉴에서 접급할 수 있는 `Project Options...`를 클릭하고 대화창으로 사용한다.
+
 
 ```{r, echo = FALSE}
 bookdown::embed_png("screenshots/project-options-1.png", dpi = 220)
 bookdown::embed_png("screenshots/project-options-2.png", dpi = 220)
 ```
 
-## What is a package? {#package}
+## 팩키지는 무엇인가? {#package}
 
-To make your first package, all you need to know is what you've learnt above. To master package development, particularly when you're distributing a package to others, it really helps to understand the five states a package can be in across its lifecycle: source, bundled, binary, installed and in-memory. Understanding the differences between these states will help you form a better mental model of what `install.packages()` and `devtools::install_github()` do, and will make it easier to debug problems when they arise.
+첫번째 팩키지를 만들기 위해서, 알아야 되는 모든 것이 위에서 학습한 것이다. 팩키지 개발에 통달하기 위해서, 특히, 외부에 배포할 팩키지를 개발할 때, __5단계 팩키지 생애주기(lifecycle)__를 이해하는 것이 정말 도움이 된다: 소스코드(source), 번들(bundled), 바이너리(binary), 설치(installed), 메모리(in-memory). 생애주기 단계 사이 차이를 이해하는 것이 `install.packages()` 와 `devtools::install_github()`이 무엇을 하는지에 대한 더 나은 정신세계를 갖추도록 도움을 줄 것이고 문제가 발생할 때 디버깅을 더 쉽게 도와준다.
 
-### Source packages
+### 소스코드(Source) 팩키지
 
-So far, we've just worked with a __source__ package: the development version of a package that lives on your computer. A source package is just a directory with components like `R/`, `DESCRIPTION`, and so on.
+지금까지, __소스코드(source)__ 팩키지로 작업했다: 로컬 개발자 컴퓨터에 작업하고 있는 개발 버젼 팩키지. 소스코드 팩키지는 다름 아닌  `R/`, `DESCRIPTION`, 등을 구성요소로 갖는 디렉토리다.
 
-### Bundled packages
+### 번들(Bundled) 팩키지
 
-A __bundled__ package is a package that's been compressed into a single file. By convention (from Linux), package bundles in R use the extension `.tar.gz`. This means that multiple files have been reduced to a single file (`.tar`) and then compressed using gzip (`.gz`). While a bundle is not that useful on its own, it's a useful intermediary between the other states. In the rare case that you do need a bundle, call `devtools::build()` to make it. 
+__번들(bundled)__
+
+A  package is a package that's been compressed into a single file. By convention (from Linux), package bundles in R use the extension `.tar.gz`. This means that multiple files have been reduced to a single file (`.tar`) and then compressed using gzip (`.gz`). While a bundle is not that useful on its own, it's a useful intermediary between the other states. In the rare case that you do need a bundle, call `devtools::build()` to make it. 
 
 If you decompress a bundle, you'll see it looks almost the same as your source package. The main differences between an uncompressed bundle and a source package are:
 
