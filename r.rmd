@@ -4,95 +4,117 @@ layout: default
 output: bookdown::html_chapter
 ---
 
-# R code {#r}
+# R 코드 {#r}
 
-The first principle of using a package is that all R code goes in `R/`. In this chapter, you'll learn about the `R/` directory, my recommendations for organising your functions into files, and some general tips on good style. You'll also learn about some important differences between functions in scripts and functions in packages.
+팩키지 사용 첫번째 원칙은 모든 R 코드는 `R/` 디렉토리에 들어간다.
+이번 장에서, `R/` 디렉토리를 학습하고, 함수를 파일로 정리하는 저자 나름의 방식을 추천하고, 좋은 스타일에 대한 일반적인 비법을 전수한다. 또한, 팩키지에 담기는 함수와 스크립트 함수 사이에 중요한 차이점도 학습할 것이다.
 
-## R code workflow {#r-workflow}
 
-The first practical advantage to using a package is that it's easy to re-load your code. You can either run `devtools::load_all()`, or in RStudio press __Ctrl/Cmd + Shift + L__,  which also saves all open files, saving you a keystroke.
+## R 코드 작업흐름(workflow) {#r-workflow}
 
-This keyboard shortcut leads to a fluid development workflow:
+팩키지를 사용하면 생기는 첫번째 실질적인 장점은 코드를 다시 적재하기 쉽다는 것이다.
+`devtools::load_all()` 명령어를 실행하던가, RStudio에서 __Ctrl/Cmd + Shift + L__ 키를 누르게 되면 키입력 횟수도 줄고 열린 모든 파일을 저장할 수도 있다.
 
-1. Edit an R file.
+키보드 단축키를 활용으로 물 흐르듯한 개발 작업흐름이 된다:
 
-1. Press Ctrl/Cmd + Shift + L.
 
-1. Explore the code in the console.
+1. R 파일을 편집한다.
 
-1. Rinse and repeat.
+1. Ctrl/Cmd + Shift + L 키를 누른다.
 
-Congratulations! You've learned your first package development workflow. Even if you learn nothing else from this book, you'll have gained a useful workflow for editing and reloading R code.
+1. 콘솔에 코드를 탐색한다.
 
-## Organising your functions {#r-organising}
+1. 코드를 깔끔하게 만들고, 과정을 반복한다.
 
-While you're free to arrange functions into files as you wish, the two extremes are bad: don't put all functions into one file and don't put each function into its own separate file. (It's OK if some files only contain one function, particularly if the function is large or has a lot of documentation.). File names should be meaningful and end in `.R`.
+축하합니다! 방금 첫번째 팩키지 개발 작업흐름을 학습했다. 
+이 책에서 다른 어떤 것도 학습하지 못했을 지라도, R 코드를 편집하고 다시 적재하는 유용한 작업흐름(workflow)을 얻었다.
+
+
+## 함수 정리하기 {#r-organising}
+
+자유로이 함수를 파일에 정리할 수 있지만, 양 극단은 좋지 않다: 모든 함수를 파일 하나에 담거나, 각각의 함수를 별도 파일에 담는 것이다. (예외적인 상황으로 함수가 크거나 함수에 따린 문서가 많은 경우에 일부 파일이 함수 하나를 담을 수 있다) 파일 명칭은 유의미해야 하며, `.R`로 끝나야 된다.
 
 ```{r, eval = FALSE}
-# Good
+# 좋은 사례
 fit_models.R
 utility_functions.R
 
-# Bad
+# 나쁜 사례
 foo.r
 stuff.r
 ```
 
-Pay attention to capitalization, since you, or some of your collaborators, might be using an operating system with a case-insensitive file system (e.g., Microsoft Windows or OS X). Avoid problems by never using filenames that differ only in capitalisation.
+개발자를 포함해서 동료 일부가 대소문자를 구분하는 파일 시스템을 갖는 운영체제(예를 들어, 마이크로소프트 윈도우 혹은 OS X) 때문에 대문자 사용에 주의한다. 단지 대문자만 다른 파일명칭을 사용하지 않아서 생기는 문제를 피하라.
 
-My rule of thumb is that if I can't remember the name of the file where a function lives, I need to either separate the functions into more files or give the file a better name. (Unfortunately you can't use subdirectories inside `R/`. The next best thing is to use a common prefix, e.g., `abc-*.R`.).
+저자 경험치에 따르면, 함수가 담기 파일 이름을 기억할 수가 없다면, 함수를 더 많은 파일로 쪼개던가 더 나은 기억하기 좋은 이름을 부여한다. (불행하게도 `R/` 내부에 하위디렉토리를 사용할 수는 없다. 차선책은 공통된 접두어를 사용하는 것으로 예를 들어, `abc-*.R`과 같다.)
 
-The arrangement of functions within files is less important if you master two important RStudio keyboard shortcuts that let you jump to the definition of a function:
+만약 함수 정의로 바로 건너뛸 수 있는 RStudio 단축키 두개를 익힌다면 파일 내부 함수 정렬은 그다지 중요하지 않게 된다:
 
-*   Click a function name in code and press __F2__.
+*   코드에 함수 명칭을 클릭하고 __F2__키를 누른다.
 
-*   Press __Ctrl + .__ then start typing the name:
+*   __Ctrl + .__ 키를 누루고 나서 명칭을 타이핑한다:
 
     ```{r, echo = FALSE}
     bookdown::embed_png("screenshots/file-finder.png", dpi = 220)
     ```
 
-After navigating to a function using one of these tools, you can go back to where you were by clicking the back arrow at the top-left of the editor (`r bookdown::embed_png("screenshots/arrows.png", dpi = 240)`), or by pressing Ctrl/Cmd-F9.
+상기 방식중 하나를 사용해서 함수를 살펴본 다음에 편집기 상단 (`r bookdown::embed_png("screenshots/arrows.png", dpi = 240)`) 역방향 화살표를 클릭하거나 Ctrl/Cmd-F9 키를 눌러 되돌아 간다.
 
-## Code style {#style}
+## 코드 스타일 (Code style) {#style}
 
-Good coding style is like using correct punctuation. You can manage without it, but it sure makes things easier to read. As with styles of punctuation, there are many possible variations. The following guide describes the style that I use (in this book and elsewhere). It is based on Google's [R style guide](https://google-styleguide.googlecode.com/svn/trunk/Rguide.xml), with a few tweaks. 
+좋은 코딩 스타일은 마치 올바른 구두점을 사용하는 것과 같다.
+코딩 가이드 없이도 개발하는데 지장은 없지만, 코드를 훨씬 읽기 쉽게 하는 것은 사실이다.
+구두점 스타일과 마찬가지로 다양한 변형이 있다. 다음 안내서에는 저자가 사용하는 스타일(이책 및 개발 팩키지에 적용)을 기술하고 있다. 구글 [R 스타일 안내서(R style guide)](https://google-styleguide.googlecode.com/svn/trunk/Rguide.xml)에 기반하여 일부 변형하여 사용하고 있다.
 
-You don't have to use my style, but I strongly recommend that you use a consistent style and you document it. If you're working on someone else's code, don't impose your own style. Instead, read their style documentation and follow it as closely as possible.
+저자 스타일을 반듯이 사용할 필요는 없지만, 일관된 스타일을 사용해서 문서화하는 것을 강력히 추천한다.
+만약 다른 개발자 작성한 코드에 작업한다면, 본인 스타일을 강제하지 마라. 대신에 다른 개발자 스타일 문서를 읽고 가능하면 가깝게 지킨다.
 
-Good style is important because while your code only has one author, it will usually have multiple readers. This is especially true when you're writing code with others. In that case, it's a good idea to agree on a common style up-front. Since no style is strictly better than another, working with others may mean that you'll need to sacrifice some preferred aspects of your style.
+좋은 스타일은 중요한데 이유는 한 사람이 코드를 개발했다고 하더라도, 대체로 코들 읽는 독자는 다수다.
+이러한 점은 특히 여러명과 공동작업을 할 때 더욱 그렇다.
+이런 경우, 공통된 스타일을 앞서 선정하는 것은 좋은 생각이다.
+어떤 스타일도 다른 스타일보다 엄밀한 의미에서 더 나을 수가 없기 때문에,
+다른 사람과 함께 작업하는 것이 함의하는 것은 가장 좋아하는 자신만의 스타일 일부를 희생할 필요도 생긴다는 것이다.
 
-The formatR package, by Yihui Xie, makes it easier to clean up poorly formatted code. It can't do everything, but it can quickly get your code from terrible to pretty good. Make sure to read [the notes on the website](http://yihui.name/formatR/) before using it. It's as easy as:
+Yihui Xie가 개발한 `formatR` 팩키지를 사용해서 형식이 엉망인 코드를 쉽게 깔끔하게 만든다.
+팩키지가 모든 것을 수행하는 것은 아니지만, 엉망인 코드에서 매우 좋은 코드로 빨리 전환되게 할 수 있다.
+팩키지를 사용하기 전에 [웹사이트 주의사항](http://yihui.name/formatR/)을 확실히 읽고 진행한다.
+사용법은 쉽다:
 
 ```{r, eval = FALSE}
 install.packages("formatR")
 formatR::tidy_dir("R")
 ```
 
-A complementary approach is to use a code __linter__. Rather than automatically fixing problems, a linter just warns you about them. The lintr package by Jim Hester checks for compliance with this style guide and lets you know where you've missed something. Compared to formatR, it picks up more potential problems (because it doesn't need to also fix them), but you will still see false positives.
+보완적인 접근법은 __코드 린터(linter)__를 사용하는 것이다.
+자동으로 문제를 고쳐주기 보다는 코드린터는 문제에 대한 경고만 준다.
+Jim Hester가 작성한 `lintr` 팩키지는 코딩 스타일 안내서 준수도를 점검하고 빠뜨린 점이 어딘지 알려준다.
+`formatR`과 비교하여, `lintr`이 더 많은 잠재적 문제를 집어낸다. (이유는 문제를 고칠 필요가 없이 지적만 하면 되기 때문이다.) 하지만, 여전히 거짓 양성(false positives) 반응이 남아있다.
+
 
 ```{r, eval = FALSE}
 install.packages("lintr")
 lintr::lint_package()
 ```
 
-### Object names
+### 객체 명칭
 
-Variable and function names should be lowercase. Use an underscore (`_`) to separate words within a name (reserve `.` for S3 methods). Camel case is a legitimate alternative, but be consistent!  Generally, variable names should be nouns and function names should be verbs. Strive for names that are concise and meaningful (this is not easy!).
+변수명칭과 함수명칭은 모두 소문자여야 한다.
+명칭 내부 단어를 구분할 때는 밑줄(`_`)을 사용한다. 낙타대문자(Camel Case)는 적법한 대안이지만, 일관성을 갖춰라! 일반적으로 변수명칭은 명사, 함수명칭은 동사다. 간결하고 유의미한 작명에 노력하라 (쉽지 않아요!)
 
 ```{r, eval = FALSE}
-# Good
+# 좋은 사례
 day_one
 day_1
 
-# Bad
+# 나쁜 사례
 first_day_of_the_month
 DayOne
 dayone
 djm1
 ```
 
-Where possible, avoid using names of existing functions and variables. This will cause confusion for the readers of your code.
+가능하면, 기존 함수명과 변수명 사용을 자제하라.
+코드를 읽는 독자에게 혼란을 줄 수 있다.
 
 ```{r, eval = FALSE}
 # Bad
@@ -101,19 +123,22 @@ c <- 10
 mean <- function(x) sum(x)
 ```
 
-### Spacing
+### 공백(Spacing)
 
-Place spaces around all infix operators (`=`, `+`, `-`, `<-`, etc.). The same rule applies when using `=` in function calls. Always put a space after a comma, and never before (just like in regular English).
+`=`, `+`, `-`, `<-` 등 모든 이항 연산자(dyadic, infix operator) 주위는 공백을 둔다.
+함수 호출에 `=`을 사용할 때도 동일한 규칙이 적용된다.
+항상 콤마 뒤에는 공백을 두고, 일반적인 영어와 마찬가지로 앞에는 공백을 두지 않는다.
 
 ```{r, eval = FALSE}
-# Good
+# 좋은 사례
 average <- mean(feet / 12 + inches, na.rm = TRUE)
 
-# Bad
+# 나쁜 사례
 average<-mean(feet/12+inches,na.rm=TRUE)
 ```
 
-There's a small exception to this rule: `:`, `::` and `:::` don't need spaces around them. (If you haven't seen `::` or `:::` before, don't worry - you'll learn all about them in [namespaces](#namespace).)
+상기 규칙에 일부 예외가 있다: `:`, `::`, `:::`은 앞뒤로 공백이 필요없다.
+(만약 아직 `::` 혹은 `:::`을 보지 못했다면, 걱정하지 마라 - [namespaces](#namespace)에서 학습할 것이다.)
 
 ```{r, eval = FALSE}
 # Good
@@ -125,19 +150,21 @@ x <- 1 : 10
 base :: get
 ```
 
+함수 호출을 제외하고, 왼쪽 괄호 앞에 공백을 둔다.
+
 Place a space before left parentheses, except in a function call.
 
 ```{r, eval = FALSE}
-# Good
+# 좋은 사례
 if (debug) do(x)
 plot(x, y)
 
-# Bad
+# 나쁜 사례
 if(debug)do(x)
 plot (x, y)
 ```
 
-Extra spacing (i.e., more than one space in a row) is ok if it improves alignment of equal signs or assignments (`<-`).
+등호 혹은 대입(`<-`)할 때 일직선을 이룬다면, 여분의 공백(예를 들어, 연이은 공백인 경우)도 괜찮다. 
 
 ```{r, eval = FALSE}
 list(
@@ -146,27 +173,30 @@ list(
 )
 ```
 
+(콤마가 있지 않는다면) 괄호나 꺾쇠 괄호 내부 코드에 공백을 두지 않는다.
+
 Do not place spaces around code in parentheses or square brackets (unless there's a comma, in which case see above).
 
 ```{r, eval = FALSE}
-# Good
+# 좋은 사례
 if (debug) do(x)
 diamonds[5, ]
 
-# Bad
-if ( debug ) do(x)  # No spaces around debug
-x[1,]   # Needs a space after the comma
-x[1 ,]  # Space goes after comma not before
+# 나쁜 사례
+if ( debug ) do(x)  # debug 앞뒤로 공백이 없어야 한다.
+x[1,]   # 콤마 다음에 공백이 필요하다.
+x[1 ,]  # 공백이 콤마 앞이 아닌 뒤에 와야 한다.
 ```
 
-### Curly braces
+### 중괄호
 
-An opening curly brace should never go on its own line and should always be followed by a new line. A closing curly brace should always go on its own line, unless it's followed by `else`.
+여는 중괄호는 그 자체로 독립된 행을 구성하지 못하고 다음에는 항상 새줄이 시작된다.
+`else`가 다음에 오지 않는다면, 닫는 중괄호는 그 자체로 독립된 행을 구성한다. 
 
-Always indent the code inside curly braces.
+항상 중괄호 내부 코드는 들여쓰기한다.
 
 ```{r, eval = FALSE}
-# Good
+# 좋은 사례
 
 if (y < 0 && debug) {
   message("Y is negative")
@@ -178,7 +208,7 @@ if (y == 0) {
   y ^ x
 }
 
-# Bad
+# 나쁜 사례
 
 if (y < 0 && debug)
 message("Y is negative")
@@ -191,25 +221,30 @@ else {
 }
 ```
 
-It's ok to leave very short statements on the same line:
+매우 짫은 문장을 동일한 행에 두는 것은 괜찮다:
 
 ```{r, eval = FALSE}
 if (y < 0 && debug) message("Y is negative")
 ```
 
-### Line length
+### 줄 길이 (Line length)
 
-Strive to limit your code to 80 characters per line. This fits comfortably on a printed page with a reasonably sized font. If you find yourself running out of room, this is a good indication that you should encapsulate some of the work in a separate function.
+코드를 매 줄마다 문자 80개 이하로 만들어라.
+이렇게 하면 일반적인 폰트 크기에 맞춰 출력도 괜찮다.
+만약 여분의 공간이 부족하다고 느껴진다면, 별도 함수에 작업 일부를 캡슐화해야 된다는 좋은 표식이 된다.
 
-### Indentation
+### 들여쓰기 (Indentation)
 
-When indenting your code, use two spaces. Never use tabs or mix tabs and spaces. Change these options in the code preferences pane:
+코드를 들여쓰기 할 때, 공백을 두개 사용한다.
+결코 탭 혹은 탭과 공백을 섞어 사용하지 마라.
+코드 환경설정 창(code preference pane)에서 선택 옵션을 변경하라:
 
 ```{r, echo = FALSE}
 bookdown::embed_png("screenshots/style-options.png", dpi = 220)
 ```
 
-The only exception is if a function definition runs over multiple lines. In that case, indent the second line to where the definition starts:
+유일한 예외는 몇줄에 걸쳐 함수를 정의할 때다.
+이 경우에, 두번째 줄을 함수가 시작하는 곳까지 들여쓴다:
 
 ```{r, eval = FALSE}
 long_function_name <- function(a = "a long argument", 
@@ -219,9 +254,9 @@ long_function_name <- function(a = "a long argument",
 }
 ```
 
-### Assignment
+### 대입(Assignment)
 
-Use `<-`, not `=`, for assignment.
+대입에는 `=` 대신, `<-`을 사용한다.
 
 ```{r}
 # Good
@@ -230,11 +265,13 @@ x <- 5
 x = 5
 ```
 
-### Commenting guidelines
+### 주석 안내서 지침
 
-Comment your code. Each line of a comment should begin with the comment symbol and a single space: `# `. Comments should explain the why, not the what. \index{comments}
+코드에 주석을 단다.
+주석 각 행은 주석 표식자(`# `)와 공백 하나로 시작한다.
+주석은 무엇(what)이 아니고 이유(why)를 설명해야 한다. \index{comments}
 
-Use commented lines of `-` and `=` to break up your file into easily readable chunks.
+`-` 와 `=` 으로 구성된 주석 행을 사용해서 파일을 가독성이 높은 코드 덩어리로 쪼갠다.
 
 ```{r, eval = FALSE}
 # Load data ---------------------------
