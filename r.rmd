@@ -279,7 +279,7 @@ x = 5
 # Plot data ---------------------------
 ```
 
-## Top-level code {#r-differences}
+## 최상단 코드 {#r-differences}
 
 Up until now, you've probably been writing __scripts__, R code saved in a file that you load with `source()`. There are two main differences between code in scripts and packages:
 
