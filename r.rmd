@@ -281,35 +281,39 @@ x = 5
 
 ## 최상단 코드 {#r-differences}
 
-Up until now, you've probably been writing __scripts__, R code saved in a file that you load with `source()`. There are two main differences between code in scripts and packages:
+지금까지 아마도 `source()` 명령어로 로딩되는 파일에 저장된 R 코드 즉, __스크립트(scripts)__를 작성해봣ㅇ르 것이다. 스크립트 코드와 팩키지 코드 사이에는 두가지 주된 차이가 있다:
 
-* In a script, code is run when it is loaded. In a package, code is run when it
-  is built. This means your package code should only create objects, the
-  vast majority of which will be functions.
-  
-* Functions in your package will be used in situations that you didn't imagine.
-  This means your functions need to be thoughtful in the way that they 
-  interact with the outside world.
+* 스크립트는 코드가 적재될 때 실행된다. 팩키지에서 코드는 빌드될 때 실행된다.
+  즉, 팩키지 코드는 대부분 함수로 이루어진 객체를 생성해야 되다는 의미다.
 
-The next two sections expand on these important differences.
+* 팩키지에 함수는 개발자가 상상하지 못한 상황에서 사용될 것이다.
+  즉, 외부 세계와 상호작용할 수 있는 방식으로 함수는 사려깊이 개발될 필요가 있다.
 
-### Loading code
+다음 두절에 걸쳐 이러한 중요한 차이점을 상세히 다룬다.
 
-When you load a script with `source()`, every line of code is executed and the results are immediately made available. Things are different in a package, because it is loaded in two steps. When the package is built (e.g. by CRAN) all the code in `R/` is executed and the results are saved. When you load a package, with `library()` or `require()`, the cached results are made available to you. If you loaded scripts in the same way as packages, your code would look like this:
+### 코드 적재
+
+`source()` 명령어로 스크립트를 적재하면, 모든 코드 라인은 실행되고 결과는 즉시 생성되어 이용가능하게 된다. 팩키지에는 차이가 있는데 이유는 두 단계로 적재되기 때문이다.
+팩키지가 빌드될 때(예를 들어, CRAN에 의해), `R/` 디렉토리에 있는 코드가 실행되고 결과가 저장된다.
+`library()` 혹은 `require()` 명령어로 팩키지가 적재될 때, 캐쉬된 결과가 사용자에게 생성되어 이용가능하게 된다. 만약 팩키지와 동일한 방식으로 스크립트를 적재한다면, 코드는 다음과 같을 것이다:
+
 
 ```{r, eval = FALSE}
-# Load a script into a new environment and save it
+# 스크립트를 신규 환경에 적재하고 저장한다.
 env <- new.env(parent = emptyenv())
 source("my-script.R", local = env)
 save(envir = env, "my-script.Rdata")
 
-# Later, in another R session
+# 또다른 R 세션에서 추후 적재
 load("my-script.Rdata")
 ```
 
-For example, take `x <- Sys.time()`. If you put this in a script, `x` would tell you when the script was `source()`d. But if you put that same code in a package, `x` would tell you when the package was _built_. 
+예를 들어, `x <- Sys.time()`을 사용해 보자.
+만약 스크립트에 명령어를 넣으면, 스크립트가 `source()` 되는 시점 정보를 `x`가 알려준다.
+하지만, 만약 팩키지에 동일 코드를 넣으면, `x`는 어느 시점에 _빌드_되는지 알려준다.
 
-This means that you should never run code at the top-level of a package: package code should only create objects, mostly functions. For example, imagine your foo package contains this code:
+상기 실험결과가 갖는 의미는 팩키지 최상위 수준에서 코드를 결코 실행하지 말아야 한다: 팩키지 코드는 대부분 함수인, 객체를 생성해야만 한다. 예를 들어, `foo` 팩키지가 다음 코드를 담고 있다고 가정하자:
+
 
 ```{r, eval = FALSE}
 library(ggplot2)
@@ -319,16 +323,18 @@ show_mtcars <- function() {
 }
 ```
 
-If someone tries to use it:
+만약 누군가 다음과 같이 실행하려고 한다면:
 
 ```{r, eval = FALSE}
 library(foo)
 show_mtcars()
 ```
 
-The code won't work because ggplot2's `qplot()` function won't be available: `library(foo)` doesn't re-execute `library(gpplot2)`. The top-level R code in a package is only executed when the package is built, not when it's loaded.
+코드는 결코 작동하지 않는데, 이유는 ggplot2 팩키지 `qplot()` 함수를 이용할 수 없기 때문이다: 
+`library(foo)` 라이브러리가 `library(gpplot2)`을 재실행하지 않기 때문이다.
+팩키지 최상단 R 코드는 팩키지가 적재될 때가 아닌 빌드될 때만 실행된다.
 
-To get around this problem you might be tempted to do:
+상기 문제를 비겨가기 위해서, 다음과 같이 코드를 작성하고 싶은 유혹이 있을지도 모른다:
 
 ```{r, eval = FALSE}
 show_mtcars <- function() {
@@ -337,9 +343,12 @@ show_mtcars <- function() {
 }
 ```
 
-That's also problematic, as you'll see below. Instead, describe the packages your code needs in the `DESCRIPTION` file, as you'll learn in [package dependencies](#dependencies).
+또한, 아래에서 알 수 있듯이, 문제 소지가 다분히 있다.
+대신에 `DESCRIPTION` 파일에 코드가 필요한 팩키지를 기술한다. [package dependencies](#dependencies)에서 학습할 예정이다.
 
 ### The R landscape
+
+스크립트와 팩키지 사이 또다른 큰 차이점은 
 
 Another big difference between a script and a package is that other people are going to use your package, and they're going to use it in situations that you never imagined. This means you need to pay attention to the R landscape, which includes not just the available functions and objects, but all the global settings. You have changed the R landscape if you've loaded a package with `library()`, or changed a global option with `options()`, or modified the working directory with `setwd()`. If the behaviour of _other_ functions differs before and after running your function, you've modified the landscape. Changing the landscape is bad because it makes code much harder to understand. 
 
@@ -450,7 +459,7 @@ If you use `.onLoad()`, consider using `.onUnload()` to clean up any side effect
 
 Another type of side-effect is defining S4 classes, methods and generics. R packages capture these side-effects so they can be replayed when the package is loaded, but they need to be called in the right order. For example, before you can define a method, you must have defined both the generic and the class. This requires that the R files be sourced in a specific order. This order is controlled by the `Collate` field in the `DESCRIPTION`. This is described in more detail in [documenting S4](#man-s4).
 
-## CRAN notes {#r-cran}
+## CRAN 주의사항 {#r-cran}
 
 (Each chapter will finish with some hints for submitting your package to CRAN. If you don't plan on submitting your package to CRAN, feel free to ignore them!)
 
