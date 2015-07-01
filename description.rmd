@@ -86,17 +86,16 @@ Suggests:
     [namespace imports](#imports)에서 다른 팩키지에 담긴 함수를 호출하는 
     대안을 학습할 것이다.
 
-*   `Suggests`: your package can use these packages, but doesn't require them.
-    You might use suggested packages for example datasets, to run tests, 
-    build vignettes, or maybe there's only one function that needs the package.
-  
-    Packages listed in `Suggests` are not automatically installed along with
-    your package. This means that you need to check if the package is available 
-    before using it (use `requireNamespace(x, quietly = TRUE)`). There are
-    two basic scenarios:
+*   `Suggests`: 작성한 패키지에서 `Suggests` 목록에 올린 팩키지를 사용할 수도 있으나,
+    반듯이 필요로 하는 것은 아니다. 예제 데이터셋으로, 테스트를 실행하려고, 소품문(Vignettes)을 빌드하는데
+    추천(suggested) 팩키지를 사용할 수도 있다. 혹은 아마도 해당 팩키지를 필요로 하는 함수가 단 하나 존재할지도 모른다.
     
+    `Suggests` 목록에 오른 팩키지는 작성한 팩키지를 따라 함께 자동으로 설치가 되지 않는다.
+    이것이 함의하는 바는 팩키지를 사용하기 전에 팩키지가 이용가능한지 점검하는 것이 필요하다는 것이다. 
+    (`requireNamespace(x, quietly = TRUE)` 명령어를 사용). 다음에 두가지 기본 시나리오가 있다. 
+  
     ```{r}
-    # You need the suggested package for this function    
+    # 다음 함수에는 추천(suggested) 팩키지가 필요하다.
     my_fun <- function(a, b) {
       if (!requireNamespace("pkg", quietly = TRUE)) {
         stop("Pkg needed for this function to work. Please install it.",
@@ -104,7 +103,7 @@ Suggests:
       }
     }
     
-    # There's a fallback method if the package isn't available
+    # 팩키지를 이용할 수 없다면, 방비책이 되는 메쏘드가 있다. 
     my_fun <- function(a, b) {
       if (requireNamespace("pkg", quietly = TRUE)) {
         pkg::f()
@@ -114,23 +113,26 @@ Suggests:
     }
     ```
 
-When developing packages locally, you never need to use `Suggests`. When releasing your package, using `Suggests` is a courtesy to your users. It frees them from downloading rarely needed packages, and lets them get started with your package as quickly as possible.
+로컬에서 팩키지를 개발할 때, `Suggests`를 사용할 필요는 결코 없다.
+팩키지를 출시할 때, `Suggests`를 사용하는 것이 응당 사용자에 대한 예의다.
+거의 필요하지 않는 팩키지를 사용자가 다운로드하지 않아도 되고, 가능한 빨리 개발된 팩키지를 사용할 수 있도록 한다.
 
-The easiest way to add `Imports` and `Suggests` to your package is to use `devtools::use_package()`. This automatically puts them in the right place in your `DESCRIPTION`, and reminds you how to use them.
+`Imports`와 `Suggests`를 팩키지에 추가하는 가장 쉬운 방법은 `devtools::use_package()`을 사용하는 것이다. 이렇게 되면 자동적으로 `DESCRIPTION` 파일에 올바른 장소에 위치하게 된다.
+그리고 어떻게 팩키지를 사용하는지 상기시키는 역할을 한다.
 
 ```{r, eval = FALSE}
-devtools::use_package("dplyr") # Defaults to imports
-#> Adding dplyr to Imports
-#> Refer to functions with dplyr::fun()
+devtools::use_package("dplyr") # 디폴트 초기설정은 imports로 되어있다.
+#> dplyr을 Imports에 추가한다.
+#> dplyr::fun()을 통해 함수를 참조한다.
 devtools::use_package("dplyr", "Suggests")
-#> Adding dplyr to Suggests
-#> Use requireNamespace("dplyr", quietly = TRUE) to test if package is 
-#>  installed, then use dplyr::fun() to refer to functions.
+#> dplyr을 Suggests에 추가한다.
+#> requireNamespace("dplyr", quietly = TRUE)을 사용해서 팩키지가 설치되었는지 
+#> 테스트한다. 그리고 나서 dplyr::fun()을 사용해서 함수를 참조한다.
 ```
 
-### Versioning
+### 버져닝(Versioning)
 
-If you need a specific version of a package, specify it in parentheses after the package name:
+만약 특정 팩키지 버젼이 필요하면, 팩키지 명칭 뒤에 괄호에 명시한다:
 
 ```yaml
 Imports:
@@ -140,55 +142,66 @@ Suggests:
     MASS (>= 7.3.0)
 ```
 
-You almost always want to specify a minimum version rather than an exact version (`MASS (== 7.3.0)`). Since R can't have multiple versions of the same package loaded at the same time, specifying an exact dependency dramatically increases the chance of conflicting versions.
+거의 항상 정확한 버젼 (예를 들어, `MASS (== 7.3.0)`) 보다는 최소 버젼을 지정한다.
+R로 동일 팩키지 다수 버젼을 동시에 적재할 수 없기 때문에, 정확한 의존성을 명시하면 버젼 충돌 가능성을 급격히 높인다.
 
-Versioning is most important when you release your package. Usually people don't have exactly the same versions of packages installed that you do. If someone has an older package that doesn't have a function your package needs, they'll get an unhelpful error message. However, if you supply the version number, they'll get a error message that tells them exactly what the problem is: an out of date package. 
+팩키지를 출시할 때 버져닝이 매우 중요해진다.
+대체로 개발자가 설치한 것과 동일한 패키지 버젼을 일반 사용자가 정확히 갖지는 않을 것이다.
+만약 개발한 팩키지가 필요한 함수를 이전 버젼을 일반 사용자가 갖고 있다면,
+도움되지 않는 오류 메시지만 발생할 것이다.
+하지만, 팩키지 개발자가 버젼 번호를 제공한다면, 오류 메시지를 보게 되는 것은 동일하지만,
+정확히 문제가 무엇인지를 알려준다: 이전 구식 팩키지입니다.
 
-Generally, it's always better to specify the version and to be conservative about which version to require. Unless you know otherwise, always require a version greater than or equal to the version you're currently using.
+일반적으로, 항상 버젼을 명시하고 어떤 버젼이 필요한지에 대해서는 보수적인 것이 항상 낫다.
+달리 알고 있지 않는다면, 개발자가 현재 사용하고 있는 버젼 번호가 동일하거나 더 큰 버젼을 항상 사용한다.
 
-### Other dependencies
 
-There are three other fields that allow you to express more specialised dependencies:
+### 기타 의존성
 
-  * `Depends`: Prior to the rollout of namespaces in R 2.14.0, `Depends` was 
-    the only way to "depend" on another package. Now, despite the name, you 
-    should almost always use `Imports`, not `Depends`. You'll learn why, and 
-    when you should still use `Depends`, in [namespaces](#namespace).
+좀더 전문적으로 의존성을 표현할 수 있는 기타 필드가 세개 있다:
+
+
+  * `Depends`: R 2.14.0 네임스페이스(namespace)를 출시하기 전에, `Depends`가
+    또다른 팩키지에 "의존성(dependancy)"을 갖는 유일한 방법이었다.
+    이제는 명칭에도 불구하고, `Depends`가 아닌, `Imports`를 거의 항상 사용해야 한다.
+    [namespaces](#namespace)에서 이유와 여전히 `Depends`를 사용할 때는 언제인지 배울 것이다.
     
-    You can also use `Depends` to require a specific version of R, e.g.
-    `Depends: R (>= 3.0.1)`. As with packages, it's a good idea to 
-    play it safe and require a version greater than or equal to the version 
-    you're currently using. `devtools::create()` will do this for you.
+    또한, `Depends`를 사용해서 예를 들어, `Depends: R (>= 3.0.1)`처럼 특정 R 버젼을 쓸 수도 있다.
+    팩키지와 마찬가지로, 개발자가 현재 사용하고 있는 버젼 번호와 동일하거나 
+    더 큰 버젼 번호를 사용하고 안전 대비책을 준비하는 것이 좋다.
+
+    R 3.1.1과 이전 버젼에서 S4를 사용하려면, `Depends: methods`을 사용할 필요가 있다.
+    이런 버그는 R 3.2.0 버젼에서 고쳐져서 메쏘드가 속해있는 `Imports`로 되돌아 갈 수 있다.
+
+  * `LinkingTo`: 여기 목록에 올라온 팩키지는 또 다른 팩키지에 C 혹은 C++ 코드에 의존성이 있다.
+    [compiled code](#src)에서 `LinkingTo`에 대해 더 많이 배울 것이다.
     
-    In R 3.1.1 and earlier you'll also need to use `Depends: methods` if 
-    you use S4. This bug is fixed in R 3.2.0, so methods can go back to
-    `Imports` where they belong.
+  * `Enhances`: 여기 목록에 올라온 팩키지는 작성한 팩키지로 "개선(enhanced)"된다.
+    전형적으로, 이것이 의미하는 바는 또다른 팩키지에 정의된 클래스에 메쏘드를 제공한다는 것이다
+    (일종의 역 `Suggests`). 하지만, 이것이 무엇을 의미하는 것인지 정의하기 어려워서,
+    저자는 `Enhances` 사용을 추천하지는 않는다.
+
+`SystemRequirements` 필드에 R 밖에서 작성한 팩키지가 필요한 목록을 작성할 수 있다.
+하지만, 텍스트 필드로만 작성되어 자동적으로 점검되지 못한다.
+이를 조견표(quick reference)로 생각할 수 있다: README에 (팩키지를 설치하는 방법과) 구체적 시스템 요구사항을 포함할 필요도 있다.
     
-  * `LinkingTo`: packages listed here rely on C or C++ code in another package. 
-    You'll learn more about `LinkingTo` in [compiled code](#src).
-    
-  * `Enhances`: packages listed here are "enhanced" by your package. Typically, 
-    this means you provide methods for classes defined in another package (a 
-    sort of reverse `Suggests`). But it's hard to define what that means, so I 
-    don't recommend using `Enhances`.
-    
-You can also list things that your package needs outside of R in the `SystemRequirements` field. But this is just a plain text field and is not automatically checked. Think of it as a quick reference; you'll also need to include detailed system requirements (and how to install them) in your README.
 
-## Title and description: What does your package do? {#pkg-description}
+## 제목과 기술: 작성한 팩키지가 어떤 작업을 수행하는가? {#pkg-description}
 
-The title and description fields describe what the package does. They differ only in length:
+제목(title)과 기술(description) 필드로 팩키지가 어떤 작업을 수행하는지 기술한다.
+제목과 기술 두 필드 차이는 단지 길이에서 있다:
 
-* `Title` is a one line description of the package, and is often shown in 
-  package listing. It should be plain text (no markup), capitalised like a 
-  title, and NOT end in a period. Keep it short: listings will often 
-  truncate the title to 65 characters.
 
-* `Description` is more detailed than the title. You can use multiple sentences 
-  but you are limited to one paragraph. If your description spans multiple 
-  lines (and it should!), each line must be no more than 80 characters wide. 
-  Indent subsequent lines with 4 spaces.
 
-The `Title` and `Description` for ggplot2 are:
+* `제목(Title)`은 팩키지를 한 줄로 기술하고 팩키지 목록에 나타난다.
+  (마크업이 아닌) 일반 텍스트여야 되며, 제목처럼 대문자로 시작되어야 되고, 마침표로 끝나면 __안__ 된다.
+  짧게 한다: 제목을 65 글자로 한정하고 나머지는 잘라낸다.
+
+* `기술(Description)`은 제목보다 좀더 자세하다. 여러 문장을 사용할 수 있지만, 한 문단 제약사항이 있다.
+  만약 기술이 여러 행에 걸쳐 기술된다면 (그리고 기술되어야만 한다!), 각 행은 문자 80자를 넘지 말아야 된다.
+  다음 행은 공백 4개로 들여 쓴다.
+
+`ggplot2` 팩키지 `제목(title)`과 `기술(Description)`은 다음과 같다:
 
 ```yaml
 Title: An implementation of the Grammar of Graphics
@@ -201,15 +214,19 @@ Description: An implementation of the grammar of graphics in R. It combines
     documentation and examples.
 ```
 
-A good title and description are important, especially if you plan to release your package to CRAN because they appear on the CRAN download page as follows:
+좋은 제목과 기술이 중요하다. 특히 만약 팩키지를 CRAN에 배포할 계획이라면, CRAN 다운로드 페이지에 다음과 같이 나타나기 때문에 더욱 그렇다:
 
 ```{r, echo = FALSE}
 bookdown::embed_png("diagrams/cran-package.png")
 ```
 
-Because `Description` only gives you a small amount of space to describe what your package does, I also recommend including a `README.md` file that goes into much more depth and shows a few examples. You'll learn about that in [README.md](#readme).
+`기술(Description)`에는 작성한 팩키지가 무엇을 수행하는지 기술하는데 적은 공간만 배정하기 때문에,
+좀더 심층적인 내용과 예제 몇가지를 `README.md` 파일을 추가하는 것을 추천한다.
+[README.md](#readme)에서 더 많은 내용을 학습할 것이다.
 
-## Author: who are you? {#author}
+## 저자 : 작성자는 누구인가? {#author}
+
+
 
 To identify the package's author, and whom to contact if something goes wrong, use the `Authors@R` field. This field is unusual because it contains executable R code rather than plain text. Here's an example:
 
