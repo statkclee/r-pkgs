@@ -4,11 +4,16 @@ layout: default
 output: bookdown::html_chapter
 ---
 
-# Package metadata {#description}
+# 팩키지 메타데이터 {#description}
 
-The job of the `DESCRIPTION` file is to store important metadata about your package. When you first start writing packages, you'll mostly use these metadata to record what packages are needed to run your package. However, as time goes by and you start sharing your package with others, the metadata file becomes increasingly important because it specifies who can use it (the license) and whom to contact (you!) if there are any problems.
+`DESCRIPTION` 파일 임무는 팩키지에 관한 중요한 메타데이터를 저장하는 것이다.
+처음 팩키지를 작성하기 시작할 때, 팩키지 메타데이터 파일을 사용해서 작성한 팩키지를 실행하는데
+필요한 팩키지 목록을 기록한다. 하지만, 시간이 흐르고 다른 분들과 팩키지를 공유하기 시작하면 메타데이터 파일이 점점 중요해지는데 이유는 누가 팩키지를 사용할 수 있는지(라이선스), 팩키지 관련해서 문제가 생기거나, 문의사항이 생기면 누구(개발자 본인!)에게 연락해야 하는지 지정하기 때문이다.
 
-Every package must have a `DESCRIPTION`. In fact, it's the defining feature of a package (RStudio and devtools consider any directory containing `DESCRIPTION` to be a package). To get you started, `devtools::create("mypackage")` automatically adds a bare-bones description file. This will allow you to start writing the package without having to worry about the metadata until you need to. The minimal description will vary a bit depending on your settings, but should look something like this:
+모든 팩키지는 `DESCRIPTION`을 갖추고 있어야 한다. 사실, 팩키지를 정의하는 기능을 한다. (RStudio와 `devtools`는 `DESCRIPTION`을 담고 있는 임의 디렉토리가 팩키지라고 생각한다.)
+시작하면, 자동으로 `devtools::create("mypackage")`가 뼈대만 갖는 기술(description) 파일을 추가한다.
+이렇게 함으로써 필요해질 때까지 아무 걱정없이 팩키지 개발을 시작할 수 있게 한다.
+최소 기술(description) 파일은 개인 설정정보에 따라 다소 차이가 있지만, 다음과 같을 것이다:
 
 ```yaml
 Package: mypackage
@@ -22,9 +27,13 @@ License: What license is it under?
 LazyData: true
 ```
 
-(If you're writing a lot of packages, you can set global options via `devtools.desc.author`, `devtools.desc.license`, `devtools.desc.suggests`, and `devtools.desc`. See `package?devtools` for more details.)
+(만약 정말 많은 팩키지를 개발한다고 하면, `devtools.desc.author`, `devtools.desc.license`, `devtools.desc.suggests`, `devtools.desc`을 전역 옵션으로 설정한다. 
+자세한 사항은 `package?devtools`를 참조한다.)
 
-`DESCRIPTION` uses a simple file format called DCF, the Debian control format. You can see most of the structure in the simple example below. Each line consists of a __field__ name and a value, separated by a colon. When values span multiple lines, they need to be indented:
+`DESCRIPTION`은 데비안 제어형식(DCF, Debian Control Format)을 사용한다.
+다음에 나오는 간단한 예제를 통해서 구조 대부분을 볼 수 있다.
+각 행은 콜론으로 구분되는 __필드(field)__ 명칭과 값(value)으로 구분된다.
+값이 여러 행에 걸쳐질 때는 들여쓰기 한다:
 
 ```yaml
 Description: The description of a package is usually long,
@@ -32,11 +41,13 @@ Description: The description of a package is usually long,
     should be indented, usually with four spaces.
 ```
 
-This chapter will show you how to use the most important `DESCRIPTION` fields.
+이번 장에서 가장 중요한 `DESCRIPTION` 필드를 사용하는 방법을 제시한다.
 
-## Dependencies: What does your package need? {#dependencies}
+## 의존성 : 팩키지가 무엇을 필요로 하는가? {#dependencies}
 
-It's the job of the `DESCRIPTION` to list the packages that your package needs to work. R has a rich set of ways of describing potential dependencies. For example, the following lines indicate that your package needs both ggvis and dplyr to work:
+팩키지가 동작하는데 필요한 팩키지 목록 정보를 담는 것이 `DESCRIPTION` 파일 책무다.
+R은 잠재적 의존성(dependencies)을 기술하는 풍부한 방법을 제공한다.
+예를 들어, 다음에 팩키지가 동작하는데 `ggvis`와 `dplyr` 필요하다는 것을 나타낸다:
 
 ```yaml
 Imports:
@@ -44,7 +55,7 @@ Imports:
     ggvis
 ```
 
-Whereas, the lines below indicate that while your package can take advantage of ggvis and dplyr, they're not required to make it work:
+반면에, 다음에 팩키지가 `ggvis`와 `dplyr`를 활용할 수는 있지만, 팩키지가 동작하는데 꼭 요구되지는 않는다는 것을 나타낸다:
 
 ```yaml
 Suggests:
@@ -52,27 +63,28 @@ Suggests:
     ggvis,
 ```
 
-Both `Imports` and `Suggests` take a comma separated list of package names. I recommend putting one package on each line, and keeping them in alphabetical order. That makes it easy to skim.
+`Imports`와 `Suggests` 팩키지 모두 명칭을 모두 콤마 구분자로 사용한다.
+저자가 추천하는 방식은 각 행마다 팩키지 하나를 두고, 알파벳 숫으로 정렬한다. 그러면 눈으로 한번 일별하기가 좋다.
 
-`Imports` and `Suggests` differ in their strength of dependency:
+`Imports`와 `Suggests`는 의존성 강도에서 차이가 난다:
 
-*   `Imports`: packages listed here _must_ be present for your package to 
-    work. In fact, any time your package is installed, those packages will, if 
-    not already present, be installed on your computer (`devtools::load_all()`
-    also checks that the packages are installed).
+
+
+*   `Imports`: 목록에 나온 팩키지는 작성한 팩키지가 제대로 동작하는데 __있어야만 한다.__
+    사실, 팩키지가 설치되는 시점에, 아직 설치가 되지 않았다면, 사용자 로컬 컴퓨터에 설치될 것이다.
+    (`devtools::load_all()`도 팩키지가 설치되었는지 점검한다).
     
-    Adding a package dependency here ensures that it'll be installed. However, 
-    it does _not_ mean that it will be attached along with your package (i.e., 
-    `library(x)`). The best practice is to explicitly refer to external 
-    functions using the syntax `package::function()`. This makes it very easy to 
-    identify which functions live outside of your package. This is especially 
-    useful when you read your code in the future.
-  
-    If you use a lot of functions from other packages this is rather
-    verbose. There's also a minor performance penalty associated with `::` 
-    (on the order of 5µs, so it will only matter if you call the function
-    millions of times). You'll learn about alternative ways to call functions
-    in other packages in [namespace imports](#imports).
+    팩키지 의존성을 `Imports`에 추가하면 팩키지 설치를 확실히 할 수 있다.
+    하지만, (예를 들어, `library(x)`) 팩키지를 따라 붙착(attach)된다는 것을 의미하는 것은 _아니다._
+    모범 사례로 `package::function()` 구문을 사용해서 명시적으로 외부 함수를 참조하게 한다.
+    이렇게 하면 어떤 함수가 외부 팩키지에서 제공되는지 식별하기 쉽게 한다.
+    미래에 코드를 읽을 때도 특히 유용하다.
+    
+    만약 다른 팩키지에서 함수를 아주 많이 사용한다면, 다소 코드가 장황하다.
+    또한 `::`와 연관된 일부 성능이 저하되는 벌칙도 있다 
+    (5µ 초 정도로, 함수를 수백만번 호출하면 문제가 될 수 있다).
+    [namespace imports](#imports)에서 다른 팩키지에 담긴 함수를 호출하는 
+    대안을 학습할 것이다.
 
 *   `Suggests`: your package can use these packages, but doesn't require them.
     You might use suggested packages for example datasets, to run tests, 
