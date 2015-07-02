@@ -4,24 +4,30 @@ layout: default
 output: bookdown::html_chapter
 ---
 
-# Object documentation {#man}
+# 객체 문서화(Documentation) {#man}
 
-Documentation is one of the most important aspects of a good package. Without it, users won't know how to use your package. Documentation is also useful for future-you (so you remember what your functions were supposed to do), and for developers extending your package. 
+문서(Documentation)는 좋은 팩키지가 갖춰야 되는 가장 중요한 측면 중 하나다.
+문서가 없다면, 사용자는 여러분이 작성한 팩키지를 어떻게 사용하는지 알 길이 없다.
+문서는 또한 미래 당신 즉, 개발자 본인(그래서 작성한 함수가 무슨 기능을 수행하도록 만들어졌는지 기억하기 편하다)에게도 유용하고 팩키지를 확장하려는 다른 개발자에게도 마찬가지다.
 
-There are multiple forms of documentation. In this chapter, you'll learn about object documentation, as accessed by `?` or `help()`. Object documentation is a type of reference documentation. It works like a dictionary: while a dictionary is helpful if you want to know what a word means, it won't help you find the right word for a new situation. Similarly, object documentation is helpful if you already know the name of the object, but it doesn't help you find the object you need to solve a given problem. That's one of the jobs of vignettes, which you'll learn about in the next chapter.
+문서화에 대한 다수 형태가 존재한다.
+이번 장에서 `?` 혹은 `help()` 명령어로 접근하는 객체 문서화에 대해 배울 것이다.
+객체 문서화는 일종의 참조 문서다. 마치 사전과 같다: 단어가 의미하는 바를 알고자 한다면 사전이 도움이 될 수 있을지라도, 전혀 새로운 상황에서 올바른 단어를 찾는데는 도움이 되지 못한다. 유사하게, 이미 객체 명칭을 알고 있다면 객체 문서가 도움이 되지만, 주어진 문제 해결책을 찾는데 필요한 객체를 찾는데는 도움이 되지 못한다.
+이런 역할을 하는 것이 소품문(vignette)의 역할이고 다음 장에서 학습할 것이다.
 
-R provides a standard way of documenting the objects in a package: you write `.Rd` files in the `man/` directory. These files use a custom syntax, loosely based on LaTeX, and are rendered to HTML, plain text and pdf for viewing. Instead of writing these files by hand, we're going to use roxygen2 which turns specially formatted comments into `.Rd` files. The goal of roxygen2 is to make documenting your code as easy as possible. It has a number of advantages over writing `.Rd` files by hand:
+팩키지 객체를 문서화하는 표준 방식을 R에서 제공한다: `man/` 디렉토리에 `.Rd` 파일을 작성한다. 이런 파일은 느슨하게 LaTeX에 기반한 사용자 정의 구문(custom syntax)을 사용해서, HTML, 일반 텍스트, pdf로 번역하여 옮겨 볼 수 있다. 수작업으로 파일 각각을 작성하는 대신에, `roxygen2`를 사용해서 특별한 형식으로 된 주석을 `.Rd` 파일로 변환한다. `roxygen2` 목적은 코드 문서화 작업을 가능하면 쉽게 자동화하는데 있다.
+`.Rd` 파일을 수작업으로 일일이 작성하는데 비해서 많은 장점을 갖는다:
 
-* Code and documentation are intermingled so that when you modify your code, 
-  you're reminded to also update your documentation.
+* 코드와 문서가 섞여있어서, 코드를 변경할 때, 문서도 갱신하도록 상기된다.
 
-* Roxygen2 dynamically inspects the objects that it documents, so you 
-  can skip some boilerplate that you'd otherwise need to write by hand.
+* `Roxygen2`가 동적으로 문서화한 객체를 검사한다. 그렇게 함으로써 `Roxygen2`를 사용하지 않는다면 
+  수작업으로 작성이 필요한 표준문안(boilerplate) 작업을 건너뛰게 돕는다.
+  
+* 다른 유형의 객체를 문서화에서 발생하는 차이점을 추상화한다. 
+  그렇게 함으로써, 구체적인 사항에 대해서 좀더 덜 학습해도 된다.  
 
-* It abstracts over the differences in documenting different types of objects,
-  so you need to learn fewer details.
-
-As well as generating `.Rd` files, roxygen2 can also manage your `NAMESPACE` and the `Collate` field in `DESCRIPTION`. This chapter discusses `.Rd` files and the collate field. [NAMESPACE](#namespace) describes how you can use roxygen2 to manage your `NAMESPACE`, and why you should care.
+`.Rd` 파일을 생성할 때, `roxygen2`를 사용해서 `DESCRIPTION` 파일에 `NAMESPACE`와 `Collate` 필드를 관리할 수 있다. 이번 장에서 `.Rd` 파일과 `collate` 필드를 다룬다. 
+[NAMESPACE](#namespace)에서 `NAMESPACE`를 관리하는데 `roxygen2`를 사용하는 방법을 기술하고, 왜 관심을 가져야 하는지도 살펴본다.
 
 ## The documentation workflow {#man-workflow}
 
