@@ -96,27 +96,22 @@ RStudio에서 출력되는 결과가 나와 있다:
 bookdown::embed_png("screenshots/man-add.png", dpi = 220)
 ```
 
-`devtools`가 일반 도움말 함수를 
+(`devtools`가 일반 도움말 함수에 우선하기 때문에 개발 문서를 미리보기 할 수 있다는 것에 주목한다.
+만약 문서가 나타나지 않는다면, `devtools`를 사용하고 있는지 `devtools::load_all()` 명령어로 팩키지를 적재했는지 확인한다.)
 
-(Note you can preview development documentation because devtools overrides the usual help functions to teach them how to work with source packages. If the documentation doesn't appear, make sure that you're using devtools and that you've loaded the package with `devtools::load_all()`.)
+## 문서화 작업흐름 다른 대안 {#man-workflow-2}
 
-## Alternative documentation workflow {#man-workflow-2}
+첫 문서화 작업흐름은 매우 빠르지만, 한가지 한계가 있다: 미리보기 문서 페이지에 페이지 사이에 어떤 링크도 보여주지 않는다. 만약 연결된 링크도 볼려면, 다음 작업흐름을 사용한다:
 
-The first documentation workflow is very fast, but it has one limitation: the preview documentation pages will not show any links between pages. If you'd like to also see links, use this workflow:
+1. `roxygen` 주석을 작성한 `.R` 파일에 추가한다.
 
-1. Add roxygen comments to your `.R` files.
+1. `build` 창에서 `r bookdown::embed_png("screenshots/build-reload.png", dpi = 220)`을 클릭하거나 Ctrl/Cmd + Shift + B 단축키를 누른다. 이 과정을 통해서 팩키지를 완전히 다시 빌드한다. 여기에는 모든 문서를 갱신하고, 문서를 정규 라이브러리에 설치하고 나서 R을 다시 시작하고 팩키지를 다시 적재한다. 느리지만 빈틈없다.
 
-1. Click `r bookdown::embed_png("screenshots/build-reload.png", dpi = 220)`
-   in the build pane or press Ctrl/Cmd + Shift + B. This completely rebuilds the 
-   package, including updating all the documentation, installs it in your
-   regular library, then restarts R and reloads your package. This is 
-   slow but thorough.
+1. `?` 명령어로 문서를 미리보기(preview) 한다.
 
-1. Preview documentation with `?`.
+1. 문서가 원하는 대로 작업이 될 때까지 반복작업한다.
 
-1. Rinse and repeat until the documentation looks the way you want.
-
-If this workflow doesn't seem to be working, check your project options in RStudio. Old versions of devtools and RStudio did not automatically update the documentation when the package was rebuilt:
+만약 상기 작업흐름이 동작하지 않는 것처럼 보인다면, RStudio에 프로젝트 선택옵션을 점검한다. 이전 `devtools`와 RStudio에서 팩키지가 다시 빌드될 때 문서를 자동으로 갱신하지 못하는 오류가 있다:
 
 ```{r, echo = FALSE}
 bookdown::embed_png("screenshots/build-reload-opts-2.png", dpi = 220)
@@ -591,3 +586,4 @@ cat(tabular(mtcars[1:5, 1:5]))
 
 ### Notes
 [^1]: Note that it is possible to define the "introduction" sections - the title and description - explicitly, rather than implicitly, using `@title` and `@description` tags. I follow the convention of avoiding this, as do many other package authors, so I don't recommend it - but you should be aware that these tags do exist and may appear in other package-writers' source code.
+
