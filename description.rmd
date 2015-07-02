@@ -43,7 +43,7 @@ Description: The description of a package is usually long,
 
 이번 장에서 가장 중요한 `DESCRIPTION` 필드를 사용하는 방법을 제시한다.
 
-## 의존성 : 팩키지가 무엇을 필요로 하는가? {#dependencies}
+## 의존성 : 팩키지가 필요하는 것은 무엇인가? {#dependencies}
 
 팩키지가 동작하는데 필요한 팩키지 목록 정보를 담는 것이 `DESCRIPTION` 파일 책무다.
 R은 잠재적 의존성(dependencies)을 기술하는 풍부한 방법을 제공한다.
@@ -226,9 +226,9 @@ bookdown::embed_png("diagrams/cran-package.png")
 
 ## 저자 : 작성자는 누구인가? {#author}
 
-
-
-To identify the package's author, and whom to contact if something goes wrong, use the `Authors@R` field. This field is unusual because it contains executable R code rather than plain text. Here's an example:
+팩키지 작성자 정보와 만약 뭔가 잘못되면 누구에게 연락을 취해야 하는지 식별하기 위해서,
+`Authors@R` 필드를 사용한다. 저자 필드가 일반적이지 않는데 이유는 일반 텍스트라기 보다는
+실행가능한 R 코드가 담겨있기 때문이다:
 
 ```yaml
 Authors@R: person("Hadley", "Wickham", email = "hadley@rstudio.com",
@@ -240,37 +240,35 @@ person("Hadley", "Wickham", email = "hadley@rstudio.com",
   role = c("aut", "cre"))
 ```
 
-This command says that both the author (aut) and the maintainer (cre) is Hadley Wickham, and that his email address is `hadley@rstudio.com`. The `person()` function has four main arguments:
+상기 명령어는 저자(aut)와 유지보수 담당자(cre)가 Hadley Wickham이고, 전자우편주소가 
+`hadley@rstudio.com`임을 알려준다. `person()` 함수에 4개 주요 인자가 있다:
 
-* The name, specified by the first two arguments, `given` and `family` (these
-  are normally supplied by position, not name). In English cultures, `given` 
-  (first name) comes before `family` (last name). In many cultures, this 
-  convention does not hold.
+
+* `given`과 `family`는 첫 두 인자가 지정하는 이름이다 (명칭이 아닌 위치로 전달된다).
+  영어 문화권에서 `given` (이름, first name)이 `family` (성, last name) 앞에 위치한다.
+  다른 문화권에서 이러한 관례를 따르지는 않는다.
   
-* The `email` address.
+* `email` 전자우편 주소.
 
-* A three letter code specifying the `role`. There are four important roles:
+* 세문자 코드는 `role` 역할을 명세한다. 중요한 역할이 네개 있다:
 
-    * `cre`: the creator or maintainer, the person you should bother 
-      if you have problems.
+    * `cre`: creator(생성자) 혹은 maintainer (유지관리 담당), 만약 팩키지에 문제가 있다면 
+      사용자가 졸라야 하는 사람 정보.
       
-    * `aut`: authors, those who have made significant contributions to the 
-      package.
+    * `aut`: authors (저자), 팩키지에 상당한 기여한 사람들 정보.
     
-    * `ctb`: contributors, those who have made smaller contributions, like 
-      patches.
+    * `ctb`: contributors (기여자), 패치(patch)처럼 좀더 적은 기여한 사람들 정보.
     
-    * `cph`: copyright holder. This is used if the copyright is held by someone 
-      other than the author, typically a company (i.e. the author's employer).
+    * `cph`: copyright holder (저작권자). 저작권이 저자가 아닌 누군가 
+      소유(예를 들어, 저자가 소속된 회사)하고 있다면 사용된다.
     
-    (The [full list of roles](http://www.loc.gov/marc/relators/relaterm.html) is
-    extremely comprehensive. Should your package have a woodcutter ("wdc"), 
-    lyricist ("lyr") or costume designer ("cst"), rest comfortably that you can 
-    correctly describe their role in creating your package.)
+    ([전체 역할 목록정보](http://www.loc.gov/marc/relators/relaterm.html)는 극도로 포괄적이다.
+    만약 작성한 팩키지에 나무꾼(woodcutter, "wdc"), 작가(lyricist, "lyr"), 
+    의상디자이너(constume designer, "cst")가 필요하다면, 팩키지 생성에 올바르게 역할을 기술한다.
 
-If you need to add further clarification, you can also use the `comment` argument and supply the desired information in plain text.
+만약 좀더 명확히 할 필요가 있다면, `comment` 인자를 사용해서 일반 텍스트로 원하는 정보를 제공한다.
 
-You can list multiple authors with `c()`:
+`c()` 명령어로 다수 저자를 목록에 올릴 수도 있다:
 
 ```yaml
 Authors@R: c(
@@ -278,7 +276,7 @@ Authors@R: c(
     person("Winston", "Chang", email = "winston@rstudio.com", role = "aut"))
 ```
 
-Alternatively, you can do this concisely by using `as.person()`:
+대안으로, `as.person()` 명령어로 간략하게도 할 수 있다:
 
 ```yaml
 Authors@R: as.person(c(
@@ -287,72 +285,86 @@ Authors@R: as.person(c(
   ))
 ```
 
-(This only works well for names with only one first and last name.)
+(상기 경우는 저자 이름이 이름과 성으로만 된 경우 잘 동작한다.)
 
-Every package must have at least one author (aut) and one maintainer (cre) (they might be the same person). The creator must have an email address. These fields are used to generate the basic citation for the package (e.g. `citation("pkgname")`). Only people listed as authors will be included in the auto-generated citation. There are a few extra details if you're including code that other people have written. Since this typically occurs when you're wrapping a C library, it's discussed in [compiled code](#src).
+모든 팩키지는 적어도 저자 한명 (aut)과 유지관리 담당자 (cre) 한명을 갖춰야 한다 (저자와 유지관리 담당은 동일인일 수도 있다).
+생성자는 전자우편주소를 가져야 한다. 이들 필드 정보를 바탕으로 팩키지 기본 인용(citation) 정보를 생성한다 (예를 들어, `citation("pkgname")`). 자동생성되는 인용에는 저자로 등재된 사람만 포함된다.
+만약 다른 사람이 작성한 코드를 포함하고자 한다면, 몇가지 추가 사항이 있다.
+C 라이브러리를 랩핑(wrapping)해서 감쌀때 전형적으로 발생하기 때문에, [compiled code](#src)에서 논의한다. 
 
-As well as your email address, it's also a good idea to list other resources availble for help. You can list URLs in `URL`. Multiple URLs are separated with a comma. `BugReports` is the URL where bug reports should be submitted. For example, knitr has:
+전장우편뿐만 아니라, 도움이 되는 다른 자원도 목록으로 제공하는 것이 좋다.
+`URL` 필드에 URL 목록을 제공할 수 있다. 다수 URL은 콤마로 구분한다.
+`BugReports` 필드는 버그 보고서를 제출하는 URL정보를 제공한다.
+예를 들어 `knitr` 팩키지는 다음과 같다:
 
 ```yaml
 URL: http://yihui.name/knitr/
 BugReports: https://github.com/yihui/knitr/issues
 ```
 
-You can also use separate `Maintainer` and `Author` fields. I prefer not to use these fields because `Authors@R` offers richer metadata. 
+`Maintainer`와 `Author` 필드를 별도로 사용할 수 있다. 저자는 이 필드 사용을 선호하지 않는데 이유는 
+`Authors@R`로 더 풍부한 메타데이터를 표현할 수 있기 때문이다.
 
-### On CRAN
+### CRAN 제출할 때
 
-The most important thing to note is that your email address (i.e., the address of `cre`) is the address that CRAN will use to contact you about your package. So make sure you use an email address that's likely to be around for a while. Also, because this address will be used for automated mailings, CRAN policies require that this be for a single person (not a mailing list) and that it does not require any confirmation or use any filtering.
+주의할 가장 중요한 것은 전자우편주소(예를 들어, `cre` 주소)가 작성한 팩키지에 대해 연락을 취할 수 있도록, 
+CRAN이 사용할 수 있는 전자우편주소로 되어야 한다.
+그래서 한동안 사용할 수 있는 전자우편주소인지 확실히 한다.
+또한, 등록된 전자우편주소가 전자우편 자동화 목적으로 사용될 것이기 때문에, CRAN 정책으로 개인 전자우편주소 (전자우편 목록(mailing list)은 안됨)이고, 별도 확인이 필요하거나 어떤 필터링도 사용되면 안된다.
 
-## License: Who can use your package? {#license}
 
-The `License` field can be either a standard abbreviation for an open source license, like `GPL-2` or `BSD`, or a pointer to a file containing more information, `file LICENSE`. The license is really only important if you're planning on releasing your package. If you don't, you can ignore this section. If you want to make it clear that your package is not open source, use `License: file LICENSE` and then create a file called `LICENSE`, containing for example:
+## 라이선스(License): 누가 팩키지를 사용할 수 있는가? {#license}
+
+`License` 필드는 공개 소프트웨어 라이선스에 대한 표준화된 축약어(예를 들어, `GPL-2`, `BSD`) 혹은 추가 정보를 담고 있는 파일에 대한 지시자(`file LICENSE`)가 된다. 라이선스는 팩키지를 배포할 계획을 갖고 있을 때만 매우 중요하다. 만약 그럴 계획이 없다면, 무시하고 넘어간다.
+작성한 팩키지가 공개 소프트웨어가 아니라는 사실을 명확히 하려면, `License: file LICENSE`을 사용하고 나서 예를 들어 다음과 같은 정보를 담는 `LICENSE` 파일을 생성한다:
 
     Proprietary 
 
     Do not distribute outside of Widgets Incorporated.
 
-Open source software licensing is a rich and complex field. Fortunately, in my opinion, there are only three licenses that you should consider for your R package:
+공개 소프트웨어 라이선스 필드는 복잡하고 풍부하다.
+다행스럽게도, 저자 견해로는 R 팩키지에 대해서 고려해야 되는 라이선스는 단 세가지다:
 
   * [MIT](https://tldrlegal.com/license/mit-license) 
-    (v. similar: to BSD 2 and 3 clause licenses). This is a simple and
-    permissive license. It lets people use  and freely distribute your code
-    subject to only one restriction: the license must always be distributed
-    with the code.
-  
-    The MIT license is a "template", so if you use it, you need 
-    `License: MIT + file LICENSE`, and a `LICENSE` file that looks like this:
+    (BSD 2, 3 라이선스와 매우 유사). 단순하고 방임적인(permissive) 라이선스다.
+    이 라이선스를 통해서 누구나 작성한 코드를 사용하고 자유로이 배포할 수 있다.
+    다만, 한가지 제약사항이 있다: 라이선스가 코드와 함께 배포되어야만 된다.
+    
+    MIT 라이선스는 "템플릿(template)"이다. 그래서 만약 사용하려면, `License: MIT + file LICENSE`가 
+    필요하고, `LICENSE`는 다음과 다음과 같다:
     
     ```yaml
     YEAR: <Year or years when changes have been made>
     COPYRIGHT HOLDER: <Name of the copyright holder>
     ```
 
-  * [GPL-2](https://tldrlegal.com/license/gnu-general-public-license-v2) or 
+  * [GPL-2](https://tldrlegal.com/license/gnu-general-public-license-v2) 혹은 
     [GPL-3](https://tldrlegal.com/license/gnu-general-public-license-v3-(gpl-3)). 
-    These are "copy-left" licenses. This means that anyone who distributes your
-    code in a bundle must license the whole bundle in a GPL-compatible way. 
-    Additionally, anyone who distributes modified versions of your code 
-    (derivative works) must also make the source code available. GPL-3 is a 
-    little stricter than GPL-2, closing some older loopholes.
+    "카피레프트(copy-left)" 라이선스다. 코드를 번들로 묶어 배포하는 누구나 전체 번들 꾸러미를
+    GPL-호환되는 방식으로 라이선스 면허를 줘야한다.
+    추가적으로 작성한 변형 코드 버젼(2차 파생작업)을 배포하려면 소스코드도 함께 공개해야만 된다.
+    GPL-3는 일부 허점을 보완한 GPL-2 보다 약간 더 엄격하다.
 
   * [CC0](https://tldrlegal.com/license/creative-commons-cc0-1.0-universal). 
-    It relinquishes all your rights on the code and data so that it can be 
-    freely used by anyone for any purpose. This is sometimes called putting it 
-    in the public domain, a term which is neither well-defined nor meaningful in 
-    all countries.
+    코드와 데이터에 대한 모든 권리를 포기해서 누구나 어떤 목적으로도 자유로이 사용한다.
+    때로는 저작권 영역 밖, 공공영역(public domain, PD)에 둔다고 한다. 
+    하지만, 모든 나라에서 깔끔히 정의되고 유의미한 것은 아니다.
+    
+    CC0 라이선스는 데이터 팩키지에 가장 적합하다. 적어도 미국에서는, 저작권을 취득할 없는 것이
+    데이터다. 그래서, 저작권을 포기할 것도 없다. CC0 라이선스는 이 점을 명확히 한다.
   
-    This license is most appropriate for data packages. Data, at least in the US, 
-    is not copyrightable, so you're not really giving up much. This 
-    license just makes this point clear.
-  
-If you'd like to learn more about other common licenses, Github's [choosealicense.com](http://choosealicense.com/licenses/) is a good place to start. Another good resource is <https://tldrlegal.com/>, which explains the most important parts of each license. If you use a license other than the three I suggest, make sure you consult the "Writing R Extensions" section on [licensing][R-exts].
+다른 일반적인 라이선스에 대해 더 학습하고자 한다면, GitHub [choosealicense.com](http://choosealicense.com/licenses/)이 좋은 출발점이 된다.
+또 다른 훌륭한 교재는 <https://tldrlegal.com/>으로 각 라이선스 별로 가장 중요한 부분을 해설한다.
+저자가 제안한 세가지 외에 다른 라이선스를 사용한다면, "Writing R Extensions" [licensing][R-exts] 절을 참조해서 라이선스 관련된 사항을 확실히 한다.
 
-If your package includes code that you didn't write, you need to make sure you're in compliance with its license. Since this occurs most commonly when you're including C source code, it's discussed in more detail in [compiled code](#src).
+본인이 작성하지 않은 코드를 팩키지가 포함하고 있다면, 라이선스를 준수하고 있는지 확인할 필요가 있다.
+C 소스 코드를 포함할 때 대부분 경우 발생하는데, [compiled code](#src)에서 좀더 상세하게 다루기로 한다.
 
-### On CRAN
+### CRAN 제출할 때
 
-If you want to release your package to CRAN, you must pick a standard license. Otherwise it's difficult for CRAN to determine whether or not it's legal to distribute your package! You can find a complete list of licenses that CRAN considers valid at <https://svn.r-project.org/R/trunk/share/licenses/license.db>.
+만약 팩키지를 CRAN에 출시하려면, 표준 라이선스를 선택해야 된다.
+그렇지 않다면, CRAN에서 팩키지 배포가 적법한지, 적법하지 않은지 판단하기 어렵다.
+CRAN에서 고려하는 적법한 전체 라이선스 목록은 <https://svn.r-project.org/R/trunk/share/licenses/license.db> 웹사이트에서 확인할 수 있다.
 
 ```{r, results='asis', echo = FALSE, eval = FALSE}
 licenses <- read.dcf(file.path(R.home("share"), "licenses", "license.db"))
@@ -363,57 +375,60 @@ has_abbrev <- subset(licenses, Abbrev != "")
 knitr::kable(has_abbrev[c("Name", "Version", "Abbrev")], row.names = FALSE)
 ```
 
-## Version {#version}
+## 버젼(Version) {#version}
 
-Formally, an R package version is a sequence of at least two integers separated by either `.` or `-`. For example, `1.0` and `0.9.1-10` are valid versions, but `1` or `1.0-devel` are not. You can parse a version number with `numeric_version`.
+형식적으로, R 팩키지 버젼은 `.` 혹은 `-` 으로 구분되는 최소 정수 두개를 갖는 시퀀스(sequence)다.
+예를 들어, `1.0` 과 `0.9.1-10`은 적법한 버젼이지만, `1` 혹은 `1.0-devel`은 적법하지 않다.
+버젼 숫자를 `numeric_version` 명령어로 파싱(parsing)할 수 있다.
 
 ```{r}
 numeric_version("1.9") == numeric_version("1.9.0")
 numeric_version("1.9.0") < numeric_version("1.10.0")
 ```
 
-For example, a package might have a version 1.9. This version number is considered by R to be the same as 1.9.0, less than version 1.9.2, and all of these are less than version 1.10 (which is version "one point ten", not "one point one zero). R uses version numbers to determine whether package dependencies are satisfied. A package might, for example, import package `devtools (>= 1.9.2)`, in which case version 1.9 or 1.9.0 wouldn't work.
+예를 들어, 팩키지가 1.9 버젼을 갖을 수도 있다.
+1.9 버젼 숫자를 1.9.0와 동일하게, 1.9.2 보다는 적게, 그리고 모두 1.10 ("일점 일공"이 아닌 "일점 십" 버젼.) 보다는 적은 버젼으로 R에서 인식된다. 버젼 숫자를 사용해서 팩키지 의존성이 만족되는지를 R이 판단한다.
+예를 들어, `devtools (>= 1.9.2)` 팩키지를 가져오기 할 때, 1.9 혹은 1.9.0 버젼은 동작하지 않는다.
 
-The version number of your package increases with subsequent releases of a package, but it's more than just an incrementing counter -- the way the number changes with each release can convey information about what kind of changes are in the package.
+작성한 팩키지 버젼 숫자는 팩키지를 연이어 출시하면서 증가한다.
+하지만, 단지 번호가 증가하는 계수기 역할 이상을 의미한다 -- 매번 출시될 때마다 번호 변경은 팩키지에 어떤 유형의 변경인지에 관한 정보를 전달한다.
 
-I don't recommend taking full advantage of R's flexiblity. Instead always use `.` to separate version numbers. 
+R이 제공하는 유연성 전체를 활용하는 것은 추천하지 않는다. 대신에 버젼 숫자를 구분하는데 `.`을 항상 사용한다.
 
-* A released version number consists of three numbers, `<major>.<minor>.<patch>`. 
-  For version number 1.9.2, 1 is the major number, 9 is the minor number, and 
-  2 is the patch number. Never use versions like `1.0`, instead always spell
-  out the three components, `1.0.0.`
 
-* An in-development package has a fourth component: the development version.
-  This should start at 9000. For example, the first version of the package
-  should be `0.0.0.9000`. There are two reasons for this recommendation:
-  first, it makes it easy to see if a package is released or in-development,
-  and the use of the fourth place means that you're not limited to what the
-  next version will be. `0.0.1`, `0.1.0` and `1.0.0` are all greater than 
-  `0.0.0.9000`.
+* 출시된 버젼 숫자는 숫자 세개로 구성된다, `<주번호>.<소번호>.<패치번호>(<major>.<minor>.<patch>)`.
+  버젼 번호 1.9.2 에서, 1은 주번호, 9는 소번호, 2는 패치번호다.
+  `1.0` 같은 버젼을 절대 사용하지 마라. 대신에 항상 `1.0.0`처럼 세 구성요소를 생략하지 말고 전부 써라.
+
+* 개발중인 팩키지는 4번째 구성요소를 갖는다: 개발 버젼.
+  개발버젼은 9000에서 시작한다. 예를 들어, 팩키지 첫 버젼은 `0.0.0.9000`이 되어야 한다.
+  이것을 추천하는 두가지 이유가 있다: 첫째, 팩키지가 출시되었는지, 개발중인지 식별하기 쉽다. 
+  둘째, 네번째 장소를 두는 것이 다음 버젼이 무엇이든지 제약을 받지 않는다는 의미가 된다.
+  버젼 번호 `0.0.1`, `0.1.0`, `1.0.0` 모두 `0.0.0.9000` 보다 항상 더 크다.
   
-    Increment the development version, e.g. from `9000` to `9001` if you've
-    added an important feature that another development package needs to depend 
-    on.
+    또다른 개발 팩키지에 필요한 만약 중요한 기능을 추가했다면 
+    예를 들어, `9000` 에서 `9001`로 개발 버젼 숫자를 증가시킨다.
     
-    If you're using svn, instead of using the arbitrary `9000`, you can
-    embed the sequential revision identifier.
+    임의로 `9000`을 사용하는 대신에, 만약 `svn`을 사용한다면, 순차 변경 식별자를 포함할 수 있다. 
 
-This advice here is inspired in part by [Semantic Versioning](http://semver.org) and by the [X.Org](http://www.x.org/releases/X11R7.7/doc/xorg-docs/Versions.html) versioning schemes. Read them if you'd like to understand more about the standards of versioning used by many open source projects.
+여기 조언은 부분적으로 [Semantic Versioning](http://semver.org)과 [X.Org](http://www.x.org/releases/X11R7.7/doc/xorg-docs/Versions.html) 버젼 변경계획에서 영감을 받았다.
+많은 공개 소프트웨어 프로젝트에서 사용되는 표준 버져닝에 대해서 좀더 이해하고자 한다면 꼭 읽어보기 바란다.
+    
+[picking a version number](#release-version) 팩키지 출시 맥락에서 버젼 숫자를 다시 살펴볼 것이다.
+지금으로서는 단지 팩키지 첫 버젼숫자는 `0.0.0.9000`이 된다는 것을 기억하라.
 
-We'll come back to version numbers in the context of releasing your package, [picking a version number](#release-version). For now, just remember that the first version of your package should be `0.0.0.9000`.
+## 다른 구성요소 {#description-misc}
 
-## Other components {#description-misc}
+일부 다른 필드는 이 책 다른 곳에 기술되어 있다:
 
-A number of other fields are described elsewhere in the book:
+* `Collate` R 파일을 가져오는(sourced) 순서를 제어한다. 만약 코드가 부작용(side-effect)을 갖을 때만,
+  중요하다; 대부분 S4를 사용하기 때문이다. 이점은 [documenting S4](#man-s4)에서 좀더 심도있게 기술된다.
 
-* `Collate` controls the order in which R files are sourced. This only
-  matters if your code has side-effects; most commonly because you're
-  using S4. This is described in more depth in [documenting S4](#man-s4).
+* `LazyData` 필드는 팩키지에 있는 데이터 접근을 더 용이하게 한다.
+  너무나도 중요하기 때문에, `devtools`이 생성한 최소 기술(minimal description)에 포함된다.
+  이점은 [external data](#data)에 좀더 자세히 기술된다.
 
-* `LazyData` makes it easier to access data in your package. Because it's so 
-  important, it's included in the minimal description created by devtools. It's
-  described in more detail in [external data](#data).
-
-There are actually many other rarely, if ever, used fields. A complete list can be found in the "The DESCRIPTION file" section of the [R extensions manual][R-exts]. You can also create your own fields to add additional metadata. The only restrictions are that you shouldn't use existing names and that, if you plan to submit to CRAN, the names you use should be valid English words (so a spell-checking NOTE won't be generated).
+실제로 거의 드물게 사용되는 필드가 많다. 전체 목록은 [R extensions manual][R-exts] "The DESCRIPTION file" 절에서 확인할 수 있다. 본인이 필요한 필드를 부가 메타데이터 정보로 추가할 수도 있다.
+유일한 제약사항은 기존 명칭을 사용해서는 않된다는 것이다. 만약 CRAN에 제출할 계획이라면, 유효한 영어 단어를 사용해야 한다 (철자법 검사에서 경고가 생성되면 안된다).
 
 [R-exts]: http://cran.r-project.org/doc/manuals/R-exts.html#Licensing
