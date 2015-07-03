@@ -117,29 +117,30 @@ bookdown::embed_png("screenshots/man-add.png", dpi = 220)
 bookdown::embed_png("screenshots/build-reload-opts-2.png", dpi = 220)
 ```
 
-## Roxygen comments {#roxygen-comments}
+## `Roxygen` 주석 {#roxygen-comments}
 
-Roxygen comments start with `#'` and come before a function. All the roxygen lines preceding a function are called a __block__. Each line should be wrapped in the same way as your code, normally at 80 characters.
+Roxygen 주석은 `#'`으로 시작하고, 함수 앞에 놓인다.
+함수에 앞선 모든 roxygen 행을 __블록(block)__이라고 한다.
+각 행도 코드와 동일하게 일반적으로 문자 80자에 맞춰야 된다.
 
-Blocks are broken up into __tags__, which look like `@tagName details`. The content of a tag extends from the end of the tag name to the start of the next tag (or the end of the block). Because `@` has a special meaning in roxygen, you need to write `@@` if you want to add a literal `@` to the documentation (this is mostly important for email addresses and for accessing slots of S4 objects).
+블록은 `@tagName details`처럼 __태그(tags)__로 쪼개진다. 
+해당 태그 내용은 태그 명칭 끝에서부터 다음 태그 시작까지(혹은 블록 끝까지) 범위를 갖는다. `@` 기호가 roxygen에서 특별한 의미를 갖기 때문에, `@`를 문자 그대로 추가하려면
+`@@`로 표현한다. (전자우편주소와 S4 객체 슬롯에 접근하는데 대체로 사용된다).
 
-Each block includes some text before the first tag.[^1] This is called the __introduction__, and is parsed specially:
+각 블록은 첫 태그[^1] 앞에 텍스트를 포함한다. 이것을 __소개(introduction)__라고 부르고, 특별하게 파싱된다:
 
-* The first _sentence_ becomes the title of the documentation. That's what you 
-  see when you look at `help(package = mypackage)` and is shown at the top of 
-  each help file. It should fit on one line, be written in sentence case, and 
-  end in a full stop.
+
+* 첫 _문장(sentence)_는 문서 제목이 된다. `help(package = mypackage)` 명령어를 실행했을 때 보는 것이고, 각 도움말 파일 상단에 나타난다. 한 줄에 맞춰야 되고, 각 단어는 대문자로 표현되고, 마침표로 끝나야 된다.
+
+
+* 두번째 _문단(paragraph)_은 기술이다: 문서 처음에 나오고, 간략하게 함수가 __무엇(what)__을 수행하는지 기술해야 한다.
   
-* The second _paragraph_ is the description: this comes first in the 
-  documentation and should briefly describe what the function does. 
-  
-* The third and subsequent _paragraphs_ go into the details: this is a 
-  (often long) section that is shown after the argument description and should 
-  go into detail about how the function works.
+* 세번째 그리고 후속 _문단(paragraphs)_은 상세로 들어간다: 인자 기술 다음에 나타나는
+  (종종 장문) 부문으로 함수가 __어떻게(how)__ 동작하는지 상세한 내용이 나와있다.
 
-All objects must have a title and description. Details are optional.
+모든 객체는 제목(title)과 기술(description)을 가져야만 된다. 상세 내용(detail)은 선택옵션이다.
 
-Here's an example showing what the introduction for `sum()` might look like if it had been written with roxygen:
+`roxygen`으로 작성한다면, `sum()` 함수에 대한 소개가 어떤 느낌이 다음에 예제로 나와 있다:
 
 ```{r}
 #' Sum of vector elements.
@@ -152,26 +153,26 @@ Here's an example showing what the introduction for `sum()` might look like if i
 sum <- function(..., na.rm = TRUE) {}
 ```
 
-`\code{}` and `\link{}` are formatting commands that you'll learn about in [formatting](#text-formatting). I've been careful to wrap the roxygen block so that it's less than 80 characters wide. You can do that automatically in Rstudio with Ctrl/Cmd + Shift + / (or from the menu, code | re-flow comment).
+`\code{}`와 `\link{}`는 [formatting](#text-formatting)에서 학습할 서식 명령어(formatting commands)다. 조심스럽게 `roxygen` 블록을 감싸서 문자 80자를 넘지않게 했다. RStudio에서 Ctrl/Cmd + Shift + / 명령어를 사용해서 자동으로 맞추게 한다. (혹은 메뉴에서 code | re-flow comment을 사용한다).
 
-You can add arbitrary sections to the documentation with the `@section` tag. This is a useful way of breaking a long details section into multiple chunks with useful headings. Section titles should be in sentence case, must be followed by a colon, and they can only be one line long.
+`@section` 태그로 임의 절(section)을 문서에 추가할 수도 있다.
+이것이 유용한 이유는 상세한 설명을 담고 있는 장문 절을 도움되는 표제를 갖는 다수 덩어리로 쪼갤 수 있게 한다. 절 제목 각 단어는 대문자로 표현되고, 콜론이 다음에 오고, 한줄 길이로 표현될 수 있다.
 
 ```{r}
 #' @section Warning:
 #' Do not operate heavy machinery within 8 hours of using this function.
 ```
 
-There are two tags that make it easier for people to navigate between help files:
+도움말 파일 사이를 쉽게 돌아다니게 도움이 되는 태그가 두개 있다:
 
-* `@seealso` allows you to point to other useful resources, either on the web, 
-  `\url{http://www.r-project.org}`, in your package `\code{\link{functioname}}`,
-  or another package `\code{\link[packagename]{functioname}}`. 
+
+* `@seealso` 태그는 `\url{http://www.r-project.org}` 웹상에, 
+  `\code{\link{functioname}}` 팩키지에, `\code{\link[packagename]{functioname}}` 
+  또 다른 팩키지에 다른 유용한 교재를 알려준다.
    
-* If you have a family of related functions where every function should link
-  to every other function in the family, use `@family`. The value of `@family` 
-  should be plural.
+* 만약 연관된 함수군으로 모든 함수가 해당 군의 다른 모든 함수에 연관되어 있다면, `@family`을 사용한다. `@family` 값은 복수형이다.
 
-For sum, these components might look like:
+합계(sum) 함수에 대해서, 상기 구성요소는 다음과 같다:
 
 ```{r}
 #' @family aggregate functions
@@ -180,26 +181,28 @@ For sum, these components might look like:
 #'   high-dimensional arrays.
 ```
 
-Two other tags make it easier for the user to find documentation:
+다른 태그 두개로 사용자가 문서를 더 쉽게 찾을 수 있게 돕는다:
 
-*   `@aliases alias1 alias2 ...` adds additional aliases to the topic.
-    An alias is another name for the topic that can be used with `?`.
+*   `@aliases alias1 alias2 ...` 태그는 주제(topic)에 추가적인 별명(alias)을 추가한다.
+    별명은 `?`으로 사용될 수 있는 주제에 대한 또다른 명칭이다.
 
-*   `@keywords keyword1 keyword2 ...` adds standardised keywords. Keywords are
-    optional, but if present, must be taken from a predefined list found in 
-    `file.path(R.home("doc"), "KEYWORDS")`. 
-  
-    Generally, keywords are not that useful except for `@keywords internal`. 
-    Using the internal keyword removes the function from the package 
-    index and disables some of their automated tests. It's common to use
-    `@keywords internal` for functions that are of interest to other
-    developers extending your package, but not most users.
+*   `@keywords keyword1 keyword2 ...` 태그는 표준화된 키워드를 추가한다.
+    키워드는 선택옵션이다. 하지만, 만약 키워드가 있다면, `file.path(R.home("doc"), "KEYWORDS")` 명령어로 찾아지는 사전 정의된 목록에서 뽑혀진다.
 
-Other tags are situational: they vary based on the type of object that you're documenting. The following sections describe the most commonly used tags for functions, packages and the various methods, generics and objects used by R's three OO systems. 
+    일반적으로, 키워드는 `@keywords internal` 예외를 제외하면 그다지 유용하지 않다.
+    내부 키워드를 사용하게 되면 팩키지 인덱스에서 함수를 제거하고 
+    테스트 자동화 일부가 비활성화된다. 대부분의 일반 사용자가 아니라 
+    작성된 팩키지를 확장하려는 다른 개발자에게 흥미로운 함수에 대해서 
+    `@keywords internal`을 사용하는 것이 일반적이다.
+    
+다른 태그는 상황에 따라 다르다: 문서화하는 객체 유형에 다양하게 나타난다.
+다음 절에서 가장 흔하게 사용되는 태그를 기술한다: 함수, 팩키지, 세가지 R OO 시스템에서 사용되는 다양한 메쏘드, 제네릭, 객체.
 
-## Documenting functions {#man-functions}
+## 함수 문서화 {#man-functions}
 
-Functions are the most commonly documented object. As well as the introduction block, most functions have three tags: `@param`, `@examples` and `@return`.
+함수는 가장 흔하게 문서화되는 객체다.
+소개 블록뿐만 아니라, 대부분의 함수는 태그를 세개 갖는다: `@param`, `@examples`, `@return`.
+
 
 *   `@param name description` describes the function's inputs or parameters.
     The description should provide a succinct summary of the type of the
@@ -585,5 +588,7 @@ cat(tabular(mtcars[1:5, 1:5]))
 ```
 
 ### Notes
-[^1]: Note that it is possible to define the "introduction" sections - the title and description - explicitly, rather than implicitly, using `@title` and `@description` tags. I follow the convention of avoiding this, as do many other package authors, so I don't recommend it - but you should be aware that these tags do exist and may appear in other package-writers' source code.
+[^1]: `@title`와 `@description` 태그를 사용해서 암묵적이기 보다 명시적으로 제목과 기술을 갖는 "소개(introduction)" 절을 정의하는 것이 가능하다는 것에 주목한다.
+다른 많은 팩키지 저자가 하듯이 이것을 피하는 관례를 저자는 따른다. 그래서 저자는 추천하지 않는다 - 하지만, 이러한 태그가 존재와 다른 팩키지 저작자 소스 코드에 나타날 수 있다는 것을 인지해야 한다.
+
 
