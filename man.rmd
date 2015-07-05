@@ -422,28 +422,32 @@ Account <- setRefClass("Account",
 
 ## 특수 문자 {#man-special}
 
-There are three special characters that need special handling if you want them to appear in the final documentation:
+최종 문서에 표현하려면 특별한 처리가 필요한 특수문자(special character)가 세개 있다:
 
-* `@`, which usually marks the start of a roxygen tag. Use `@@` to insert a
-  literal `@` in the final documentation.
+
+* `@` 특수문자는 보통 `roxygen`태그 시작을 명기한다. 
+  `@@`을 사용해서 최종 문서 `@` 문자 그대로 찍는다.
   
-* `%`, which usually marks the start of a latex comment which continues to the
-  end of the line. Use `\%` to insert a literal `%` in the output document. 
-  The escape is not needed in examples.
-  
-* `\`, which usually marks the start of a latex escaping. Use `\\` to 
-  insert a literal `\` in the documentation.
+* `%` 특수문자는 보통 행 마지막까지 계속되는 LaTeX 주석 시작을 명기한다.
+  `\%`을 사용해서 `%` 문자 그대로 출력문서에 찍는다.
+  예제에서는 이스케이프(`\`)가 필요없다.
 
-## Do repeat yourself {#dry2}
 
-There is a tension between the DRY (don't repeat yourself) principle of programming and the need for documentation to be self-contained. It's frustrating to have to navigate through multiple help files in order to pull together all the pieces you need. Roxygen2 provides two ways to avoid repetition in the source, while still assembling everything into one documentation file:
+* `\` 특수문자는 보통 LaTex 이스케이프 시작을 명기한다. 
+  `\\`을 사용해서 `\` 문자 그대로 문서에 찍는다.
 
-* The ability to reuse parameter documentation with `@inheritParams`.
+## 스스로 반복하라 {#dry2}
 
-* The ability to document multiple functions in the same place with 
-  `@describeIn` or `@rdname`
+DRY (don't repeat yourself, 스스로 반복하지마라) 프로그래밍 원칙과 문서 자체로 포함되어야 되는 필요성 사이에 긴장이 있다. 필요한 모든 부분을 뽑아내기 위해서
+다수 도움말 파일을 돌아다녀야 되는 것은 난감하다. 두가지 방식으로 `roxygen2`로 반복을 필할 수 있는 반면에, 여전히 모든 것을 한 문서 파일로 조립할 수 있다:
 
-### Inheriting parameters from other functions
+* `@inheritParams`으로 매개변수 문서를 재사용하는 기능.
+
+* `@describeIn` 혹은 `@rdname` 태그로 동일한 장소에 다수 함수를 문서화하는 기능.
+
+### 다른 함수에서 매개변수를 상속하기
+
+`@inheritParams source_function` 태그를 사용해서 다른 함수의 매개변수 기술문서를 상속할 수 있다. 
 
 You can inherit parameter descriptions from other functions using `@inheritParams source_function`. This tag will bring in all documentation for parameters that are undocumented in the current function, but documented in the source function. The source can be a function in the current package, via `@inheritParams function`, or another package, via `@inheritParams package::function`. For example the following documentation:
 
