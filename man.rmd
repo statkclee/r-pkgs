@@ -204,40 +204,39 @@ sum <- function(..., na.rm = TRUE) {}
 소개 블록뿐만 아니라, 대부분의 함수는 태그를 세개 갖는다: `@param`, `@examples`, `@return`.
 
 
-*   `@param name description` describes the function's inputs or parameters.
-    The description should provide a succinct summary of the type of the
-    parameter (e.g., string, numeric vector) and, if not obvious from
-    the name, what the parameter does. 
+*   `@param name description` 태그를 통해 함수 입력 혹은 매개변수를 기술한다.
+    명칭에서 명확하지 않다면 매개변수 역할과 매개변수 유형을 
+    간결한 요약으로 기술한다.
     
-    The description should start with a capital letter and end with a full stop. 
-    It can span multiple lines (or even paragraphs) if necessary. All 
-    parameters must be documented.
+    매개변수 기술은 대문자로 시작해서 마침표로 끝나다. 
+    필요하면 여러 행에 걸쳐서 혹은 심지어 문단으로도 확장될 수 있다. 
+    매개변수 모두를 문서화해야 한다.
+    
+    (공백 없이) 콤마로 명칭을 분리해서 한 장소에서 다수 인자를 문서화할 수 있다.
+    예를 들어, `x`와 `y` 모두를 문서화하려면, 
+    `@param x,y Numeric vectors.` 처럼 작성할 수 있다.
 
-    You can document multiple arguments in one place by separating
-    the names with commas (no spaces). For example, to document both
-    `x` and `y`, you can write `@param x,y Numeric vectors.`.
 
-*   `@examples` provides executable R code showing how to use the function in
-    practice. This is a very important part of the documentation because
-    many people look at the examples first. Example code must work without 
-    errors as it is run automatically as part of `R CMD check`.
+*   `@examples` 태그는 실행가능한 R 코드를 제공해서, 실전에서 어떻게 함수를
+    사용하는지 알려준다. 
+    이것이 문서에서 가장 중요한 부분이 되는데, 
+    이유는 많은 사람들이 예제를 먼저 보기 때문이다.
+    `R CMD check` 일부로 자동 실행되어, 예제 코드는 오류 없이 동작되야 된다.
+    
+    실례 목적으로 오류(error)를 발생시키는 코드를 포함하는 것이 종종 유용할 때가 있다.
+    `\dontrun{}`을 사용해서 실행되지 않는 코드를 예제로 넣는다.
+    (유사한 목적으로 `\dontrun{}`을 사용하곤 했는데, 더 이상 추천하지는 않는다. 
+    왜냐하면 실제로 테스트가 __되기__ 때문이다).
+    
+    문서에 직접 예제를 포함하는 대신에, 예제를 별도 파일에 저장하고, 
+    `@example path/relative/to/packge/root` 태그를 사용해서 문서에 삽입한다.
+    
 
-    For the purpose of illustration, it's often useful to include code
-    that causes an error. `\dontrun{}` allows you to include code in the
-    example that is not run. (You used to be able to use `\donttest{}` for
-    a similar purpose, but it's no longer recommended because it actually
-    __is__ tested.)
+*   `@return description` 태그는 함수에서 나온 출력결과를 기술한다.
+    항상 필요하는 것은 아니지만, 만약 작성한 함수가 입력에 따라 다른 유형의 
+    출력을 반환하거나, S3, S4, RC 객체를 반환한다면 반환값을 기술하는 것이 좋다.
 
-    Instead of including examples directly in the documentation, you can
-    put them in separate files and use `@example path/relative/to/packge/root`
-    to insert them into the documentation.
-
-*   `@return description` describes the output from the function. This is
-    not always necessary, but is a good idea if your function returns different 
-    types of output depending on the input, or if you're returning an S3, S4 or 
-    RC object.
-
-We could use these new tags to improve our documentation of `sum()` as follows:
+상기 신규 학습한 태그를 사용해서 다음과 같이 `sum()` 함수 문서를 개선한다:
 
 ```{r}
 #' Sum of vector elements.
@@ -274,17 +273,23 @@ We could use these new tags to improve our documentation of `sum()` as follows:
 sum <- function(..., na.rm = TRUE) {}
 ```
 
-Indent the second and subsequent lines of a tag so that when scanning the documentation it's easy to see where one tag ends and the next begins. Tags that always span multiple lines (like `@example`) should start on a new line and don't need to be indented.
+태그 두번째 이후 라인을 들여쓴다. 그렇게 해서, 문서를 일별할 때, 태그가 어디서 끝나고, 다음 태그가 어디서 시작하는지 식별하기 좋다. 
+`@example`처럼 항상 다수 행을 잡아먹는 태그는 새줄(new line)에 시작하고 들여쓰기할 필요가 없다.
 
-## Documenting datasets {#man-data}
 
-See [documenting data](#documenting-data).
+## 데이터셋(dataset) 문서화 {#man-data}
 
-## Documenting packages {#man-packages}
+[documenting data](#documenting-data) 참조한다.
 
-You can use roxygen to provide a help page for your package as a whole. This is accessed with `package?foo`, and can be used to describe the most important components of your package. It's a useful supplement to vignettes, as described in the next chapter. 
+## 팩키지 문서화 {#man-packages}
 
-There's no object that corresponds to a package, so you need to document `NULL`, and then manually label it with `@docType package` and `@name <package-name>`. This is also an excellent place to use the `@section` tag to divide up page into useful categories.
+`roxygen`을 사용해서 전체 작성한 팩키지 도움말 페이지를 생성한다.
+`package?foo` 명령어로 접근되고, 작성한 팩키지의 가장 중요한 구성요소를 기술하는데 사용한다.
+다음 장에서 기술되는 소품문(vignettes)에 대한 유용한 부록이다.
+
+팩키지에 상응하는 객체는 없다. 그래서, `NULL`을 문서화할 필요가 있다.
+그리고 나서, 수작업으로 `@docType package`와 `@name <package-name>` 태그로 라벨을 붙인다. `@section` 태그를 사용해서 페이지를 유용한 범주로 나누기에 더할나위 없이 좋은 장소다.
+
 
 ```{r}
 #' foo: A package for computating the notorious bar statistic.
@@ -300,21 +305,39 @@ There's no object that corresponds to a package, so you need to document `NULL`,
 NULL
 ```
 
-I usually put this documentation in a file called `<package-name>.R`. It's also a good place to put the package level import statements that you'll learn about in [imports](#imports).
+저자는 `<package-name>.R`로 불리는 파일에 이 문서를 저장한다.
+[imports](#imports)에서 학습할 팩키지 레벨 `import` 문장을 두기도 좋은 장소다.
 
-## Documenting classes, generics and methods {#man-classes}
 
-It's relatively straightforward to document classes, generics and methods. The details vary based on the object system you're using. The following sections give the details for the S3, S4 and RC object systems.
+## 클래스, 제네릭, 메쏘드 문서화 {#man-classes}
+
+클래스, 제네릭, 메쏘드를 문서화하는 것은 상대적으로 쉽다.
+사용하는 객체 시스템에 따라 구체적인 내용은 변한다.
+다음 절에서 S3, S4, RC 객체 시스템에 대한 구체적인 내용을 다룬다.
 
 ### S3 {#man-s3}
 
-S3 __generics__ are regular functions, so document them as such. S3 __classes__ have no formal definition, so document the constructor function. It is your choice whether or not to document S3 __methods__. You don't need to document methods for simple generics like `print()`. But if your method is more complicated or includes additional arguments, you should document it so people know how it works. In base R, you can see examples of documentation for more complex methods like `predict.lm()`, `predict.glm()`, and `anova.glm()`.
+S3 __제네릭(generics)__은 정규 함수다. 그래서, 함수로 문서화한다.
+S3 __클래스(classes)__는 어떤 정형화된 정의가 없다. 그래서 생성자 함수를 문서화한다.
+S3 __메쏘드(methods)__를 문서화할지 하지 말지는 개발자 선택사항이다.
+`print()`같은 간단한 제네릭에 대한 메쏘드를 문서화할 필요는 없다.
+하지만, 만약 작성한 메쏘드가 더 복잡하거나 추가적인 인자가 포함된다면, 
+문서화해서 사람들이 사용법을 알 수 있게 한다.
+`predict.lm()`, `predict.glm()`, `anova.glm()` 같은 좀더 복잡한 메쏘드에 대한 문서 예제를 기반 R(R base)에서,볼 수 있다.
 
-Older versions of roxygen required explicit `@method generic class` tags for all S3 methods. From version 3.0.0 onward, this is no longer needed as roxygen2 will figure it out automatically. If you are upgrading, make sure to remove these old tags. Automatic method detection will only fail if the generic and class are ambiguous. For example is `all.equal.data.frame()` the `equal.data.frame` method for `all`, or the `data.frame` method for `all.equal`?. If this happens, you can disambiguate with e.g. `@method all.equal data.frame`.
+`roxygen` 이전 버젼에서 모든 S3 메쏘드에 대해서 `@method generic class` 태그가 명시적으로 필요하다. 3.0.0 버젼 이후로, 더 이상 필요하지는 않는데 이유는 
+`roxygen2`가 자동으로 해결해주기 때문이다.
+만약 업그레이드한다면, 이전 태그를 확실히 제거한다.
+만약 제네릭과 클래스가 애매모호하다면 자동 메쏘드 탐지는 실패한다.
+예를 들어, `all.equal.data.frame()`은 `all`에 대한 `equal.data.frame` 메쏘드인지 아니면 
+`all.equal`에 대한 `data.frame` 메쏘드인가? 만약 이런 상황이 발생되면, 
+예를 들어, `@method all.equal data.frame` 태그로 상황을 명확히 한다.
+
 
 ### S4 {#man-s4}
 
-Document __S4 classes__ by adding a roxygen block before `setClass()`. Use `@slot` to document the slots of the class in the same way you use `@param` to describe the parameters of a function. Here's a simple example:
+`setClass()` 앞에 `roxygen` 블록을 추가해서 __S4 클래스(classes)__를 문서화한다.
+`@param`을 사용해서 함수 매개변수를 기술하는 동일한 방식으로 `@slot` 태그를 사용해서 클래스 슬롯을 문서화한다.
 
 ```{r}
 #' An S4 class to represent a bank account.
@@ -325,27 +348,36 @@ Account <- setClass("Account",
 )
 ```
 
-S4 __generics__ are also functions, so document them as such. S4 __methods__ are a little more complicated, however. Unlike S3, all S4 methods must be documented. You document them like a regular function, but you probably don't want each method to have its own documentation page. Instead, put the method documentation in one of three places:
+S4 __제네릭(generics)__도 함수다. 그래서 마찬가지로 문서화한다.
+하지만, S4 __메쏘드(methods)__는 약간 더 복잡하다.
+S3와 달리, S4 메쏘드는 문서화되어야 한다.
+정규 함수처럼 S4 메쏘드를 문서화 하지만, 아마도 각 메쏘드에 대해 각자 문서 페이지를 배정하고 싶지는 않을 것이다. 대신에 다음 세 장소 중에서 한 곳에 메쏘드를 문서화하여 둔다:
 
-* In the class. Most appropriate if the corresponding generic uses single
-  dispatch and you created the class.
 
-* In the generic. Most appropriate if the generic uses multiple dispatch
-  and you have written both the generic and the method.
+* 클래스에 둔다. 만약 상응하는 제네릭이 단일 작업지정(dispatch)을 사용하고, 여러분이 클래스를 생성한다면 가장 적절하다.
 
-* In its own file. Most appropriate if the method is complex, or if
-  you've written the method but not the class or generic.
 
-Use either `@rdname` or `@describeIn` to control where method documentation goes. See [documenting multiple objects in one file](#multiple-man) for details.
+* 제네릭에 둔다. 만약 제네릭이 다수 작업지정(dispatch)를 사용하고, 여러분이 메쏘드와 제네릭 둘다 작성했다면 가장 적절하다.
 
-Another consideration is that S4 code often needs to run in a certain order. For example, to define the method `setMethod("foo", c("bar", "baz"), ...)` you must already have created the `foo` generic and the two classes. By default, R code is loaded in alphabetical order, but that won't always work for your situation. Rather than relying on alphabetic ordering, roxygen2 provides an explicit way of saying that one file must be loaded before another: `@include`. The `@include` tag gives a space separated list of file names that should be loaded before the current file:
+* 파일 자체에 둔다. 만약 메쏘드가 복잡하거나 만약 여러분이 메쏘드를 작성했지만, 클래스와 제네릭을 작성하지 않았다면 가장 적절하다.
+
+`@rdname` 혹은 `@describeIn`을 사용해서 메쏘드 문서를 어느 장소에 위치할지 제어한다.
+자세한 사항은 [documenting multiple objects in one file](#multiple-man)을 참조한다.
+
+고려해봐야할 다른 점은 S4 코드가 종종 특정 순서로 실행될 필요가 있다는 점이다.
+예를 들어, `setMethod("foo", c("bar", "baz"), ...)` 메쏘드를 정의하려면,
+이미 `foo` 제네릭과 두 클래스를 생성해야 한다.
+기본 설정으로 R 코드는 알파벳 순서로 적재되지만, 상황에 따라 항상 동작되지는 않는다.
+알파벳 순서에 의존하기 보다, `roxygen2`를 사용해서 명시적으로 다른 파일 이전에 특정 파일이 적재되도록 순서를 정한다: `@include`. 현재 파일 이전에 적재되어야 되는 파일 목록을 공백으로 구분하여 `@include` 태그가 담고 있다:
+
 
 ```{r, eval = FALSE}
 #' @include class-a.R
 setClass("B", contains = "A")
 ```
 
-Often, it's easiest to put this at the top of the file. To make it clear that this tag applies to the whole file, and not a specific object, document `NULL`.
+종종, 파일 상단에 상기 코드를 위치시키는 것이 가장 쉽다.
+상기 태그가 특정 객체가 아니라 전체 파일에 적용된다는 것을 명확히 하도록, `NULL` 문서화한다.
 
 ```{r, eval = FALSE}
 #' @include foo.R bar.R baz.R
@@ -354,13 +386,20 @@ NULL
 setMethod("foo", c("bar", "baz"), ...)
 ```
 
-Roxygen uses the `@include` tags to compute a topological sort which ensures that dependencies are loaded before they're needed. It then sets the `Collate` field in `DESCRIPTION`, which overrides the default alphabetic ordering. A simpler alternative to `@include` is to define all classes and methods in `aaa-classes.R` and `aaa-generics.R`, and rely on these coming first since they're in alphabetical order. The main disadvantage is that you can't organise components into files as naturally as you might want.
+`roxygen`은 `@include` 태그를 사용해서 필요하기 전에 의존성이 확실히 적재되도록 위상정렬(topological sort)을 계산한다.
+그리고 나서, `DESCRIPTION` 파일에 `Collate` 필드를 설정하는데 그렇게 되면 디폴트 기본 설정된 알파벳 정렬은 무시(override)된다. 
+`@include`에 유사한 대안은 `aaa-classes.R`와 `aaa-generics.R` 파일에 모든 클래스와 메쏘드를 정의하고, 알파벳 순서로 정렬되어 있기 때문에 먼저 오는 것에 사용한다.
+주된 단점은 원하는 만큼 자연스럽게 컴포넌트(components)를 파일에 조직화할 수 없다.
 
-Older versions of roxygen2 required explicit `@usage`, `@alias` and `@docType` tags for document S4 objects. However, as of version 3.0.0, roxygen2 generates the correct values automatically so you no longer need to use them. If you're upgrading from an old version, you can delete these tags.
+`roxygen2` 이전 버젼에서는 명시적으로  S4 객체 문서화에 `@usage`, `@alias`, `@docType`
+태그가 필요하다.
+하지만, 3.0.0 버젼부터 `roxygen2`가 자동으로 올바른 값을 생성해서 더 이상 필요가 없다.
+만약 이전 버젼에서 업그레이드하면, 이런 태그를 삭제할 수 있다.
 
-### RC {#man-rc}
+### 참조 클래스 (RC) {#man-rc}
 
-Reference classes are different to S3 and S4 because methods are associated with classes, not generics. RC also has a special convention for documenting methods: the __docstring__. The docstring is a string placed inside the definition of the method which briefly describes what it does. This makes documenting RC simpler than S4 because you only need one roxygen block per class.
+참조 클래스(Reference Class, RC)는 S3, S4와 다르다. 왜냐하면 메쏘드가 제네릭이 아닌 클래스와 연계되기 때문이다. 또한 RC는 메쏘드를 문서화하는 특별한 관례가 있다: __docstring__. `docstring`은 메쏘드 정의 내부에 위치하는 문자열로, 간략하게 메쏘드가 무엇을 수행하는지 기술한다. 이것이 S4보다 RC를 더 문서화하기 단순하한다. 왜냐하면 클래스마다 한 `roxygen` 블록만 필요하기 때문이다.
+
 
 ```{r}
 #' A Reference Class to represent a bank account.
@@ -377,9 +416,11 @@ Account <- setRefClass("Account",
 )
 ```
 
-Methods with doc strings will be included in the "Methods" section of the class documentation. Each documented method will be listed with an automatically generated usage statement and its doc string. Also note the use of `@field` instead of `@slot`.
+`docstring`을 갖는 메쏘드는 클래스 문서 "Methods" 절에 추가된다.
+각기 문서화된 메쏘드는 자동 생성된 사용 문장(usage statement)과 `docstring`으로 목록으로 표시된다. `@slot` 대신 `@field` 사용하는 것에 주의한다.
 
-## Special characters {#man-special}
+
+## 특수 문자 {#man-special}
 
 There are three special characters that need special handling if you want them to appear in the final documentation:
 
