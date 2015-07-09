@@ -4,70 +4,89 @@ layout: default
 output: bookdown::html_chapter
 ---
 
-# Vignettes: long-form documentation {#vignettes}
+# 소품문(Vignettes): 장문 문서 {#vignettes}
 
-A vignette is a long-form guide to your package. Function documentation is great if you know the name of the function you need, but it's useless otherwise. A vignette is like a book chapter or an academic paper: it can describe the problem that your package is designed to solve, and then show the reader how to solve it. A vignette should divide functions into useful categories, and demonstrate how to coordinate multiple functions to solve problems. Vignettes are also useful if you want to explain the details of your package. For example, if you have implemented a complex statistical algorithm, you might want to describe all the details in a vignette so that users of your package can understand what's going on under the hood, and be confident that you've implemented the algorithm correctly.
+팩키지에 대한 장문 안내서가 소품문(Vignettes)이다.
+함수 명칭을 알기만 한다면 함수 문서(Function Documentation)가 훌륭하지만,
+명칭을 알지 못한다면 쓸모 없다.
+소품문은 논문이나 책 장(chapter)과 같다: 작성된 팩키지로 해결하려는 문제를 기술하고 나서, 독자에게 문제해결하는 방법을 보여준다.
+소품문은 함수를 유용한 범주로 나눠야 하고, 문제 해결을 위해서 다수 함수를 조직화하는 방법을 시연해야 한다. 소품문을 또한 팩키지 세부사항을 설명하는데 유용하게 활용할 수도 있다. 예를 들어, 복잡한 통계 알고리즘을 구현했다면 소품문에 상세한 전체 내용을 기술할 수도 있다. 그렇게 함으로써 팩키지 사용자가 내부적으로 동작되는 구조를 이해할 수 있고, 알고리즘이 올바르게 구현됐다는 확신을 줄 수 있다.
 
-Many existing packages have vignettes. You can see all the installed vignettes with `browseVignettes()`. To see the vignette for a specific package, use the argument, `browseVignettes("packagename")`. Each vignette provides three things: the original source file, a readable HTML page or PDF, and a file of R code. You can read a specific vignette with `vignette(x)`, and see its code with `edit(vignette(x))`. To see vignettes for a package you haven't installed, look at its CRAN page, e.g., <http://cran.r-project.org/web/packages/dplyr>.
+현존하는 많은 팩키지에는 소품문이 있다.
+`browseVignettes()` 명령어로 설치된 모든 소품문을 볼 수 있다.
+특정 팩키지 소품문을 보려고 한다면, 인자로 팩키지 명칭을 `browseVignettes("packagename")`와 같이 넣는다.
+각 소품문은 세가지를 제공한다: 원 소스파일, 읽기 가능한 HTML 페이지 혹은 PDF, R 코드 파일.
+`vignette(x)` 명령어로 특정 소품문을 읽을 수 있으며, `edit(vignette(x))` 명령어로 코드를 볼 수도 있다.
+설치되지 않은 팩키지에 대한 소품문을 보려면, 예를 들어, <http://cran.r-project.org/web/packages/dplyr> 처럼 CRAN 페이지를 살펴본다.
 
-Before R 3.0.0, the only way to create a vignette was with Sweave. This was challenging because Sweave only worked with LaTeX, and LaTeX is both hard to learn and slow to compile. Now, any package can provide a vignette __engine__, a standard interface for turning input files into HTML or PDF vignettes. In this chapter, we're going to use the R markdown vignette engine provided by [knitr](http://yihui.name/knitr/). I recommend this engine because:
+R 3.0.0 이전에는 소품문을 생성하는 유일한 방법이 `Sweave`였다.
+LaTeX만이 `Sweave`와 동작되는데 LaTeX은 배우기 힘들고, 컴파일할 때 느려서 나름 도전적이였다.
+이제는 어떤 팩키지도 소품문 __엔진__(입력 파일을 HTML 혹은 PDF 소품문으로 바꾸는 표준 인터페이스)을 제공할 수 있다.
+이번 장에서, [knitr](http://yihui.name/knitr/)이 제공하는 R 마크다운(markdown) 소품문 엔진을 사용한다.
+저자는 [knitr](http://yihui.name/knitr/) 엔진을 추천하는데 이유가 다음과 같다:
 
-* You write in Markdown, a plain text formatting system. Markdown is limited
-  compared to LaTeX, but this limitation is good because it forces you to
-  focus on the content.
+* 일반 텍스트 서식 시스템인 마크다운으로 작성한다. 마크다운은 LaTeX과 비교하여 제한된 기능을 갖지만, 
+  오히려 좋을 수 있는 것은 콘텐츠 내용에 집중하게 만들기 때문이다.
+
+* 마크다운은 텍스트, 코드, 결과(텍스트와 시각 정보)를 뒤섞을 수 있다.
+
+* [rmarkdown 팩키지](http://rmarkdown.rstudio.com/)를 사용해서 삶이 단순해진다. 
+  rmarkdown 팩키지 역할은 마크다운과 `knitr`를 조정해서 [pandoc](http://johnmacfarlane.net/pandoc)을 사용하고, 
+  유용한 많은 템플릿을 제공해서 마크다운을 HTML로 변환한다.
   
-* It can intermingle text, code and results (both textual and visual).
+`Sweave`에서 R 마크다운 전환은 소품문 작성에 지대한 영향을 주었다.
+이전에, 소품문 작성은 고생스럽고 느려서 거의 작업하지 않았다.
+이제는, 저자가 작성한 팩키지 핵심부분이 소품문이다.
+복잡한 주제를 설명하거나 문제 해결을 여러 단계로 보여줄 때마다 소품문을 사용한다.
 
-* Your life is further simplified by the [rmarkdown package](http://rmarkdown.rstudio.com/), 
-  which coordinates Markdown and knitr by using [pandoc](http://johnmacfarlane.net/pandoc) 
-  to convert Markdown to HTML and by providing many useful templates.
 
-Switching from Sweave to R Markdown had a profound impact on my use of vignettes. Previously, making a vignette was painful and slow and I rarely did it. Now, vignettes are an essential part of my packages. I use them whenever I need to explain a complex topic, or to show how to solve a problem with multiple steps.
+현재, R 마크다운을 활용하는 가장 쉬운 방법이 [RStudio](http://www.rstudio.com/products/rstudio/download/preview/)다.
+RStudio가 자동으로 필요한 모든 전제조건을 설치한다. 만약 RStudio를 사용하지 않는다면, 다음이 필요하다:
 
-Currently, the easiest way to get R Markdown is to use [RStudio](http://www.rstudio.com/products/rstudio/download/preview/). RStudio will automatically install all of the needed prerequisites. If you don't use RStudio, you'll need to:
+1. `install.packages("rmarkdown")` 명령어로 `rmarkdown` 팩키지를 설치한다.
 
-1. Install the rmarkdown package with `install.packages("rmarkdown")`.
+1. [pandoc을 설치한다.](http://johnmacfarlane.net/pandoc/installing.html)
 
-1. [Install pandoc](http://johnmacfarlane.net/pandoc/installing.html).  
 
-## Vignette workflow {#vignette-workflow}
+## 소품문(Vignette) 작업흐름(workflow) {#vignette-workflow}
 
-To create your first vignette, run:
+첫번째 소품문을 생성하려면, 다음을 실행한다:
 
 ```{r, eval = FALSE}
 devtools::use_vignette("my-vignette")
 ```
 
-This will:
+상기 명령어는 다음을 수행한다:
 
-1.  Create a `vignettes/` directory.
 
-1.  Add the necessary dependencies to `DESCRIPTION` (i.e. it adds knitr to 
-    the `Suggests` and `VignetteBuilder` fields).
+1.  `vignettes/` 디렉토리를 생성한다.
 
-1.  Draft a vignette, `vignettes/my-vignette.Rmd`.
+1. `DESCRIPTION` 필요한 의존성을 추가한다. (즉, `knitr`을 `Suggests`와 `VignetteBuilder` 필드에 추가한다).
 
-The draft vignette has been designed to remind you of the important parts of an R Markdown file. It serves as a useful reference when you're creating a new vignette.
+1. `vignettes/my-vignette.Rmd` 파일에 소품문(vignette) 초안을 작성한다.
 
-Once you have this file, the workflow is straightforward:
+R 마크다운 파일의 중요한 부분을 상기시키도록 소품문 초안을 설계했다.
+신규 소품문을 작성할 때, 유용한 참고서로서 역할을 한다.
 
-1.  Modify the vignette.
+소품문 초안이 생성되면, 작업흐름은 단순하다:
 
-2.  Press Ctrl/Cmd + Shift + K (or click 
-    `r bookdown::embed_png("screenshots/knit.png", dpi = 220)`) to knit the 
-    vignette and preview the output.
+1.  소품문을 변경한다.
 
-There are three important components to an R Markdown vignette:
+2.  소품문을 생성(knit)하고 출력결과를 사전 확인하는데, Ctrl/Cmd + Shift + K 를 누른다. 
+    (혹은 `r bookdown::embed_png("screenshots/knit.png", dpi = 220)`을 클릭한다.)
 
-* The initial metadata block.
-* Markdown for formatting text.
-* Knitr for intermingling text, code and results.
+R 마크다운 소품문에 세가지 중요한 구성요소가 있다:
 
-These are described in the following sections.
+* 초기 메타데이터(metadata) 블록.
+* 텍스트 서식을 입히는 마크다운(markdown).
+* 텍스트, 코드, 결과를 뒤섞는 `knitr`.
 
-## Metadata {#vignette-metadata}
+다음 절에 각각을 상세히 기술한다.
 
-The first few lines of the vignette contain important metadata. The default template contains the following information:
+## 메타데이터 (Metadata) {#vignette-metadata}
+
+소품문 처음 몇 줄에 중요한 메타데이터가 담겨있다.
+디폴트 기본설정 템플릿에은 다음 정보가 담겨있다.
 
     ---
     title: "Vignette Title"
@@ -80,11 +99,19 @@ The first few lines of the vignette contain important metadata. The default temp
       \usepackage[utf8]{inputenc}
     ---
 
-This metadata is written in [yaml](http://www.yaml.org/), a format designed to be both human and computer readable. The basics of the syntax is much like the `DESCRIPTION` file, where each line consists of a field name, a colon, then the value of the field. The one special YAML feature we're using here is `>`. It indicates the following lines of text are plain text and shouldn't use any special YAML features.
+사람과 컴퓨터 모두 읽기 가능한 포맷(format)인 [yaml](http://www.yaml.org/)로 메타데이터가 작성된다.
+기본 구문은 `DESCRIPTION` 파일과 매우 유사하다. 즉, 필드명칭, 콜론, 그리고 필드값으로 각 행이 구성된다.
+여기서 사용하는 YAML 특수 기능이 `>`이다.
+텍스트 다음 행이 일반 텍스트로 어떤 특별한 YAML 기능도 사용하지 말아야 된다는 것을 나타낸다.
 
-The fields are:
+필드 상세 내용은 다음과 같다:
 
-* Title, author and date: this is where you put the vignette's title, author and 
+
+* 제목, 저자, 날짜(Title, author, date): 소품문 제목, 저자, 날짜 정보를 작성한다.
+  
+
+
+this is where you put the vignette's title, author and 
   date. You'll want to fill these in yourself (you can delete them 
   if you don't want the title block at the top of the page). The date is filled 
   in by default: it uses a special knitr syntax (explained below) to insert 
