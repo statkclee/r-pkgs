@@ -107,143 +107,152 @@ R 마크다운 소품문에 세가지 중요한 구성요소가 있다:
 필드 상세 내용은 다음과 같다:
 
 
-* 제목, 저자, 날짜(Title, author, date): 소품문 제목, 저자, 날짜 정보를 작성한다.
+* 제목, 저자, 날짜(Title, author, date): 이곳에 소품문 제목, 저자, 날짜 정보를 작성한다.
+  (만약 페이지 상단에 제목 블록을 원한지 않는다면 삭제할 수 있다) 본인 스스로 상기 정보를 채우고 싶을 것이다.
+  날짜 정보는 기본 디폴트값으로 채워진다: 오늘 날짜를 삽입하는데 (아래 설명할) `knitr` 특수 구문을 사용한다.
+  
+* 출력: `rmarkdown`에 어떤 출력 서식자(formatter)를 사용할지 전달한다. 
+  유용한 정규 보고장표(html, pdf, slideshows, ...)에 유용한 많은 선택 옵션이 있다.
+  하지만, 팩키지 내부에서 잘 동작하도록 전문적으로 설계된 `rmarkdown::html_vignette`이 있다.
+  더 자세한 사항은 `?rmarkdown::html_vignette`을 참조한다.
+
+* 소품문(Vignette): 소품문에는 R에서 필요로하는 특수 메타데이터 블록이 담겨있다.
+  여기서, LaTeX 소품문이 남긴 유산을 볼 수 있다: 메타데이터가 LaTeX 명령어처럼 생겼다.
+  소품문 색인에 나타내려면,   `\VignetteIndexEntry`를 변형해서 소품문 색인 제목으로 넘겨준다.
+  R에 작업을 넘겨 `knitr`을 사용해서 파일을 처리하고, 
+  파일은 UTF-8(소품문 작성세 사용해야 되는 유일한 인코딩)으로 인코딩된다.
   
 
+## 마크다운(Markdown) {#markdown}
 
-this is where you put the vignette's title, author and 
-  date. You'll want to fill these in yourself (you can delete them 
-  if you don't want the title block at the top of the page). The date is filled 
-  in by default: it uses a special knitr syntax (explained below) to insert 
-  today's date. 
-  
-* Output: this tells rmarkdown which output formatter to use. 
-  There are many options that are useful for regular reports (including
-  html, pdf, slideshows, ...) but `rmarkdown::html_vignette` has been 
-  specifically designed to work well inside packages. See 
-  `?rmarkdown::html_vignette` for more details.
-  
-* Vignette: this contains a special block of metadata needed by R. Here, you can 
-  see the legacy of LaTeX vignettes: the metadata looks like LaTeX commands. 
-  You'll need to modifiy the `\VignetteIndexEntry` to provide the title of your 
-  vignette as you'd like it to appear in the vignette index. Leave the other 
-  two lines as is. They tell R to use `knitr` to process the file, and that the 
-  file is encoded in UTF-8 (the only encoding you should ever use to write 
-  vignettes).
+R 마크다운(Markdown) 소품문은 경량 마크업 언어인, 마크다운으로 작성된다.
+마크다운 저자 존 그루버(John Gruber)가 마크다운 철학과 목표를 다음과 같이 요약정리했다:
 
-## Markdown {#markdown}
+> 마크다운 개발 의도는 가능하면 읽고, 쓰기 쉽도록 하는데 있다.
+> 
+> 하지만, 다른 무엇보다 가독성을 강조한다.
+> 마크다운 서식 문서는 태그나 서식 명령어로 마크업(markup)되는 것 없이 일반 텍스트로 게시되어야 한다.
+> 마크다운 구분은 현존하는 몇몇 text-to-HTML 필터의 영향을 받았다. 
+> 여기에는 Setext, atx, Textile, reStructuredText, Grutatext, EtText가 포함되지만, 
+> 마크다운 구문에 가장 큰 영감을 준 것은 일반 텍스트 전자우편 서식이다.
+> 
+> 이 목적을 달성하기 위해서, 마크다운 구문은 완전히 구분문자(punctuation character)로 구성된다. 
+> 구분문자를 주의깊이 선택해서 의도하는 바를 충분히 담아내게 했다.
+> 예를 들어, 별표로 감싼 단어는 *강조(emphasis)*하는 것처럼 보인다.
+> 마크다운 목록은, 또한, 글머리 목록처럼 보인다.
+> 전자우편을 사용해왔다고 가정하면, 심지어 인용구문은 텍스트 인용 구절처럼 보인다.
 
-R Markdown vignettes are written in Markdown, a light weight markup language. John Gruber, the author of Markdown, summarises the goals and philosophy of Markdown:
+마크다운은 LaTeX, reStructuredText, docbook 만큼 강력하지는 않지만,
+단순하고, 작성하기 쉽고, 렌더링(rendering, 기계번역)되지 않을 때조차도 가독성이 좋다.
+저자 생각에는 마크다운 제약사항이 저작에 도움이 된다고 보는데 이뉴는 콘텐츠 내용에 집중하게 하고,
+스타일링으로 인해 주변을 엉망으로 만드는 것을 방지한다.
 
-> Markdown is intended to be as easy-to-read and easy-to-write as is feasible.
->
-> Readability, however, is emphasized above all else. A Markdown-formatted 
-> document should be publishable as-is, as plain text, without looking like 
-> it’s been marked up with tags or formatting instructions. While Markdown’s 
-> syntax has been influenced by several existing text-to-HTML filters — 
-> including Setext, atx, Textile, reStructuredText, Grutatext, and EtText — 
-> the single biggest source of inspiration for Markdown’s syntax is the format 
-> of plain text email.
->
-> To this end, Markdown’s syntax is comprised entirely of punctuation 
-> characters, which punctuation characters have been carefully chosen so as 
-> to look like what they mean. E.g., asterisks around a word actually look 
-> like *emphasis*. Markdown lists look like, well, lists. Even blockquotes 
-> look like quoted passages of text, assuming you’ve ever used email.
+이전에 마크다운을 결코 사용한 적이 없다면, 출발점은 존 그루버가 직접 작성한 [마크다운 구문 문서(Markdown syntax documentation)](http://daringfireball.net/projects/markdown/syntax)다.
+Pandoc 마크다운 구현에는 마크다운 원본에 있는 거친 부분을 다듬고, 신규 기능이 일부 추가되었다.
+그래서, [pandoc readme](http://johnmacfarlane.net/pandoc/README.html) 파일과 친숙해지는 것도 추천한다.
+RStudio으로 마크다운 문서를 편집하면 물음표 아이콘을 경유해 드롭다운 메뉴로 마크다운 참조카드를 제공한다.
 
-Markdown isn't as powerful as LaTeX, reStructuredText or docbook, but it's simple, easy to write, and easy to read even when it's not rendered. I find Markdown's constraints helpful for writing because it lets me focus on the content, and prevents me from messing around with the styling.
+다음 절에는 저자 판단에 pandoc 마크다운 방언의 가장 중요한 기능이다.
+15분 안에 기초를 배울 수 있다.
 
-If you've never used Markdown before, a good place to start is John Gruber's [Markdown syntax documentation](http://daringfireball.net/projects/markdown/syntax). Pandoc's implementation of Markdown rounds off some of the rough edges and adds a number of new features, so I also recommend familiarising yourself with the [pandoc readme](http://johnmacfarlane.net/pandoc/README.html). When editing a Markdown document, RStudio presents a drop-down menu via the question mark icon, which offers a Markdown reference card.
+### 절(Sections)
 
-The sections below show you what I think are the most important features of pandoc's Markdown dialect. You should be able to learn the basics in under 15 minutes.
+`#` 기호로 표제(Headings)가 식별된다:
 
-### Sections
+    # 제목 1
+    ## 제목 2
+    ### 제목 3
 
-Headings are identified by `#`:
-
-    # Heading 1
-    ## Heading 2
-    ### Heading 3
-
-Create a horizontal rule with three or more hyphens (or asterisks):
+3개 이상 하이픈 (혹은 별표)으로 수평선(horizontal rule)을 생성한다:
 
     --------
     ********
 
-### Lists
+### 글머리 목록(Lists)
 
-Basic unordered lists use `*`:
+순서없는 기본 글머리 기호 목록은 `*`을 사용한다:
 
-    * Bulleted list
-    * Item 2
-        * Nested bullets need a 4-space indent.
-        * Item 2b
 
-If you want multiparagraph lists, the second and subsequent paragraphs need additional indenting:
+    * 글머리 기호 목록
+    * 두번째 항목
+        * 중첩 글머리 기호목록은 공백 4개 들여쓰기한다.
+        * 두번째 소항목
 
-      * It's possible to put multiple paragraphs of text in a list item. 
+다중 문단 목록을 원한다면, 두번째와 후속 문단은 계속 들여쓰기한다:
+
+      * 한 글머리 목록 항목에 다중 문단 텍스트를 배치하는 것도 가능하다.
     
-        But to do that, the second and subsequent paragraphs must be
-        indented by four or more spaces. It looks better if the first
-        bullet is also indented.
+        하지만, 그러려고 한다면, 두번째와 후속 문단은 공백 4개 혹은 그 이상 공백으로 들여써야 한다.
+        첫번째 글머리 기호가 들여쓰기 된다면 가독성이 더 좋다.
 
-Ordered lists use: `1.`:
+순서있는 글머리 기호 목록은 `1.`을 사용한다:
     
-    1. Item 1
-    1. Item 2
-    1. Items are numbered automatically, even though they all start with 1.
+    1. 항목 1
+    1. 항목 2
+    1. 모두 1로 시작하지만, 항목 각각은 자동으로 번호가 매겨진다.
 
-You can intermingle ordered and bulleted lists, as long as you adhere to the four space rule:
+공백 4개 규칙만 준수하기만 하면, 순서있고, 순서없는 글머리 기호를 뒤섞을 수 있다:
 
-    1.  Item 1.
-        *  Item a
-        *  Item b
-    1.  Item 2.
 
-Definition lists use ` : `
+    1.  항목 1.
+        *  항목 a
+        *  항목 b
+    1.  항목 2.
 
-    Definition
-      : a statement of the exact meaning of a word, especially in a dictionary.
-    List 
-      : a number of connected items or names written or printed consecutively, 
-        typically one below the other. 
-      : barriers enclosing an area for a jousting tournament.
 
-### Inline formatting
+정의(definition) 목록은 ` : `을 사용한다:
 
-Inline format is similarly simple:
 
-    _italic_ or *italic*
-    __bold__ or **bold**    
-    [link text](destination)
+
+    정의
+      : 특히 사전에서 정확한 단어 의미를 기술하는 문장
+    목록
+      : 연속적으로 출력되거나 작성되는 연관된 항목 혹은 명칭
+        통상 아래 한 항목씩 표현한다.
+      : 마상 경기 대회에 영역을 둘러싸는 장벽
+
+### 인라인 서식 (Inline formatting)
+
+인라인 서식도 유사하게 단순하다:
+
+
+    _이탤릭(italic)_ 혹은 *이탤릭((italic)*
+    __굵게(bold)__ or **굵게(bold)**    
+    [텍스트 링크](행선지)
     <http://this-is-a-raw-url.com>
 
-### Tables
+### 표(Tables)
 
-There are [four types of tables](http://johnmacfarlane.net/pandoc/README.html#tables). I recommend using the pipe table which looks like this:
 
-    | Right | Left | Default | Center |
-    |------:|:-----|---------|:------:|
-    |   12  |  12  |    12   |    12  |
-    |  123  |  123 |   123   |   123  |
-    |    1  |    1 |     1   |     1  |
+[네가지 유형 표](http://johnmacfarlane.net/pandoc/README.html#tables)가 있다.
+다음과 같은 파이프 표를 저자는 추천한다:
 
-Notice the use of the `:` in the spacer under the heading. This determines the alignment of the column. 
 
-If the data underlying your table exists in R, don't lay it out by hand. Instead use `knitr::kable()`, or look at [printr](https://github.com/yihui/printr) or [pander](http://rapporter.github.io/pander/).
+    | 오른쪽 | 왼쪽 |  디폴트 |   중앙 |
+    |-------:|:-----|---------|:------:|
+    |    12  |  12  |    12   |    12  |
+    |   123  |  123 |   123   |   123  |
+    |     1  |    1 |     1   |     1  |
 
-### Code
+표제목 아래 `:` 표식자 사용에 주목한다. 이 표식자를 사용해서 칼럼정렬을 결정한다.
 
-For inline code use `` `code` ``.
+R로 표를 표현하는 데이터가 있다면, 수작업으로 표를 그리지 말고, 대신에 `knitr::kable()`을 사용하거나,
+[printr](https://github.com/yihui/printr), [pander](http://rapporter.github.io/pander/)을 참조한다.
 
-For bigger blocks of code, use ```` ``` ````. These are known as "fenced" code blocks:
+### 코드(Code)
+
+인라인 코드에 대해서 `` `code` `` 표식자를 사용한다.
+
+좀더 큰 대형 코드 블록에는 ```` ``` ```` 표식자를 사용한다.
+"울타리(fence)" 코드 블록으로 알려져 있다.
 
     ```
     # A comment
     add <- function(a, b) a + b
     ```
 
-To add syntax highlighting to the code, put the language name after the backtick:
+코드에 구문강조 기능을 추가하려면, 역작은따옴표(```, 백틱) 다음에 프로그래밍 언어명칭을 붙인다:
+
 
     ```c
     int add(int a, int b) {
@@ -251,23 +260,28 @@ To add syntax highlighting to the code, put the language name after the backtick
     }
     ```
 
-(At time of printing, languages supported by pandoc were: actionscript, ada, apache, asn1, asp, awk, bash, bibtex, boo, c, changelog, clojure, cmake, coffee, coldfusion, commonlisp, cpp, cs, css, curry, d, diff, djangotemplate, doxygen, doxygenlua, dtd, eiffel, email, erlang, fortran, fsharp, gnuassembler, go, haskell, haxe, html, ini, java, javadoc, javascript, json, jsp, julia, latex, lex, literatecurry, literatehaskell, lua, makefile, mandoc, matlab, maxima, metafont, mips, modula2, modula3, monobasic, nasm, noweb, objectivec, objectivecpp, ocaml, octave, pascal, perl, php, pike, postscript, prolog, python, r, relaxngcompact, rhtml, ruby, rust, scala, scheme, sci, sed, sgml, sql, sqlmysql, sqlpostgresql, tcl, texinfo, verilog, vhdl, xml, xorg, xslt, xul, yacc, yaml. Syntax highlighting is done by the haskell package [highlighting-kate](http://johnmacfarlane.net/highlighting-kate); see the website for current list.)
+(출판시점에, pandoc이 지원하는 언어는 다음과 같다: actionscript, ada, apache, asn1, asp, awk, bash, bibtex, boo, c, changelog, clojure, cmake, coffee, coldfusion, commonlisp, cpp, cs, css, curry, d, diff, djangotemplate, doxygen, doxygenlua, dtd, eiffel, email, erlang, fortran, fsharp, gnuassembler, go, haskell, haxe, html, ini, java, javadoc, javascript, json, jsp, julia, latex, lex, literatecurry, literatehaskell, lua, makefile, mandoc, matlab, maxima, metafont, mips, modula2, modula3, monobasic, nasm, noweb, objectivec, objectivecpp, ocaml, octave, pascal, perl, php, pike, postscript, prolog, python, r, relaxngcompact, rhtml, ruby, rust, scala, scheme, sci, sed, sgml, sql, sqlmysql, sqlpostgresql, tcl, texinfo, verilog, vhdl, xml, xorg, xslt, xul, yacc, yaml. 
+구문강조는 하스칼 [highlighting-kate](http://johnmacfarlane.net/highlighting-kate)
+팩키지로 처리한다; 최신 목록에 대해서는 웹사이트를 참조한다.)
 
-When you include R code in your vignette, you usually won't use ```` ```r ````. Instead, you'll use ```` ```{r} ````, which is specially processed by knitr, as described next.
+R 코드를 소품문에 추가할 때, ```` ```r ```` 표식자를 통상 사용하지는 않는다.
+대신에 ```` ```{r} ````을 사용해서 다음에 기술되는 `knitr`로 특별히 처리한다.
 
 ## Knitr {#knitr}
 
-Knitr allows you to intermingle code, results and text. Knitr takes R code, runs it, captures the output, and translates it into formatted Markdown. Knitr captures all printed output, messsages, warnings, errors (optionally) and plots (basic graphics, lattice & ggplot and more). 
+코드, 결과, 텍스트를 `knitr`를 사용해서 뒤섞을 수 있다.
+`knitr`는 R 코드를 받아, 실행하고, 출력결과를 잡아내고, 마크다운 서식으로 번역한다.
+출력결과, 메시지, 경고, (선택 옵션) 오류, 플롯(기본 그래픽, lattice & ggplot 등)을 `knitr`로 잡아낸다.
 
-Consider the simple example below. Note that a knitr block looks similar to a fenced code block, but instead of using `r`, you using `{r}`.
+다음 단순 예제를 살펴보자. `knitr` 블록은 울타리친 코드 블록과 유사한데, `r` 대신 `{r}`을 사용함에 주목한다.
 
-    ```{r}
+    ```{r}
     # Add two numbers together
     add <- function(a, b) a + b
     add(10, 20)
     ```
 
-This generates the following Markdown:
+상기 코드는 다음 마크다운을 생성한다:
 
     ```r
     # Add two numbers together
@@ -276,7 +290,7 @@ This generates the following Markdown:
     ## [1] 30
     ```
 
-Which, in turn, is rendered as:
+이번에는 다음과 같이 렌더링 기계번역된다:
 
 ```r
 # Add two numbers together
@@ -285,70 +299,73 @@ add(10, 20)
 ## 30
 ```
 
-Once you start using knitr, you'll never look back. Because your code is always run when you build the vignette, you can rest assured knowing that all your code works. There's no way for your input and output to be out of sync.
+`knitr`을 사용하면, 결코 뒤를 돌아보지 않게 된다.
+소품문을 생성할 때 항상 코드가 실행되기 때문에, 작성한 모든 코드가 동작하는 것을 확실히 알기 때문에 쉴 수 있다.
+입력과 출력이 동기화되지 않는 경우는 없다.
 
-### Options
 
-You can specify additional options to control the rendering:
+### 선택 옵션
 
-* To affect a single block, add the block settings:
+렌더링 기계번역작업을 제어하는데 추가적으로 선택옵션을 명시할 수 있다:
 
-        ```{r, opt1 = val1, opt2 = val2}
+* 단일 블록에만 영향을 주려면, 블록설정을 추가한다:
+
+        ```{r, opt1 = val1, opt2 = val2}
         # code
         ```
   
-* To affect all blocks, call `knitr::opts_chunk$set()` in a knitr block:
-    
-        ```{r, echo = FALSE}
+* 모든 블록에 영향을 주려면, `knitr` 블록에 `knitr::opts_chunk$set()`을 호출한다.
+
+        ```{r, echo = FALSE}
         knitr::opts_chunk$set(
           opt1 = val1,
           opt2 = val2
         )
         ```
 
-The most important options are:
+가장 중요한 선택옵션은 다음과 같다:
 
-* `eval = FALSE` prevents evaluation of the code. This is useful if you want
-  to show some code that would take a long time to run. Be careful when you
-  use this: since the code is not run, it's easy to introduce bugs.
-  (Also, your users will be puzzled when they copy & paste code and it doesn't
-  work.)
 
-* `echo = FALSE` turns off the printing of the code _input_ (the output
-  will still be printed). Generally, you shouldn't use this in vignettes
-  because understanding what the code is doing is important. It's more useful
-  when writing reports since the code is typically less important than the
-  output.
+* `eval = FALSE` 선택옵션은 코드 평가를 방지한다.
+  이 선택옵션이 장기실행 시간이 소요되는 코드를 보여주는데 유용하지만, 사용할 때 주의가 요구된다:
+  코드가 실행되지 않기 때문에 버그가 생기기 쉽다. 
+  (또한, 사용자가 코드를 복사해서 붙여넣기(copy & paste)할 때 동작하지 않기 때문에 혼란을 줄 수 있다.)
+  
 
-* `results = "hide"` turns off the printing of code _output_.
+* `echo = FALSE` 선택옵션은 _입력(input)_ 코드 출력기능을 끈다. (출력결과는 여전히 출력된다.)
+  일반적으로 소품문에 이 기능을 사용하지 말아야 하는데 
+  이유는 코드가 무엇을 수행하는지 이해하는 것이 중요하기 때문이다.
+  보고서를 작성할 때 이 선택옵션 기능이 중요한데, 이유는 출력결과보다 코드가 덜 중요하기 때문이다.
 
-* `warning = FALSE` and `message = FALSE` suppress the display of warnings
-  and messages.
 
-* `error = TRUE` captures any errors in the block and shows them inline. 
- This is useful if you want to demonstrate what happens if code throws an error. 
- Whenever you use `error = TRUE`, you also need to use `purl = FALSE`. This 
- is because every vignette is accompanied by a file code that contains all the
- code from the vignette. R must be able to source that file without errors,
- and `purl = FALSE` prevents the code from being inserted into that document.
+* `results = "hide"` 선택옵션은 코드 _출력(output)_ 결과를 출력하지 않게 한다.
 
-* `collapse = TRUE` and `comment = "#>"` are my preferred way of displaying
-  code output. I usually set these globally by putting the following knitr
-  block at the start of my document.
+* `warning = FALSE` 와 `message = FALSE`는 경고와 메시지를 화면에 출력하지 않게 한다.
 
-        ```{r, echo = FALSE}
+* `error = TRUE` 선택옵션은 블록에 있는 어떤 오류도 잡아내서 인라인으로 보여준다.
+  코드가 오류를 던질 때 무엇이 발생하는지 시연하는데 이 선택옵션을 유용하게 사용한다.
+  `error = TRUE`을 사용할 때마다, `purl = FALSE` 선택옵션을 사용할 필요도 있다.
+  이유는, 모든 소품문에는 모든 코드가 파일코드로 동봉되기 때문이다.
+  오류없는 소스파일을 R이 불러와야 하고, 
+  `purl = FALSE` 선택옵션이 문서에 오류 코드가 삽입되는 것을 방지한다.
+
+* `collapse = TRUE` 와 `comment = "#>"` 선택옵션은 코드 출력결과를 출력하는 저자가 선호하는 방식이다.
+  전역으로 설정해서 문서 첫부분에 다음 `knitr` 블록을 배치해서 설정한다.
+
+        ```{r, echo = FALSE}
         knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
         ```
 
-*   `results = "asis"` treats the output of your R code as literal Markdown.
-    This is useful if you want to generate text from your R code. For example,
-    if you want to generate a table using the pander package, you'd do:
-  
-        ```{r, results = "asis"}
+*   `results = "asis"` 선택옵션은 R 코드 출력결과를 마크다운 문자그대로 처리한다.
+   R 코드에서 텍스트를 생성할 때 유용하게 사용될 수 있다.
+   예를 들어, `pander` 팩키지를 사용해서 테이블을 생성한다면, 다음을 실행한다:
+
+        ```{r, results = "asis"}
         pander::pandoc.table(iris[1:3, 1:4])
         ```
     
-    That generates a Markdown table that looks like:
+
+    상기 코드블록은 다음과 같은 마크다운 표를 생성한다:
     
         --------------------------------------------------------
          Sepal.Length   Sepal.Width   Petal.Length   Petal.Width 
@@ -360,7 +377,7 @@ The most important options are:
              4.7            3.2           1.3            0.2     
         ---------------------------------------------------------
         
-    Which makes a table that looks like:
+    상기 결과는 다음과 같은 표를 생성한다.
     
     --------------------------------------------------------
      Sepal.Length   Sepal.Width   Petal.Length   Petal.Width 
@@ -372,77 +389,110 @@ The most important options are:
          4.7            3.2           1.3            0.2     
     ---------------------------------------------------------
 
-* `fig.show = "hold"` holds all figures until the end of the code block.
+* `fig.show = "hold"` 선택옵션을 사용해서 코드블록 끝까지 모든 그림을 유보한다.
 
-* `fig.width = 5` and `fig.height = 5` set the height and width of figures
-  (in inches).
 
-Many other options are described at <http://yihui.name/knitr/options>. 
+* `fig.width = 5`, `fig.height = 5` 선택옵션을 통해 그림 높이와 폭을 (인치 단위로) 설정한다.
 
-## Development cycle {#vignette-workflow-2}
+기타 많은 선택옵션이 <http://yihui.name/knitr/options>에 기술되어 있다.
 
-Run code a chunk at a time using Cmd + Alt + C. Re-run the entire document in a fresh R session using Knit (Ctrl/Cmd + Shift + K). 
 
-You can build all vignettes from the console with `devtools::build_vignettes()`, but this is rarely useful. Instead use `devtools::build()` to create a package bundle with the vignettes included.  RStudio's "Build & reload" does not build vignettes to save time. Similarly, `devtools::install_github()` (and friends) will not build vignettes by default because they're time consuming and may require additional packages. You can force building with `devtools::install_github(build_vignettes = TRUE)`. This will also install all suggested packages.
+## 개발 주기(Development cycle) {#vignette-workflow-2}
 
-## Advice for writing vignettes {#vignette-advice}
+Cmd + Alt + C 키를 눌러 따로따로 코드 블록을 실행한다.
+`knitr` (Ctrl/Cmd + Shift + K)을 사용해서 신규 R 세션에서 전체 문서를 다시 실행한다.
 
-> If you're thinking without writing, you only think you're thinking.
-> --- Leslie Lamport
+`devtools::build_vignettes()` 명령어로 콘솔에서 전체 소품문을 빌드할 수 있지만, 거의 유용하지 않다.
+대신에, `devtools::build()` 명령어를 사용해서 소품문을 포함한 팩키지 번들을 생성한다.
+RStudio에 "Build & reload"는 시간을 절약하기 위해서 소품문을 빌드하지 않는다. 
+마찬가지로, `devtools::install_github()`와 친구들도 기본 디폴트설정으로 소품문을 빌드하지 않는데 이유는
+시간이 오래 걸리고 추가로 다수 팩키지가 필요하기 때문이다.
+`devtools::install_github(build_vignettes = TRUE)` 명령어로 강제로 빌드할 수 있고 제안된 모든 팩키지도 설치한다.
 
-When writing a vignette, you're teaching someone how to use your package. You need to put yourself in the readers' shoes, and adopt a "beginner's mind". This can be difficult because it's hard to forget all of the knowledge that you've already internalised. For this reason, I find teaching in-person a really useful way to get feedback on my vignettes. Not only do you get that feedback straight away but it's also a much easier way to learn what people already know.
 
-A useful side effect of this approach is that it helps you improve your code. It forces you to re-see the initial onboarding process and to appreciate the parts that are hard. Every time that I've written text that describes the initial experience, I've realised that I've missed some important functions. Adding those functions not only helps my users, but it often also helps me! (This is one of the reasons that I like writing books).
+## 소품문 작성 조언 {#vignette-advice}
 
-* I strongly recommend literally anything written by Kathy Sierra. Her old blog,
-  [Creating passionate users](http://headrush.typepad.com/) is full of advice
-  about programming, teaching, and how to create valuable tools. I thoroughly
-  recommend reading through all the older content. Her new blog,
-  [Serious Pony](http://seriouspony.com/blog/), doesn't have as much content,
-  but it has some great articles.
+> 만약 적지 않고 생각한다면, 생각하고 있는 것을 생각만 한다.
+> --- 레슬리 램포트 (Leslie Lamport), LaTeX 저자.
+> > If you're thinking without writing, you only think you're thinking.
 
-* If you'd like to learn how to write better, I highly recommend 
-  [Style: Lessons in Clarity and Grace](http://amzn.com/0321898680) by
-  Joseph M. Williams and Joseph Bizup. It helps you understand the structure of
-  writing so that you'll be better able to recognise and fix bad writing.
+소품문을 작성할 때 잘 생각해 보면, 누군가에 작성한 팩키지 사용법을 가르치고 있다.
+본인 스스로를 독자에 맞춰 "초보자 마음"을 읽을 필요가 있다.
+이것은 보기보다 어려운데 이유는 이미 내재화된 모든 지식을 잊어버려야 되기 때문이다.
+이러한 연유로, 저자가 개발하는 소품문에 피드백을 얻는데 몸소 직접 가르치는 것이 유용한 방법임을 깨달았다.
+직접 피드백을 받을 수 있을 뿐만 아니라, 이미 사람들이 알고 있는 내용을 배울 수 있는 훨씬 더 쉬운 방법이기도 하다.
 
-Writing a vignette also makes a nice break from coding. In my experience, writing uses a different part of the brain from programming, so if you're sick of programming, try writing for a bit. (This is related to the idea of [structured programming](http://www.structuredprocrastination.com/).).
 
-### Organisation
+상기 접근방법의 유용한 부작용은 더 좋은 코드를 작성하는데 도움도 준다.
+초기 탑승과정을 다시 살펴보게하고, 어려운 부분을 인식하게 한다.
+초기 경험을 기술하는 텍스트를 작성할 때마다, 저자는 뭔가 중요한 기능을 놓쳤다는 것을 깨닫게 된다.
+이러한 기능을 추가하는 것은 사용자에게도 도움이 되지만, 종종 저자 본인에게도 도움을 준다.
+(이것이 저자가 책을 쓰는 여러 요인중 하나다).
 
-For simpler packages, one vignette is often sufficient. But for more complicated packages you may actually need more than one. In fact, you can have as many vignettes as you like. I tend to think of them like chapters of a book - they should be self-contained, but still link together into a cohesive whole. 
 
-Although it's a slight hack, you can link various vignettes by taking advantage of how files are stored on disk: to link to vignette `abc.Rmd`, just make a link to `abc.html`.
+* 저자는 강력하게 Kathy Sierra가 쓴 문자그대로 어떤 것이나 추천한다.
+  그녀의 오래된 블로그 [열정적인 사용자 창출(Creating passionate users)](http://headrush.typepad.com/)에는
+  프로그래밍, 가르침(teaching), 값진 도구 생성 방법에 관한 충고로 가득차 있다.
+  모든 이전 콘텐츠를 탐독하길 추천한다. 그녀의 신규 블로그 
+  [Serious Pony](http://seriouspony.com/blog/)에는 콘텐츠가 많지 않지만, 훌륭한 기사가 일부 있다.
 
-## CRAN notes {#vignette-cran}
+* 만약 더나은 작문 방법을 학습하고 한다면, Joseph M. Williams와 Joseph Bizup의 
+  [Style: Lessons in Clarity and Grace](http://amzn.com/0321898680)을 추천한다.
+  작문 구조를 이해하는데 도움을 줘서, 좋지 못한 작문을 인지하고 고칠 수 있게 돕는다.
 
-Note that since you build vignettes locally, CRAN only receives the html/pdf and the source code. However, CRAN does not re-build the vignette. It only checks that the code is runnable (by running it). This means that any packages used by the vignette must be declared in the `DESCRIPTION`. But this also means that you can use Rmarkdown (which uses pandoc) even though CRAN doesn't have pandoc installed.
 
-Common problems:
+소품문을 작성하게 되면 코딩에서 떨어져 나와 멋진 휴식을 취하게 된다.
+저자 경험으로 작문은 프로그래밍과 다른 뇌 부위를 사용해서,
+프로그래밍이 지겹다면, 잠시 작문을 시도해 보세요.
+([구조화 프로그래밍(structured programming)](http://www.structuredprocrastination.com/)의 사상과 연관된다).
 
-*   The vignette builds interactively, but when checking, it fails with an error 
-    about a missing package that you know is installed. This means that you've
-    forgotten to declare that dependency in the `DESCRIPTION` (usually it should
-    go in `Suggests`).
 
-*   Everything works interactively, but the vignette doesn't show up after 
-    you've installed the package. One of the following may have occurred. First, 
-    because RStudio's "build and reload" doesn't build vignettes, you may need 
-    to run `devtools::install()` instead. Next check:
-  
-    1. The directory is called `vignettes/` and not `vignette/`.
+### 구조화(Organisation)
 
-    1. Check that you haven't inadvertently excluded the vignettes with
-       `.Rbuildignore`
-       
-    1. Ensure you have the necessary vignette metadata.
+좀더 단순한 팩키지에는 소품문 한개면 충분하다.
+하지만, 좀더 복잡한 팩키지에 대해서는 사실 한개 이상이 필요하다.
+사실, 원하는 만큼 많은 소품문을 갖을 수도 있다.
+저자는 소품문을 책의 각 장(chapter)로 생각한다 - 소품문 자체로 완비된 하지만, 소품문이 연결되어 응집된 전체가 되야 한다.
 
-*   If you use `error = TRUE`, you must use `purl = FALSE`.
+다소 코딩이 필요하지만, 하드디스크에 파일이 저장된 사실을 이용해서 여러 소품문을 연결할 수 있다:
+`abc.Rmd` 소품문에 링크 연결하려면, `abc.html` 파일에 링크 연결만 생성하면 된다.
 
-You'll need to watch the file size. If you include a lot of graphics, it's easy to create a very large file. There are no hard and fast rules, but if you have a very large vignette be prepared to either justify the file size, or to make it smaller.
+## CRAN 주의사항 {#vignette-cran}
 
-## Where next {#where-next}
+소품문을 로컬 컴퓨터에서 빌드했기 때문에, CRAN에서는 html/pdf, 소스코드 파일만 전달받는 것에 주목한다.
+하지만, CRAN에서 소품문을 다시 빌드하지는 않는다.
+CRAN에서 (코드를 실행해서)코드가 동작가능한지 점검만 한다.
+이것이 의미하는 바는 소품문에 사용된 어떤 팩키지도 `DESCRIPTION` 파일에 선언되어야 된다.
+하지만, 이것이 의미하는 바는 또한 CRAN이 pandoc을 설치하지 않았을지라도 (pandoc을 사용하는) Rmarkdown을 
+사용할 수도 있다는 것이다.
 
-If you'd like more control over the appearance of your vignette, you'll need to learn more about Rmarkdown. The website, <http://rmarkdown.rstudio.com>, is a great place to start. There you can learn about alternative output formats (like LaTex and pdf) and how you can incorporate raw HTML and LateX if you need additional control.
+흔한 문제점:
 
-If you write a nice vignette, consider submitting it to the _Journal of Statistical Software_ or _The R Journal_. Both journals are electronic only and peer-reviewed. Comments from reviewers can be very helpful for improving the quality of your vignette and the related software.
+*   인터랙티브하게 소품문을 빌드하지만, 점검할 때 설치한 팩키지가 빠졌다는 오류로 실패한다.
+    이것이 의미하는 바는 `DESCRIPTION` 파일에 의존성 선언을 잊었다는 것이다. (통상 `Suggests`에 있어야 한다)
+    
+
+*   인터랙티브하게 모든 것이 잘 동작하지만, 팩키지를 설치한 후에 소품문이 나타나지 않는다.
+    다음 중 하나가 일어났을지도 모른다.
+    첫째, RStudio "build and reload"는 소품문을 빌드하지 않기 때문에,
+    대신에 `devtools::install()`을 실행할 필요가 있을지도 모른다. 그리고 다음 사항을 점검한다.
+
+    1. 디렉토리가 `vignette/`이 아니라 `vignettes/`인지 확인한다.
+
+    1. 우연히 `.Rbuildignore` 파일에 소품문을 제외했는지 점검한다.
+    
+    1. 필요한 소품문 메타데이터를 준비했는지 확인한다.
+
+*   만약 `error = TRUE` 선택옵션을 사용한다면, `purl = FALSE` 선택옵션을 사용해야 된다.
+
+파일 크기를 조심할 필요가 있다.
+많은 그래픽 이미지를 포함한다면, 매우 큰 파일을 생성하기 쉽다.
+어떤 고정되고 신속한 규칙은 없지만, 만약 매우 큰 소품문이라면, 파일 크기를 정당화할 수 있는 논리를 개발하거나 파일크기를 줄여라.
+
+## 다음으로 갈 곳 {#where-next}
+
+만약 소품문 외양에 대해서 좀더 제어를 하고자 한다면, Rmarkdown에 관해서 좀더 학습할 필요가 있다.
+<http://rmarkdown.rstudio.com> 웹사이트가 시작하기 좋은 곳이고, (LaTeX과 pdf같은) 대안 출력 서식과 좀더 제어한다면 원 HTML과 LaTeX도 포함하는 방법도 배울 수 있다.
+
+멋진 소품문을 작성했다면, _Journal of Statistical Software_ 혹은 _The R Journal_에 제출하는 것도 고려해 보라.
+두 저널 모두 전자저널이고 동료검토된다. 검토자 코멘트를 통해서 소품문과 관련된 소프트웨어 품질을 높이는데 많은 도움을 받을 수 있다.
