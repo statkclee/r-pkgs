@@ -8,82 +8,101 @@ output: bookdown::html_chapter
 library(testthat)
 ```
 
-# Testing {#tests}
+# 테스팅(Testing) {#tests}
 
-Testing is a vital part of package development. It ensures that your code does what you want it to do. Testing, however, adds an additional step to your development workflow. The goal of this chapter is to show you how to make this task easier and more effective by doing formal automated testing using the testthat package.
+테스팅은 팩키지 개발에서 있어 매우 중요한 부분이다.
+테스팅을 통해서 작성한 코드가 의도한 대로 동작하는 것을 확신할 수 있다.
+그런 장점에도 불구하구, 테스팅은 개발흐름에 부가 단계를 추가한다.
+이번 장 목표는 `testthat` 팩키지를 사용해서 정형적인 테스팅 자동화를 통해서 테스팅 작업을 좀더 쉽고 효과적으로 수행하는 방법을 시연하는데 있다.
 
-Up until now, your workflow probably looks like this:
+지금까지 작업흐름은 아마도 다음과 같을 것이다:
 
-1. Write a function.
-1. Load it with Ctrl/Cmd + Shift + L or `devtools::load_all()`.
-1. Experiment with it in the console to see if it works.
-1. Rinse and repeat.
+1. 함수를 작성한다.
+1. Ctrl/Cmd + Shift + L 단축키 혹은 `devtools::load_all()` 명령어를 통해서 함수를 적재한다.
+1. 작성한 함수가 동작하는지 살펴보기 위해서 콘솔에서 실험한다.
+1. 함수를 깔끔하게 만들고, 과정을 반복한다.
 
-While you _are_ testing your code in this workflow, you're only doing it informally. The problem with this approach is that when you come back to this code in 3 months time to add a new feature, you've probably forgotten some of the informal tests you ran the first time around. This makes it very easy to break code that used to work. 
+작업흐름 과정에서 코드를 _테스팅_을 했지만, 비정형으로만 작업을 수행한 것이다.
+이러한 접근방법의 문제점은 3개월이 지난 뒤에 코드 베이스에 신규 기능을 추가하려면, 개발 초기 실행했던
+비정형 테스트 일부를 아마도 잊어버렸을 것이다.
+따라서, 잘 동작했던 코드가 깨져서 돌아기지 않기 매우 쉽게 된다.
 
-I started using automated tests because I discovered I was spending too much time re-fixing bugs that I'd already fixed before. While writing code or fixing bugs, I'd perform interactive tests to make sure the code worked. But I never had a system which could store those tests so I could re-run them as needed. I think that this is a common practice among R programmers. It's not that you don't test your code, it's that you don't automate your tests.
+저자가 테스트 자동화를 사용하기 시작한 이유는 너무 많은 시간을 이전에 고친 버그를 다시 고치는데 쓰고 있다는 것을 발견했기 때문이다.
+코드를 작성하고 버그를 고치면서 작성한 코드가 잘 동작하는지 확인하는데 인터랙티브 테스트를 수행한다.
+하지만, 저자는 테스트를 저장할 수 있는 시스템을 갖추지 않았다. 그래서, 필요해지면 테스트를 다시 실행할 수 있었다. 저자 생각에는 R 프로그래머 사이에 이러한 것이 일반적이라고 본다.
+이유는 코드를 테스트하지 않기 때문이 아니라, 테스트를 자동화하지 않았기 때문이다.
 
-In this chapter you'll learn how to graduate from using informal ad hoc testing, done at the command line, to formal automated testing (aka unit testing). While turning casual interactive tests into reproducible scripts requires a little more work up front, it pays off in four ways:
+이번 장에서 명령라인에서 수행하는 비정형 무작위 테스팅을 졸업하고, 정형화된 테스트 자동화(aka, 단위 테스트)로 옮겨가는 것을 학습한다.
+임시방편 인터랙티브 테스트를 재현가능 스크립트로 변환하는 것이 앞단에 일부 업무부하를 주지만, 4가지 방식으로 나중에 보상을 한다:
 
-* Fewer bugs. Because you're explicit about how your code should behave
-  you will have fewer bugs. The reason why is a bit like the reason double 
-  entry book-keeping works: because you describe the behaviour of your code in 
-  two places, both in your code and in your tests, you are able to check one against 
-  the other. By following this approach to testing, you can be sure that bugs 
-  that you've fixed in the past will never come back to haunt you.
+* 더 적은 버그. 코드가 동작해야 되는 방식에 대해 명시적으로 선언했기 때문에,
+  더 적은 버그를 갖게 된다. 이유는 회계학에서 복식부기가 동작하는 것과 유사하다:
+  코드와 테스트 두곳에 작성한 코드 행동을 기술했기 때문에, 서로에 대해 검증할 수 있다.
+  이러한 접근방법을 테스팅에 도입하면, 
+  과거에 고친 버그가 결코 귀신처럼 다시 쫓아다니지 못하게 확실히 할 수 있다.
+  
+* 향상된 코드 구조. 테스트하기 쉬운 코드는 일반적으로 더 잘 설계되었다.
+  이유는 테스트를 작성하면 어쩔 수 없이 코드의 복잡한 부분을 격리되어 동작되는 별도 함수로 쪼개야 
+  되기 때문이다. 코드에 중복도 줄여준다.
+  결과적으로 함수는 테스트하고, 이해하고, 동작하기 쉽게 된다
+  (새로운 방식으로 조합하기도 더 쉽게 된다).
+  
 
-* Better code structure. Code that's easy to test is usually better designed. 
-  This is because writing tests forces you to break up complicated parts of 
-  your code into separate functions that can work in isolation. This reduces 
-  duplication in your code. As a result, functions will be easier to test, 
-  understand and work with (it'll be easier to combine them in new ways).
+* 더 쉬운 재시작. (예를 들어, 구현하려는 다음 기능에 대해서) 
+  항상 실패 테스트(failing test)를 생성해서 코딩 세션을 마무리한다면, 
+  테스팅을 통해서 마지막 중단한 곳을 쉽게 찾아준다: 
+  테스트를 통해서 다음 무엇을 수행해야 하는지 알게 해준다.
+  
 
-* Easier restarts. If you always finish a coding session by creating a failing 
-  test (e.g. for the next feature you want to implement), testing makes it 
-  easier for you to pick up where you left off: your tests will let you know 
-  what to do next.
+* 강건한 코드. 작성한 팩키지의 거의 모든 주요 기능이 연관된 테스트를 갖는 것을 알게 되면,
+  신뢰감을 갖고 우연히 무언가 망가뜨린다는 걱정없이 큰 변화를 줄 수 있다.
+  작업을 수행할 훨씬 더 단순한 방법이 생각났을 때 저자에게 이 기능이 유용하다.
+  (대체로 해결책이 훨씬 더 단순한 이유는 중요한 사용자 사용사례(use case)를 잊어버렸다는 것이다!).
 
-* Robust code. If you know that all the major functionality of your package has 
-  an associated test, you can confidently make big changes without worrying 
-  about accidentally breaking something. For me, this is particularly useful 
-  when I think I have a simpler way to accomplish a task (usually the reason my 
-  solution is simpler is that I've forgotten an important use case!).
+만약 이미 다른 프로그래밍 언어 단위 테스트에 친숙하다면,
+`testthat`에 일부 근본적인 차이가 있음을 주목한다.
+이유는 R 자체가 가슴속으로 객체지향 프로그래밍이라기 보다는 함수형 프로그래밍 언어에 가깝기 때문이다.
+예를 들어, R 주요 객체지향 시스템 (S3와 S4)는 제네릭 함수에 기반하기 때문에 (즉, 메쏘드는 클래스가 아닌 함수에 속해있다), 객체와 메쏘드로 구성된 테스팅 접근법이 그다지 의미를 갖지 못한다.
 
-If you're familiar with unit testing in other languages, you should note that there are some fundamental differences with testthat. This is because R is, at heart, more a functional programming language than an object oriented programming language. For instance, because R's main OO systems (S3 and S4) are based on generic functions (i.e., methods belong to functions not classes), testing approaches built around objects and methods don't make much sense.
 
-## Test workflow {#test-workflow}
+## 테스트 작업흐름 {#test-workflow}
 
-To set up your package to use testthat, run:
+`testhat`을 사용하는 팩키지를 설정하려면, 다음을 실행한다:
 
 ```{r, eval = FALSE}
 devtools::use_testthat()
 ```
 
-This will:
+상기 명령어는 다음을 수행한다:
 
-1.  Create a `tests/testthat` directory.
+1.  `tests/testthat` 디렉토리를 생성한다.
 
-1.  Adds testthat to the `Suggests` field in the `DESCRIPTION`.
+1.  testthat을 `DESCRIPTION` 파일 `Suggests` 필드에 추가한다.
 
-1.  Creates a file `tests/testthat.R` that runs all your tests are when
-    `R CMD check` runs. (You'll learn more about that in 
-    [automated checking](#check).)
+1.  `tests/testthat.R` 파일을 생성해서 `R CMD check`을 실행할 때 모든 테스트를 실행한다.
+     ([automated checking](#check)에서 좀더 학습할 것이다.)
 
-Once you're set up the workflow is simple:
 
-1.  Modify your code or tests.
+설정만 마치게되면, 작업흐름은 단순하다:
 
-2.  Test your package with Ctrl/Cmd + Shift + T or `devtools::test()`.
 
-3.  Repeat until all tests pass.
+1.  코드 혹은 테스트를 변형한다.
 
-The testing output looks like this:
+2.  Ctrl/Cmd + Shift + T 단축키 혹은 `devtools::test()` 명령어로 팩키지를 테스트한다.
+
+3.  모든 테스트가 통과할 때까지 반복한다.
+
+테스팅 출력결과는 다음과 같아 보인다:
 
     Expectation : ...........
     rv : ...
     Variance : ....123.45.
 
-Each line represents a test file. Each `.` represents a passed test. Each number represents a failed test. The numbers index into a list of failures that provides more details:
+각 행은 테스트 파일을 표현한다.
+각 `.` 기호는 통과한 테스트를 표현한다.
+각 숫자는 실패한 테스트를 표현한다.
+세부 정보를 담고 있는 실패 목록으로 숫자는 색인된다:
+
 
     1. Failure(@test-variance.R#22): Variance correct for discrete uniform rvs -----
     VAR(dunif(0, 10)) not equal to var_dunif(0, 10)
@@ -93,11 +112,15 @@ Each line represents a test file. Each `.` represents a passed test. Each number
     VAR(dunif(0, 100)) not equal to var_dunif(0, 100)
     Mean relative difference: 3.882353
 
-Each failure gives a description of the test (e.g., "Variance correct for discrete uniform rvs"), its location (e.g., "\@test-variance.R#22"), and the reason for the failure (e.g., "VAR(dunif(0, 10)) not equal to var_dunif(0, 10)"). The goal is to pass all the tests.
+테스트 각 실패는 테스트에 대한 기술 (예를 들어, "Variance correct for discrete uniform rvs"),
+위치 (예를 들어, "\@test-variance.R#22"), 실패로 돌아간 사유 (예를 들어, "VAR(dunif(0, 10)) not equal to var_dunif(0, 10)") 정보를 전달한다. 목표는 모든 테스트를 통과시키는 것이다.
 
-## Test structure {#test-structure}
+## 테스트 구조 {#test-structure}
 
-A test file lives in `tests/testthat/`. Its name must start with `test`. Here's an example of a test file from the stringr package:
+테스트 파일은 `tests/testthat/`에 위치한다.
+테스트 파일 명칭은 `test`로 시작해야 된다.
+`stringr` 팩키지에서 나온 테스트 파일 예제가 다음에 있다:
+
 
 ```{r}
 library(stringr)
@@ -122,41 +145,46 @@ test_that("str_length of missing is missing", {
 })
 ```
 
-Tests are organised hierarchically: __expectations__ are grouped into __tests__ which are organised in __files__:
+테스트는 계층적으로 구성되어 있다: __expectations__는 __tests__ 집단으로 묶여지고, __tests__는 __files__ 집단으로 묶여진다:
 
-* An __expectation__ is the atom of testing. It describes the expected result 
-  of a computation: Does it have the right value and right class? Does it 
-  produce error messages when it should? An expectation automates visual
-  checking of results in the console. Expectations are functions that start 
-  with `expect_`.
 
-* A __test__ groups together multiple expectations to test the output
-  from a simple function, a range of possibilities for a single parameter
-  from a more complicated function, or tightly related functionality from 
-  across multiple functions. This is why they are sometimes called __unit__
-  as they test one unit of functionality. A test is created with `test_that()` .
-
-* A __file__ groups together multiple related tests. Files are given a human 
-  readable name with `context()`.
-
-These are described in detail below. 
-
-### Expectations
-
-An expectation is the finest level of testing. It makes a binary assertion about whether or not a function call does what you expect. All expectations have a similar structure:
-
-* They start with `expect_`.
-
-* They have two arguments: the first is the actual result, the second is what 
-  you expect.
+* __예상(expectation)__이 테스팅 원자에 해당된다. 
+  연산에 대한 예상결과를 기술한다: 올바른 값과 올바른 클래스를 갖는가?
+  오류 메시지를 내야할 때, 오류 메시지를 생성하는가?
+  예상(expectation)은 시각적 점검하는 콘솔 결과값을 자동화한다.
+  예상(expectation)은 `expect_`으로 시작하는 함수가 된다.
   
-* If the actual and expected results don't agree, testthat throws an error.
 
-While you'll normally put expectations inside tests inside files, you can also run them directly. This makes it easy to explore expectations interactively. There are almost 20 expectations in the testthat package. The most important are discussed below.
+* __테스트(test)__는 예상(expectation) 다수를 집단으로 묶어 간단한 함수에서 출력결과를 테스트한다.
+  좀더 복잡한 함수에서 단일 매개변수에 대한 가능한 범위 혹은 함수 다수로부터 단단히 연관된 기능이 포함된다.
+  이것이 종종 한 기능 단위를 테스트할 때 __단위(unit)__라고 불리는 이유다.
+  테스트는 `test_that()`으로 생성된다.
 
-*   There are two basic ways to test for equality: `expect_equal()`, 
-    and `expect_identical()`. `expect_equal()` is the most commonly used: it 
-    uses `all.equal()` to check for equality within a numerical tolerance:
+* __파일(file)__은 연관된 테스트 다수를 집단으로 묶는다. 
+  파일은 `context()` 명령어로 사람이 읽을 수 있는 명칭이 부여된다.
+
+다음에 각각에 대해 자세한 사항이 기술된다.
+
+### 예상(Expectations)
+
+예상은 가장 낮은 수준 테스팅으로 함수 호출이 기대한 바를 수행하는지 아닌지에 대해 이진 가정대입(binary assertion)한다. 모든 예상은 유사한 구조를 갖느다:
+
+* `expect_` 으로 시작한다.
+
+* 인자를 두개 갖는다: 첫번째는 실제 결과, 두번째는 예상하는 것.
+
+* 만약 실제 결과값과 예상 결과값이 일치하지 않으면, `testthat`은 오류를 던진다.
+
+정상적으로 파일 내부, 테스트 내부에 예상을 넣지만, 
+직접적으로도 예상을 실행할 수 있다.
+인터랙티브하게 예상을 탐색하기 쉽게 만든다.
+`testthat` 팩키지에는 거의 20개 예상이 있다.
+가장 중요한 것이 아래 논의된다.
+
+
+*   등치를 테스트하는 기본적인 방법이 두개 있다: `expect_equal()`, `expect_identical()`.
+    `expect_equal()`이 가장 흔히 사용된다: `all.equal()`을 사용해서 수치해석 허용한계에서 
+    등치성을 점검한다:
 
     ```{r, error = TRUE}
     expect_equal(10, 10)
@@ -164,19 +192,19 @@ While you'll normally put expectations inside tests inside files, you can also r
     expect_equal(10, 11)
     ```
   
-    If you want to test for exact equivalence, or need to compare a more
-    exotic object like an environment, use `expect_identical()`. It's built
-    on top of `identical()`:
+    만약 정확한 등치성을 시험하거나, 환경(environment)같은 외래 객체와 비교가 필요하다면,
+    `expect_identical()`을 사용한다. 이 함수는 `identical()` 위에서 빌드되었다:
 
     ```{r, error = TRUE}
     expect_equal(10, 10 + 1e-7)
     expect_identical(10, 10 + 1e-7)
     ```
 
-*   `expect_match()` matches a character vector against a regular expression. 
-    The optional `all` argument controls whether all elements or just one 
-    element needs to match. This is powered by `grepl()` (additional arguments 
-    like `ignore.case = FALSE` or `fixed = TRUE` are passed on down).
+*   `expect_match()`는 정규표현식에 문자 벡터를 매칭한다.
+    선택옵션 `all` 인자를 통해 모든 요소 혹은 단지 요소 하나만 매칭할지를 제어한다.
+    `grepl()` 명령어로 강력한 기능이 부여된다 (`ignore.case = FALSE` 혹은 `fixed = TRUE` 같은
+    부가 인자가 매개변수로 전달된다).
+
 
     ```{r, error = TRUE}
     string <- "Testing is fun!"
@@ -189,10 +217,11 @@ While you'll normally put expectations inside tests inside files, you can also r
     expect_match(string, "testing", ignore.case = TRUE)
     ```
 
-*   Four variations of `expect_match()` let you check for other types of 
-    result: `expect_output()`, inspects printed output; `expect_message()`,
-    messages; `expect_warning()`, warnings; and `expect_error()` errors.
-    
+*   4가지 `expect_match()` 변형 명령어로 다른 결과 유형을 점검한다:
+    `expect_output()`은 출력결과를 점검한다; `expect_message()`는 메시지를 점검한다;
+    `expect_warning()`은 경고를 점검한다; `expect_error()`은 오류를 점검한다.
+
+
     ```{r, error = TRUE}
     a <- list(1:10, letters)
 
@@ -201,11 +230,11 @@ While you'll normally put expectations inside tests inside files, you can also r
 
     expect_message(library(mgcv), "This is mgcv")
     ```
+
+    `expect_message()`, `expect_warning()`, `expect_error()` 명령어에 두번째 인자를 공백으로 남겨두면,
+    메시지, 경고, 오류가 생성되었는지만 확인한다.
+    하지만, 일반적으로 명시적으로 메시지로부터 테스트 일부를 제공하는 것이 더 낫다.
     
-    With `expect_message()`, `expect_warning()`, `expect_error()` you can
-    leave the second argument blank if you just want to see if a message,
-    warning or error is created. However, it's normally better to be explicit, 
-    and provide some text from the message.
     
     ```{r, error = TRUE}  
     expect_warning(log(-1))
@@ -220,7 +249,7 @@ While you'll normally put expectations inside tests inside files, you can also r
     expect_error(1 / 2) 
     ```
 
-*   `expect_is()` checks that an object `inherit()`s from a specified class.
+*   `expect_is()` 명령어를 통해서 특정된 클래스에서 객체가 `inherit()` 상속되었는지 점검한다.
 
     ```{r, error = TRUE}
     model <- lm(mpg ~ wt, data = mtcars)
@@ -228,40 +257,56 @@ While you'll normally put expectations inside tests inside files, you can also r
     expect_is(model, "glm")
     ```
 
-*   `expect_true()` and `expect_false()` are useful catchalls if none of the 
-    other expectations do what you need.
+*   만약 어떤 예상도 필요한 것을 수행하지 않는다면, `expect_true()` 와 `expect_false()`이 유용하다.
 
-*   Sometimes you don't know exactly what the result should be, or it's too 
-    complicated to easily recreate in code. In that case the best you can do is 
-    check that the result is the same as last time. `expect_equal_to_reference()` 
-    caches the result the first time its run, and then compares it to subsequent 
-    runs. If for some reason the result does change, just delete the cache (*)
-    file and re-test.
+*   때때로, 결과가 무엇이 되어야 하는지 알지 못하거나, 혹은 너무 복잡해서 코드로 재생성하기가 쉽지 않다.
+    이런 경우에, 취할 수 있는 가장 최선은 결과가 가장 마지막 수행결과와 동일한지 점검하는 것이다.
+    `expect_equal_to_reference()`으로 첫 실행 결과를 캐쉬로 갖고 나서, 후속 실행결과와 비교한다.
+    만약 어떤 연유로 인해서 결과가 변경되면, 캐쉬 (*) 파일을 삭제만하고 다시 테스트한다.
 
-Running a sequence of expectations is useful because it ensures that your code behaves as expected. You could even use an expectation within a function to check that the inputs are what you expect. However, they're not so useful when something goes wrong. All you know is that something is not as expected. You don't know the goal of the expectation. Tests, described next, organise expectations into coherent blocks that describe the overall goal of a set of expectations.
+일련의 예상을 실행하는 것이 유용한데 이유는 작성한 코드가 예상한대로 동작하는지 확실히 해주기 때문이다.
+심지어 함수 내부에도 예상을 사용해서 입력값이 기대한 것인지 점검한다.
+하지만, 뭔가 잘못되면 그다지 유용하지는 않다.
+이를 통해 무언가 기대한 것이 아니라는 것만 알게 된다. 예상 목적을 알지 못하기 때문이다.
+다음에 기술되는 테스트는 예상을 일관된 블록을 구조화해서 전반적인 예상 집합 목적을 기술한다.
 
-## Writing tests {#test-tests}
 
-Each test should have an informative name and cover a single unit of functionality. The idea is that when a test fails, you'll know what's wrong and where in your code to look for the problem. You create a new test using `test_that()`, with test name and code block as arguments. The test name should complete the sentence "Test that ...". The code block should be a collection of expectations.
+## 테스트 작성 {#test-tests}
 
-It's up to you how to organise your expectations into tests. The main thing is that the message associated with the test should be informative so that you can quickly narrow down the source of the problem. Try to avoid putting too many expectations in one test - it's better to have more smaller tests than fewer larger tests.
+각 테스트는 정보가 되는 명칭을 가져야 되고, 단일 기능 단위만을 다뤄야만 된다.
+기본적인 생각은 테스트가 실패할 때, 무엇이 잘못되었는지와 코드에서 문제점이 어디에 있는지 찾을 수 있게 한다.
+테스트 명칭과 코드 블록을 인자로 갖는 `test_that()` 명령어를 사용해서 신규 테스트를 생성한다.
+테스트 명칭은 "Test that ..." 완전한 문장이 되어야 한다. 코드 블록은 예상 집합이다.
 
-Each test is run in its own environment and is self-contained. However, testthat doesn't know how to cleanup after actions affect the R landscape: 
+예상을 테스트로 어떻게 구조화할지는 작성자에 달려있다.
+주요한 점은 테스트와 연관된 메시지가 정보가 되게 작성되어 문제 원천으로 빠르게 좁혀갈 수 있어야 된다.
+한 테스트에 너무 많은 예상을 넣는 것을 피하라 - 좀더 커다란 적은 수의 테스트 보다는 더 많은 작은 테스트를 갖는게 더 낫다.
 
-* The filesystem: creating and deleting files, changing the working directory,
-  etc.
 
-* The search path: `library()`, `attach()`.
+각 테스트는 자체 환경에서 실행되고 그 자체로 완비되어야 한다.
+하지만, 동작(action)이 R 실행환경에 영향을 준 다음에 정리하는 방법을 `testthat`은 갖고 있지 않다: 
 
-* Global options, like `options()` and `par()`.
 
-When you use these actions in tests, you'll need to clean up after yourself. While many other testing packages have set-up and teardown methods that are run automatically before and after each test, these are not so important with testthat because you can create objects outside of the tests and you can rely on R's copy-on-modify semantics to keep them unchanged between test runs. To clean up other actions you can use regular R functions.
+* 파일시스템: 파일 생성과삭제, 작업 디렉토리 변경 등.
 
-### What to test
+* 검색 경로: `library()`, `attach()`.
 
-> Whenever you are tempted to type something into a print statement or a 
-> debugger expression, write it as a test instead.
-> --- Martin Fowler
+* `options()` 와 `par()` 같은 전역 선택옵션.
+
+테스트에 상기 동작(action)을 사용하면, 본인 스스로 정리할 필요가 있다.
+
+다른 많은 테스팅 팩키지가 설정 및 해제 메쏘드를 갖고서 각 테스트 이전과 이후에 자동으로 실행되지만, 
+`testthat` 팩키지에서는 그다지 중요하지 않다. 이유는 테스트 외부에 객체를 생성하고, 
+R의 '변경에 복사(copy-on-modify)' 시맨틱을 사용해서 테스트 실행 간에 변경이 일어나지 않게 한다.
+다른 동작을 정리하는데는 정규 R 함수를 사용한다.
+
+
+### 테스트 대상 (What to test)
+
+> 무언가를 출력문장(print statement) 혹은 디버거 표현식으로 타이핑하려는 유혹이 있을 때마다,
+> 그러지 말고 대신에 테스트로 작성하라. --- 마틴 파울러(Martin Fowler)
+
+테스트 
 
 There is a fine balance to writing tests. Each test that you write makes your code less likely to change inadvertently; but it also can make it harder to change your code on purpose. It's hard to give good general advice about writing tests, but you might find these points helpful:
 
