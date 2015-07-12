@@ -7,25 +7,43 @@ output: bookdown::html_chapter
 # 네임스페이스(Namespace) {#namespace}
 
 (`NAMESPACE` 파일에 기록되는) 팩키지 네임스페이스는 팩키지를 작성할 때 혼동스러운 부분 중에 하나다.
+네임스페이스는 상당히 고급 주제로 대체로 본인이 사용할 팩키지만 개발한다면 그다지 중요하지는 않다.
+하지만, 팩키지를 제출할 계획을 갖고 있다면, 네임스페이스를 이해하는 것이 꼭 필요하다.
+이유는 CRAN에서 작성한 팩키지가 다른 팩키지와 멋지게 동작하도록 요구하기 때문이다.
 
-The package namespace (as recorded in the `NAMESPACE` file) is one of the more confusing parts of building a package. It's a fairly advanced topic, and by-and-large, not that important if you're only developing packages for yourself. However, understanding namespaces is vital if you plan to submit your package to CRAN. This is because CRAN requires that your package plays nicely with other packages.
+처음 네임스페이스를 사용하기 시작하면 얻는 것에 비해 들어가는 작업이 엄청난 것처럼 느껴진다.
+하지만, 고품질 네임스페이를 획득하면 팩키지를 캡슐화하고 그 자체로 완비된 팩키지가 되게 한다.
+이를 통해 다른 팩키지가 본인 코드를 방해하지 못하게 하고, 본인 코드도 다른 팩키지를 침범하지 않게 하고,
+실행 환경에 관계없이 팩키지가 동작되게 확실히 한다.
 
-When you first start using namespaces, it'll seem like a lot of work for little gain. However, having a high quality namespace helps encapsulate your package and makes it self-contained. This ensures that other packages won't interfere with your code, that your code won't interfere with other packages, and that your package works regardless of the environment in which it's run.
 
-## Motivation {#namespace-motivation}
+## 동기 {#namespace-motivation}
 
-As the name suggests, namespaces provide "spaces" for "names". They provide a context for looking up the value of an object associated with a name. 
+명칭에서 알 수 있듯이, 네임스페이스(namespace)는 "명칭(names)"에 대한 "공간(space)"을 제공한다.
+명칭과 연관된 객체 값을 조회하는데 있어 맥락(context)을 제공한다.
 
-Without knowing it, you've probably already used namespaces. For example, have you ever used the `::` operator? It disambiguates functions with the same name. For example, both plyr and Hmisc provide a `summarize()` function. If you load plyr, then Hmisc, `summarize()` will refer to the Hmisc version. But if you load the packages in the opposite order, `summarize()` will refer to the plyr version. This can be confusing. Instead, you can explicitly refer to specific functions: `Hmisc::summarize()` and `plyr::summarize()`. Then the order in which the packages are loaded won't matter.
+부지불식 중에 아마도 네임스페이스를 이미 사용했다.
+예를 들어, `::` 연산자를 사용했지요?
+동일한 명칭을 갖는 함수의 모호성을 제거한다.
+예를 들어, `plyr`, `Hmisc` 팩키지 모두 `summarize()` 함수를 제공한다.
+만약 `plyr`을 로드하고 나서, `Hmisc`를 로드하면, `summarize()` 함수는 Hmisc 버젼을 참조한다.
+하지만, 역순으로 로드하면, `summarize()` 함수는 dplyr 버젼을 참조한다.
+이러한 면이 혼란스러울 수 있다.
+대신에 명시적으로 특정 함수를 참조할 수 있다: `Hmisc::summarize()`, `plyr::summarize()`.
+그러고 나면, 팩키지가 적재되는 순서는 문제가 되지 않는다.
 
-Namespaces make your packages self-contained in two ways: the __imports__ and the __exports__. The __imports__ defines how a function in one package finds a function in another. To illustrate, consider what happens when someone changes the definition of a function that you rely on: for example, the simple `nrow()` function in base R:
+네임스페이스는 두가지 방식으로 팩키지를 스스로 완비되게 만든다: __가져오기(imports)__, __내보내기(exports)__.
+__가져오기(imports)__는 특정 팩키지에 있는 함수를 또다른 팩키지에 있는 함수를 찾는 방법을 정의한다.
+시연 목적으로, 누군가 참조하고 있는 함수 정의를 변경했을 때 무슨 일이 발생하는지 생각해보자: R 베이스(base) 간단한 `nrow()` 함수를 예를 들어보자:
   
 ```{r}
 nrow
 ```
 
-It's defined in terms of `dim()`. So what will happen if we override `dim()` 
-with our own definition? Does `nrow()` break?
+`nrow()` 함수는 `dim()` 함수로 정의된다. 
+그래서 만약 `dim()` 함수를 사용자 정의로 재정의(override)하면 무슨 일이 발생할까요?
+`nrow()` 함수가 망가질까요?
+
 
 ```{r}
 dim <- function(x) c(1, 1)
@@ -33,13 +51,17 @@ dim(mtcars)
 nrow(mtcars)
 ```
 
-Surprisingly, it does not! That's because when `nrow()` looks for an object 
-called `dim()`, it uses the package namespace, so it finds `dim()` in 
-the base environment, not the `dim()` we created in the global environment.
+놀랍게도 망가지지 않아요! 이유는 `nrow()` 함수가 `dim()`로 불리는 객체를 찾을 때, 팩키지 네임스페이스를
+사용해서 베이스 실행환경에 있는 `dim()` 함수를 찾기 때문이다. 전역 환경에서 사용자가 생성한 `dim()` 함수를 찾는게 아니다.
 
-The __exports__ helps you avoid conflicts with other packages by specifying which functions are available outside of your package (internal functions are available only within your package and can't easily be used by another package). Generally, you want to export a minimal set of functions; the fewer you export, the smaller the chance of a conflict. While conflicts aren't the end of the world because you can always use `::` to disambiguate, they're best avoided where possible because it makes the lives of your users easier.)
+__내보내기(exports)__는 어떤 함수를 팩키지 외부에 노출시킬지 명시함으로써
+다른 팩키지와 충돌을 회피하게 돕는다 (내부 함수는 팩키지 내부에서만 이용가능하고 다른 팩키지가 쉽게 사용할 수 없다). 일반적으로, 최소 함수 집합만 내보내고 싶을 것이다: 적게 내보낼수록, 충돌가능성은 작아진다.
+충돌 문제로 세상이 끝나는 것은 아닌 것은 `::`을 사용해서 항상 모호성을 제거할 수 있기 때문이다.
+충돌은 가능하면 최선을 다해 피해야 되는데, 팩키지 사용자 삶을 더 쉽게 만들기 때문이다.
 
-## Search path {#search-path}
+
+
+## 검색 경로 (Search path) {#search-path}
 
 To understand why namespaces are important, you need a solid understanding of search paths. To call a function, R first has to find it. R does this by first looking in the global environment. If R doesn't find it there, it looks in the search path, the list of all the packages you have __attached__. You can see this list by running `search()`. For example, here's the search path for the code in this book:
 
