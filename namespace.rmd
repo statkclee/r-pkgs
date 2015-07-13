@@ -59,36 +59,46 @@ __내보내기(exports)__는 어떤 함수를 팩키지 외부에 노출시킬�
 충돌 문제로 세상이 끝나는 것은 아닌 것은 `::`을 사용해서 항상 모호성을 제거할 수 있기 때문이다.
 충돌은 가능하면 최선을 다해 피해야 되는데, 팩키지 사용자 삶을 더 쉽게 만들기 때문이다.
 
-
-
 ## 검색 경로 (Search path) {#search-path}
 
-To understand why namespaces are important, you need a solid understanding of search paths. To call a function, R first has to find it. R does this by first looking in the global environment. If R doesn't find it there, it looks in the search path, the list of all the packages you have __attached__. You can see this list by running `search()`. For example, here's the search path for the code in this book:
+네임스페이스 중요성을 이해하기 위해서는 검색 경로(search path)에 대한 확고한 이해가 필요하다. 함수를 호출하면, R이 함수를 찾아야 한다.
+R은 먼저 전역 환경(global environment)을 뒤져 탐색을 시작한다.
+만약 전역 환경에서 찾지 못한다면, 검색 경로를 뒤진다. 
+검색 경로에는 사용자가 __부착한(attached)__ 모든 팩키지 목록 정보가 담겨있다.
+`search()` 명령어를 실행해서 해당 목록정보를 확인할 수 있다.
+예를 들어, 다음에 이 책을 저술하는데 사용된 코드에 대한 검색경로가 나와 있다:  
 
 ```{r}
 search()
 ```
 
-There's an important difference between loading and attaching a package. Normally when you talk about loading a package you think of `library()`, but that actually attaches the package. 
+팩키지 적재(loading)와 부착(attaching) 사이에는 중요한 차이점이 있다.
+일반적으로 팩키지를 적재한다고 얘기할 때 `library()`를 생각하지만,
+사실은 팩키지를 부착하는 것이다.
 
-If a package is installed,
+만약 팩키지가 설치되었다면,
 
-* __Loading__ will load code, data and any DLLs; register S3 and 
-  S4 methods; and run the `.onLoad()` function. After loading, the 
-  package is available in memory, but because it's not in the search 
-  path, you won't be able to access its components without using `::`. 
-  Confusingly, `::` will also load a package automatically if it 
-  isn't already loaded. It's rare to load a package explicitly, but you
-  can do so with `requireNamespace()` or `loadNamespace()`.
-  
-* __Attaching__ puts the package in the search path. You can't attach a 
-  package without first loading it, so both `library()` or `require()`, load
-  then attach the package. You can see the currently attached packages with 
-  `search()`.
+* __적재(Loading)__는 코드, 데이터, DLLs 파일을 적재해서 올린다; 
+  S3, S4 메쏘드를 등록하고 `.onLoad()` 함수를 실행한다.
+  적재된 후에 팩키지는 메모리에 상주하여 이용가능하지만, 
+  검색경로에 있지 않기 때문에, `::` 없이 해당 컴포넌트에 접근할 수 없다.
+  혼동스럽게도, `::`도 만약 팩키지가 적재되지 않았다면 자동으로 팩키지를 적재한다.
+  팩키지를 명시적으로 적재하는 않지만, 
+  `requireNamespace()` 혹은 `loadNamespace()`을 사용해서 적재하기도 한다.
 
-If a package isn't installed, loading (and hence attaching) will fail with an error.
 
-To see the differences more clearly, consider two ways of running `expect_that()` from the testthat package. If we use `library()`, testthat is attached to the search path. If we use `::`, it's not.
+* __부착(Attaching)__은 팩키지를 검색경로에 놓는다.
+  팩키지를 먼저 적재하지 않고 팩키지를 부착할 수는 없다.
+  그래서, `library()` 혹은 `require()` 명령어는 적재하고 나서 팩키지를 부착한다.
+  `search()` 명령어로 현재 부착된 팩키지를 살펴볼 수 있다.
+
+만약 팩키지가 설치되어 있지 않다면, 적재(그리고 나서 부착)를 하면 오류가 나서 정상 실행되지 않는다.
+
+좀더 명확하게 차이점을 살펴보기 위해서,
+`testthat` 팩키지로부터 `expect_that()`을 실행하는 두가지 방법을 고려해보자.
+만약 `library()`를 사용하면, `testthat`은 검색경로에 부착된다.
+만약 `::`을 사용하면, `testthat`은 검색경로에 부착되지 않는다.
+
 
 ```{r, error = TRUE}
 old <- search()
@@ -102,36 +112,52 @@ setdiff(search(), old)
 expect_true(TRUE)
 ```
 
-There are four functions that make a package available. They differ based on whether they load or attach, and what happens if the package is not found (i.e., throws an error or returns FALSE).
+팩키지를 이용가능하게 만드는 함수가 4개 있다.
+적재되거나 부착되느냐에 따라, 그리고 팩키지가 검색되지 않았을 때 발생되는 사건(즉, 오류를 던지느냐 혹은 FALSE를 반환하느냐)에 따라 차이점이 생긴다.
 
-|        | Throws error         | Returns `FALSE`                           |
-|--------|----------------------|-------------------------------------------|
-| Load   | `loadNamespace("x")` | `requireNamespace("x", quietly = TRUE)`   |
-| Attach | `library(x)`         | `require(x, quietly = TRUE)`              |
 
-Of the four, you should only ever use two:
+|              | 오류 생성(Throws error) |    `FALSE` 반환                           |
+|--------------|-------------------------|-------------------------------------------|
+| 적재(Load)   |  `loadNamespace("x")`   | `requireNamespace("x", quietly = TRUE)`   |
+| 부착(Attach) |  `library(x)`           | `require(x, quietly = TRUE)`              |
 
-* Use `library(x)` in data analysis scripts. It will throw an error if the
-  package is not installed, and will terminate the script. You want to attach 
-  the package to save typing. Never use `library()` in a package.
+4가지 경우 중에서, 오직 두가지만 사용한다:
+
+
+* 자료분석 스크립트로 `library(x)`을 사용한다.
+  만약 팩키지가 설치되어 있지 않다면 오류를 던지고 스크립트를 종료한다.
+  적게 타이핑을 하려면 팩키지를 부착한다.
+  팩키지에 절대로 `library()`를 사용하지 마라.
   
-* Use `requireNamespace(x, quietly = TRUE)` inside a package if you want a
-  specific action (e.g. throw an error) depending on whether or not
-  a suggested package is installed.
+
+* 추천 팩키지 설치 여부에 따라 특정 동작(예를 들어, 오류 발생)을
+  구현하고자 한다면, 팩키지 내부에서 `requireNamespace(x, quietly = TRUE)`를 사용한다.
   
-You never need to use `require()` (`requireNamespace()` is almost always better), or `loadNamespace()` (which is only needed for internal R code). You should never use `require()` or `library()` in a package: instead, use the `Depends` or `Imports` fields in the `DESCRIPTION`.
+`require()` (왜냐하면, `requireNamespace()`가 거의 항상 더 좋다) 혹은 `loadNamespace()` (왜냐하면 내부 R 코드에만 필요하다)는 절대로 사용할 필요가 없다.
+팩키지 내부에서 `require()` 혹은 `library()` 는 절대 사용하지 말라:
+대신에, `DESCRIPTION` 파일에 `Depends` 혹은 `Imports` 필드를 사용한다.
 
-Now's a good time to come back to an important issue which we glossed over earlier. What's the difference between `Depends` and `Imports` in the `DESCRIPTION`? When should you use one or the other? 
+앞에서 얼버무리고 넘어갔던 중요한 이슈로 돌아올 적절한 시점이 되었다.
+`DESCRIPTION` 파일에서 `Depends` 와 `Imports` 간 차이가 뭘까요?
+어느 시점에 `Depends`를 또 다른 시점에는 `Imports`를 사용해야 할까요?
 
-Listing a package in either `Depends` or `Imports` ensures that it's installed when needed. The main difference is that where `Imports` just _loads_ the package, `Depends` _attaches_ it. There are no other differences. The rest of the advice in this chapter applies whether or not the package is in `Depends` or `Imports`.
+`Depends` 혹은 `Imports`에 팩키지 목록을 작성하면 필요할 때 팩키지가 확실히 설치되게 한다. 주된 차이점은 `Imports`는 단지 팩키지를 _적재(load)_하는 반면,
+`Depends`는 팩키지를 _부착(attach)_한다. 다른 차이점은 없다.
+이 장에서 나머지 조언은 팩키지에 `Depends` 혹은 `Imports`를 적용할지 말지다.
 
-Unless there is a good reason otherwise, you should always list packages in `Imports` not `Depends`. That's because a good package is self-contained, and minimises changes to the global environment (including the search path). The only exception is if your package is designed to be used in conjunction with another package. For example, the [analogue](https://github.com/gavinsimpson/analogue) package builds on top of [vegan](https://github.com/vegandevs/vegan). It's not useful without vegan, so it has vegan in `Depends` instead of `Imports`. Similarly, ggplot2 should really `Depend` on scales, rather than `Import`ing it.
+특별한 다른 사유가 없다면, 항상 `Depends`가 아닌 `Imports`에 팩키지 목록을 올려야 된다.
+이유는 훌륭한 팩키지는 그자체로 완비되고 (검색경로를 포함해서) 전역 환경에 변경을 최소화한다. 유일한 예외는 팩키지가 또다른 팩키지와 결합되어 사용되도록 설계되었을 때다. 예를 들어, [analogue](https://github.com/gavinsimpson/analogue) 팩키지는 [vegan](https://github.com/vegandevs/vegan) 팩키지 기반으로 개발되었다. `vagan` 없이는 유용하게 사용될 수 없기 때문에, `Imports` 대신에 vagan을 `Depends`에 넣는다.
+마찬가지로 `ggplot2`는 `scales`를 `Import` 하는 대신에, 정말 `Depend` 해야 된다.
 
-Now that you understand the importance of the namespace, let's dive into the nitty gritty details. The two sides of the package namespace, imports and exports, are both described by the `NAMESPACE`. You'll learn what this file looks like in the next section. In the section after that, you'll learn the details of exporting and importing functions and other objects.
+네임스페이스의 중요성에 대해서 이해했기 때문에, 핵심 사항으로 바로 들어가 보자.
+팩키지 네임스페이스 양쪽면, 즉 imports 와 exports는 `NAMESPACE`에 기술된다.
+다음 절에서 해당 파일 어떻게 생겼는지 학습할 것이다.
+그 다음 절에서는 함수와 관련 객체를 가져오고(import) 내보내는(export) 상세한 점을 학습할 것이다.
 
-## The `NAMESPACE` {#NAMESPACE}
 
-The following code is an excerpt of the `NAMESPACE` file from the testthat package.
+## `NAMESPACE` {#NAMESPACE}
+
+다음 코드는 `testthat` 팩키지로부터 나온 `NAMESPACE` 파일을 발췌한 것이다.
 
     # Generated by roxygen2 (4.0.2): do not edit by hand
     S3method(as.character,expectation)
@@ -146,58 +172,73 @@ The following code is an excerpt of the `NAMESPACE` file from the testthat packa
     useDynLib(testthat,duplicate_)
     useDynLib(testthat,reassign_function)
 
-You can see that the `NAMESPACE` file looks a bit like R code. Each line contains a __directive__: `S3method()`, `export()`, `exportClasses()`, and so on. Each directive describes an R object, and says whether it's exported from this package to be used by others, or it's imported from another package to be used locally. 
+`NAMESPACE` 파일이 R 코드처럼 생긴 것을 볼 수 있다.
+각 행에는 __지시어(directive)__가 포함되어 있다: `S3method()`, `export()`, `exportClasses()`, 등등.
+각 지시어는 R 객체를 기술하고, 팩키지에서 내보내서 다른 사용자들이 사용하게 할지, 다른 팩키지에서 가져와서 로컬 컴퓨터에서 사용할지 표현하고 있다.
 
-In total, there are eight namespace directives. Four describe exports: 
+전체로 보면, 8개 네임스페이스 지시어가 있다. 그중 4개는 내보내기(export)를 기술한다:
 
-* `export()`: export functions (including S3 and S4 generics).
-* `exportPattern()`: export all functions that match a pattern.
-* `exportClasses()`, `exportMethods()`: export S4 classes and methods.
-* `S3method()`: export S3 methods.
+* `export()`: 내보내기 함수 (S3 와 S4 제네릭 포함).
+* `exportPattern()`: 패턴과 매칭되는 모든 함수를 내보내기.
+* `exportClasses()`, `exportMethods()`: S4 클래스와 메쏘드를 내보낸다.
+* `S3method()`: S3 메쏘드를 내보낸다.
 
-And four describe imports:
+그리고, 나머지 4개는 가져오기(import)를 기술한다:
 
-* `import()`: import all functions from a package.
-* `importFrom()`: import selected functions (including S4 generics).
-* `importClassesFrom()`, `importMethodsFrom()`: import S4 classes and methods.
-* `useDynLib()`: import a function from C. This is described in more
-   detail in [compiled code](#src).
+* `import()`: 팩키지로부터 모든 함수를 가져온다.
+* `importFrom()`: 선택 함수만 가져온다. (S4 제네릭 포함).
+* `importClassesFrom()`, `importMethodsFrom()`: S4 클래스와 메쏘드 가져오기.
+* `useDynLib()`: C 로부터 함수를 가져오기. 
+  [compiled code](#src)에서 좀더 자세한 사항이 기술된다.
 
-I don't recommend writing these directives by hand. Instead, in this chapter you'll learn how to generate the `NAMESPACE` file with roxygen2. There are three main advantages to using roxygen2:
+수작업으로 지시어를 작성하는 것을 저자는 추천하지 않는다.
+대신에 이번 장에서 `roxygen2`로 `NAMESPACE`를 생성하는 방법을 학습할 것이다.
+`roxygen2`를 사용하는 세가지 장점이 있다:
 
-* Namespace definitions live next to its associated function, so when you 
-  read the code it's easier to see what's being imported and exported.
+* 네임스페이스 정의는 연관된 함수 바로 옆에 위치한다. 
+  그래서 코드를 읽을 때, 어떤 팩키지를 가져오고 내보내는지 확인하기 더 쉽다.
 
-* Roxygen2 abstracts away some of the details of `NAMESPACE`. You only 
-  need to learn one tag, `@export`, which will automatically generate the right 
-  directive for functions, S3 methods, S4 methods and S4 classes.
+* Roxygen2를 통해서 `NAMESPACE` 구체적인 사항 일부를 추상화해서 없애버린다.
+  `@export` 태그만 배우면, 나머지는 알아서 함수, S3 메쏘드, S4 메쏘드, S4 클래스에 
+  대한 적절한 지시어를 자동으로 생성해준다.
 
-* Roxygen2 makes `NAMESPACE` tidy. No matter how many times you use 
-  `@importFrom foo bar` you'll only get one `importFrom(foo, bar)` in your 
-  `NAMESPACE`. This makes it easy to attach import directives to every function
-  that need them, rather than trying to manage in one central place.
 
-Note that you can choose to use roxygen2 to generate just `NAMESPACE`, just `man/*.Rd`, or both. If you don't use any namespace related tags, roxygen2 won't touch `NAMESPACE`. If you don't use any documentation related tags, roxygen2 won't touch `man/`.
+* Roxygen2가 `NAMESPACE`를 깜끔하게 만든다.
+  `@importFrom foo bar`을 얼마나 많이 사용하는지 관계없이,
+  `NAMESPACE`에는 단 하나의 `importFrom(foo, bar)`이 존재한다.
+  한 중심장소에서 관리하기 보다는, 
+  지시어가 필요한 모든 함수에 가져오기 지시어를 부착하기 쉽게 한다.
 
-## Workflow {#namespace-workflow}
+`roxygen2`를 사용해서 `NAMESPACE`만, 혹은 `man/*.Rd`만, 혹은 양쪽 모두 생성할 수 있다는 점에 주목한다. 만약 어떠한 네임스페이스 관련된 태그를 사용하지 않는다면, `roxygen2`는 
+`NAMESPACE`에 일절 손대지 않는다. 만약 어떤 문서화 관련된 태그도 사용하지 않는다면, 
+`roxygen2`는 `man/`에 일절 손대지 않는다.
 
-Generating the namespace with roxygen2 is just like generating function documentation with roxygen2. You use roxygen2 blocks (starting with `#'`) and tags (starting with `@`). The workflow is the same:
+## 작업흐름 {#namespace-workflow}
 
-1. Add roxygen comments to your `.R` files.
+`roxygen2`로 네임스페이스를 생성하는 것은 `roxygen2`를 사용해서 함수 문서를 생성하는 것과 같다. `roxygen2` 블록 (`#'`로 시작)과 태그 (`@`로 시작) 를 사용한다.
+작업흐름은 동일하다:
 
-1. Run `devtools::document()` (or press Ctrl/Cmd + Shift + D in RStudio) to 
-   convert roxygen comments to `.Rd` files.
 
-1. Look at `NAMESPACE` and run tests to check that the specification is
-   correct.
+1. roxygen 주석을 `.R` 파일에 추가한다.
 
-1. Rinse and repeat until the correct functions are exported.
+1. `devtools::document()` (혹은 RStudio에서 Ctrl/Cmd + Shift + D 단축키 누름) 명령어를 
+  실행해서 roxygen 주석을 `.Rd` 파일로 변환한다.
 
-## Exports {#exports}
+1. `NAMESPACE`를 살펴보고 테스트를 실행해서 사양서가 올바른지 점검한다.
 
-For a function to be usable outside of your package, you must __export__ it. When you create a new package with `devtools::create()`, it produces a temporary `NAMESPACE` that exports everything in your package that doesn't start with `.` (a single period). If you're just working locally, it's fine to export everything in your package. However, if you're planning on sharing your package with others, it's a really good idea to only export needed functions. This reduces the chances of a conflict with another package.
+1. 올바른 함수를 내보낼때까지 깔끔히 하고 과정을 반복한다.
 
-To export an object, put `@export` in its roxygen block. For example:
+
+## 내보내기 (Exports) {#exports}
+
+작성한 팩키지가 밖에서도 함수가 유용하게 사용되려면,
+함수를 __내보내야(export)__만 된다.
+`devtools::create()` 명령어로 신규 팩키지를 생성하면,
+임시 `NAMESPACE`를 만들어서 `.` (마침표)로 시작되지 않는 팩키지에 있는 모든 것을 내보낸다.
+로컬 컴퓨터에서만 작업한다면, 팩키지에 모든 것을 내보내는 것도 좋다.
+하지만, 다른 사람들과 작성한 팩키지를 공유할 계획이 있다면, 꼭 필요한 함수만 내보는 것이 정말 좋은 접근법이 된다. 이런 과정을 통해 다른 팩키지와 충돌날 가능성을 줄인다.
+
+객체를 내보내려면, roxygen 블록에 `@export` 태그를 넣는다. 예를 들어:
 
 ```{r}
 #' @export
@@ -206,11 +247,19 @@ foo <- function(x, y, z) {
 }
 ```
 
-This will then generate `export()`, `exportMethods()`, `exportClass()` or `S3method()` depending on the type of the object.
+상기 코드블록은 객체 유형에 따라 `export()`, `exportMethods()`, `exportClass()`, `S3method()` 을 생성한다.
 
-You export functions that you want other people to use. Exported functions must be documented, and you must be cautious when changing their interface --- other people are using them! Generally, it's better to export too little than too much. It's easy to export things that you didn't before; it's hard to stop exporting a function because it might break existing code. Always err on the side of caution, and simplicity. It's easier to give people more functionality than it is to take away stuff they're used to.
+다른 사용자가 사용하고 싶은 함수를 내보낸다.
+내보내기한 함수는 문서화되어야 되고, 인터페이스를 변경할 때 주의해야 한다 - 다른 사람이 함수를 사용하고 있기 때문이다! 일반적으로,
+너무 많이 내보내는 것보다 너무 적게 내보내는 것이 낫다.
+전에 내보내지 않은 것을 내보내는 것은 쉽다; 함수 내보내는 것을 멈추기는 어려운데 이유는 기존 코드를 망가뜨릴 수 있기 때문이다.
+항상 지나치다 싶을 정도로 조심하고 단순화하라.
+사용자가 익숙한 무언가를 빼앗기 보다 사용자에게 더 많은 기능을 부여하는 것이 더 쉽다.
 
-I believe that packages that have a wide audience should strive to do one thing and do it well. All functions in a package should be related to a single problem (or a set of closely related problems). Any functions not related to that purpose should not be exported. For example, most of my packages have a `utils.R` file that contains many small functions that are useful for me, but aren't part of the core purpose of those packages. I never export these functions.
+저자가 믿기로는 폭넓은 사용자를 갖는 팩키지는 단지 하나에 집중하고 그것을 잘 한다.
+팩키지에 있는 모는 함수는 단일 문제(혹은 매우 밀접하게 연관된 문제 집합)에 연관되어 있어야 된다. 그 목적에 연관되지 않는 어떤 함수도 내보내기해서는 안된다.
+예를 들어, 저자가 집필한 대부분의 팩키지는 `utils.R` 파일을 갖는데 
+작은 함수가 다수 포함되어 있는데 저자에게는 도움이 되지만, 팩키지의 핵심 목적에는 부합하지 않는다. 저자는 절대로 이러한 함수를 내보내지 않는다.
 
 ```{r}
 # Defaults for NULL values
@@ -222,39 +271,44 @@ compact <- function(x) {
 }
 ```
 
-That said, if you're creating a package for yourself, it's far less important to be so disciplined. Because you know what's in your package, it's fine to have a local "misc" package that contains a passel of functions that you find useful. But I don't think you should release such a package.
+앞의 사례를 통해서, 만약 본인을 위한 목적으로 팩키지를 생성한다면,
+너무 규율을 잡아 철저히 하는 것이 그다지 중요하지 않다.
+작성한 팩키지에 무엇이 담겨있는지 알고 있기 때문에,
+본인 생각에 유용한 함수를 꾸러미로 모아 로컬에 "잡동산이(misc)" 팩키지를 생성해도 좋다.
+하지만, 그런 팩키지를 외부에 출시하는 것은 반대한다.
 
-The following sections describe what you should export if you're using S3, S4 or RC.
+다음 절에서 S3, S4, RC 를 사용한다면 무엇을 내보낼지 기술한다.
 
 ### S3  {#export-s3}
 
-If you want others to be able to create instances of an S3 class, `@export` the constructor function. S3 generics are just regular R functions, you can `@export` them like functions. 
+만약 다른 사용자가 S3 클래스 인스턴스를 생성하려고 한다면, `@export` 태그로 생성자 함수를 내보낸다.
+S3 제네릭은 정규 R 함수에 불과하다. 그래서 `@export`를 사용해서 함수처럼 내보낸다.
 
-S3 methods represent the most complicated case because there are four different scenarios:
+S3 메쏘드는 가장 복잡한 경우를 표현하는데 이유는 4가지 다른 시나리오가 있기 때문이다:
 
-* A method for an exported generic: export every method.
 
-* A method for an internal generic: technically, you don't need to export
-  these methods. However, I recommend exporting every S3 method you write
-  because it's simpler and makes it less likely that you'll introduce hard to 
-  find bugs. Use `devtools::missing_s3()` to list all S3 methods that 
-  you've forgotten to export.
+* 내보내기 제네릭에 대한 메쏘드: 모든 메쏘드를 내보낸다.
 
-* A method for a generic in a required package. You'll need to import the
-  generic (see below), and export the method.
+* 내부 제네릭에 대한 메쏘드: 기술적으로 이런 메쏘드를 내보내기할 필요는 없다.
+  하지만, 작성한 모든 S3 메쏘드를 내보내는데 저자는 주저하지 않는다.
+  왜냐하면 더 간단하고 찾기 힘든 버그를 신규로 만들어낼 것 같지 않다.
+  `devtools::missing_s3()`를 사용해서 내보내기를 잊은 모든 S3 메쏘드를 목록으로 만든다.
 
-* A method for a generic in a suggested package. Namespace directives must
-  refer to available functions, so they can not reference suggested packages. 
-  It's possible to use package hooks and code to add this at run-time,
-  but this is sufficiently complicated that I currently wouldn't recommend it.
-  Instead, you'll have to design your package dependencies in a way that avoids this 
-  scenario.
+* require 팩키지에 있는 제네릭에 대한 메쏘드: 
+  제네릭을 가져와서 (아래 참조) 메쏘드를 내보낼 필요가 있다. 
+
+* suggest 팩키지에 있는 제네릭에 대한 메쏘드: 네임스페이스 지시어는 이용가능한
+  함수를 참조해야 되어서, suggest 패키지를 참조할 수는 없다.
+  팩키지 후크(hook)과 코드를 사용해서 실행될 때 추가하는 것은 가능하다.
+  하지만, 그 자체로 충분히 복잡해서 현재 저자는 이 방법을 추천하지는 않는다.
+  대신에, 상기 시나리오를 피하는 방식으로 팩키지 의존성을 설계해야 된다.
 
 ### S4 {#export-s4}
 
-S4 classes: if you want others to be able to extend your class, `@export` it.
-If you want others to create instances of your class but not to extend it,
-`@export` the constructor function, not the class.
+S4 클래스: 다른 사용자가 작성한 클래스를 확장하려고 한다면, `@export` 태그로 내보내기 하라. 
+만약 다른 사용자로 하여금 클래스 인스턴스 생성은 가능하지만, 확장하지 못하게 하려면, 
+`@export` 태그로 클래스가 아닌 생성자 함수로 내보낸다.
+
 
 ```{r, eval = FALSE}
 # Can extend and create with new("A", ...)
@@ -277,19 +331,25 @@ C <- setClass("C")
 D <- setClass("D")
 ```
 
-S4 generics: `@export` if you want the generic to be publicly usable.
 
-S4 methods: you only need to `@export` methods for generics that you did not define. But I think it's a good idea to `@export` every method: that way you don't need to remember whether or not you created the generic.
+S4 제네릭: 만약 제네릭을 외부에서도 사용가능하게 하려면 `@export` 태그를 사용한다.
+
+S4 메쏘드: `@export` 태그로 정의하지 않은 제네릭에 대한 메쏘드를 내보내면 된다.
+하지만, `@export`태로 모든 메쏘드를 내보내는 것이 저자 생각에는 좋다:
+이런 방식으로 하면 제네릭을 생성했는지 않았는지 기억할 필요가 없다.
 
 ### RC {#export-rc}
 
-The principles used for S4 classes apply here. Note that due to the way that RC is currently implemented, it's typically impossible for your classes to be extended outside of your package.
+S4 클래스에 사용된 원칙이 여기서도 동일하게 적용된다.
+주목할 점은 RC가 현재 구현된 방식 때문에, 일반적으로 작성한 클래스를 팩키지 외부로 확장하는 것은 불가능하다.
 
-### Data {#export-data}
+### 데이터 {#export-data}
 
-As you'll learn about in [data](#data), files that live in `data/` don't use the usual namespace mechanism and don't need to be exported. 
+[data](#data)에서 학습할 예정으로, `data/` 디렉토리에 있는 파일은 일반적인 네임스페이스 메카니즘을 사용하지 않아서 내보내기할 필요가 없다. 
 
-## Imports {#imports}
+## 가져오기(Imports) {#imports}
+
+
 
 `NAMESPACE` also controls which external functions can be used by your package without having to use `::`.
 
