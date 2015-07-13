@@ -4,7 +4,10 @@ title: Compiled code
 output: bookdown::html_chapter
 ---
 
-# Compiled code {#src}
+# 컴파일된 코드 {#src}
+
+고급, 표현 언어가 R이다. 하지만, 이러한 풍부한 표현성이 공짜로 오는 것은 아니다: 속도.
+
 
 R is high-level, expressive language. But that expressivity comes at a price: speed. That's why incorporating a low-level, compiled language like C or C++ can powerfully complement your R code. While C and C++ often require more lines of code (and more careful thought) to solve the same problem, they can be orders of magnitude faster than R. 
 
