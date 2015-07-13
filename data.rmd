@@ -6,35 +6,41 @@ output: bookdown::html_chapter
 
 # 외부 데이터 {#data}
 
-It's often useful to include data in a package. If you're releasing the package to a broad audience, it's a way to provide compelling use cases for the package's functions. If you're releasing the package to a more specific audience, interested either in the data (e.g., NZ census data) or the subject (e.g., demography), it's a way to distribute that data along with its documentation (as long as your audience is R users).
+팩키지에 데이터를 포함하는 것이 종종 유용하다.
+만약 팩키지를 폭넓은 독자에게 출시한다면, 팩키지 기능에 대해서 설득력 있는 활용 사례를 제공하는 방식이 될 수 있다. 만약 데이터(예를 들어, 한국 인구 총조사 자료) 혹은 주제(예를 들어, 인구통계)에만 관심있는 좀더 특정한 독자에게만 팩키지를 출시한다면, 문서와 함께 데이터를 배포하는 방식이기도 하다 (독자가 R 사용자라면).
 
-There are three main ways to include data in your package, depending on what you want to do with it and who should be able to use it:
+데이터로 무엇을 하고자 하는지와 누가 사용할 수 있느냐에 따라, 팩키지에 데이터를 포함하는 세가지 방식이 있다:
 
-* If you want to store binary data and make it available to the user, put it
-  in `data/`. This is the best place to put example datasets.
+* 만약 이진 데이터로 저장해서 사용자에게 이용할 수 있게 만들려면, `data/` 디렉토리에 넣는다.
+  예제 데이터를 넣는 가장 좋은 장소가 된다.
+
+* 만약 파싱된 데이터를 저장하지만, 사용자에게 이용할 수 없게 만들려면, `R/sysdata.rda` 디렉토리에 넣는다.
+  작성한 함수가 필요로 하는 데이터를 넣는 가장 좋은 장소가 된다.
   
-* If you want to store parsed data, but not make it available to the user,
-  put it in `R/sysdata.rda`. This is the best place to put data that your
-  functions need.
+* 원자료를 저장하려면, `inst/extdata` 디렉토리에 넣는다.
 
-* If you want to store raw data, put it in `inst/extdata`.
+상기 세가지 선택옵션에 간단한 대안은 수작업으로 생성하거나, `dput()`을 사용해서 기존 데이터셋을 R 코드로 직렬화하거나 해서 팩키지 소스에 데이터를 저장하는 것이다.
 
-A simple alternative to these three options is to include it in the source of your package, either creating by hand, or using `dput()` to serialise an existing data set into R code.
+각기 가능한 위치에 대해서는 다음에 좀더 자세히 기술된다.
 
-Each possible location is described in more detail below.
+## 가져오기한 데이터 (Exported data) {#data-data}
 
-## Exported data {#data-data}
-
-The most common location for package data is (surprise!) `data/`. Each file in this directory should be a `.RData` file created by `save()` containing a single object (with the same name as the file). The easiest way to adhere to these rules is to use `devtools::use_data()`:
+팩키지 데이터를 위한 가장 일반적인 위치가 `data/` 디렉토리다 (놀라셨죠!).
+이 디렉토리에 각 파일은 (파일과 동일한 명칭을 갖는) 단일 객체를 담고서 `save()` 명령어로 생성된 `.RData` 파일이 되어야만 한다.
+이러한 규칙을 준수하는 가장 쉬운 방법은 `devtools::use_data()`을 사용하면 해결된다:
 
 ```{r, eval = FALSE}
 x <- sample(1000)
 devtools::use_data(x, mtcars)
 ```
 
-It's possible to use other types of files, but I don't recommend it because `.RData` files are already fast, small and explicit. Other options are described in `data()`. For larger datasets, you may want to experiment with the compression setting. The default is `bzip2`, but sometimes `gzip` or `xz` can create smaller files (typically at the expense of slower loading times).
+다른 유형의 파일을 사용할 수도 있지만, 저자는 추천하지는 않는다. 이유는 `.RData` 파일이 이미 충분히 빠르고, 용량도 작고, 명시적이기 때문이다. 다른 선택옵션은 `data()`에 기술되어 있다.
+좀더 큰 데이터셋에 대해서, 압축 설정을 실험하고 싶을지도 모른다.
+디폴드 기본설정은 `bzip2` 압축형식이지만, `gzip` 혹은 `xz` 압축형식으로 좀더 용량이 적은 파일을 생성할 수 있다 (일반적으로 좀더 적재 시간이 오래 걸린다는 댓가를 치뤄야 된다).
 
-If the `DESCRIPTION` contains `LazyData: true`, then datasets will be lazily loaded. This means that they won't occupy any memory until you use them. The following example shows memory usage before and after loading the nycflights13 package. You can see that memory usage doesn't change until you inspect the flights dataset stored inside the package. 
+`DESCRIPTION` 파일이 `LazyData: true`를 포함하고 있다면,
+데이터셋은 지연(lazy)되어 적재된다. 이것이 의미하는 바는 데이터를 사용할 때까지는 어떤 메모리 공간도 차지하지 않는다는 것이 된다. `nycflights13` 팩키지 적재 전후 메모리 사용량이 다음 예제로 나와있다.
+팩키지 내부에 저장된 비행 데이터셋을 검사할 때까지 메모리 사용량이 변경되지 않는 것을 알 수 있다.
 
 ```{r}
 pryr::mem_used()
@@ -45,15 +51,22 @@ invisible(flights)
 pryr::mem_used()
 ```
 
-I recommend that you always include `LazyData: true` in your `DESCRIPTION`. `devtools::create()` does this for you.
+`DESCRIPTION` 파일에 항상 `LazyData: true`을 포함하는 것을 저자는 추천한다.
+`devtools::create()`가 여러분을 대신해서 자동으로 작업을 수행한다.
 
-Often, the data you include in `data/` is a cleaned up version of raw data you've gathered from elsewhere. I highly recommend taking the time to include the code used to do this in the source version of your package. This will make it easy for you to update or reproduce your version of the data. I suggest that you put this code in `data-raw/`. You don't need it in the bundled version of your package, so also add it to `.Rbuildignore`. Do all this in one step with:
+종종, `data/` 디렉토리에 포함된 데이터는 어디선가 수집한 원데이터의 최종 버젼이다.
+시간을 들여서 팩키지 소스 버젼에 데이터를 수집한 이력을 코드로 포함할 것을 저자는 추천한다.
+이러한 방식이 데이터 버젼을 갱신하고 재현하기 쉽게 만든다.
+데이터 생성 코드는 `data-raw/` 디렉토리에 넣는 것을 제안한다.
+팩키지 번들 버젼에는 필요치 않아서, `.Rbuildignore`에도 추가한다.
+다음 명령어로 이 모든 것을 수행한다:
 
 ```{r, eval = FALSE}
 devtools::use_data_raw()
 ```
 
-You can see this approach in practice in some of my recent data packages. I've been creating these as packages because the data will rarely change, and because multiple packages can then use them for examples:
+최근 저자가 작업한 일부 데이터 팩키지에서 이 접근방법을 볼 수 있다.
+데이터를 팩키지로 생성했는데 이유는 데이터가 거의 변경되지 않고 다수 팩키지에서 예제로 데이터를 사용하기 때문이다:
 
 * [babynames](https://github.com/hadley/babynames)
 * [fueleconomy](https://github.com/hadley/fueleconomy)
@@ -61,9 +74,14 @@ You can see this approach in practice in some of my recent data packages. I've b
 * [nycflights13](https://github.com/hadley/nycflights13)
 * [usdanutrients](https://github.com/hadley/usdanutrients)
 
-### Documenting datasets {#documenting-data}
+### 데이터셋 문서화 {#documenting-data}
 
-Objects in `data/` are always effectively exported (they use a slightly different mechanism than `NAMESPACE`'s but the details are not important). This means that they must be documented. Documenting data is like documenting a function with a few minor differences. Instead of documenting the data directly, you document the name of the dataset. For example, the roxygen2 block used to document the diamonds data in ggplot2 looks something like this:
+`data/` 디렉토리에 객체는 항상 효과적으로 내보내기가 된다 (`NAMESPACE`와 다소 다른 메커니즘을 사용하지만, 세부사항이 중요한 것은 아니다). 
+이것이 의미하는 바는 문서화되어야 된다는 점이다.
+데이터 문서화는 함수를 문서화하는 것과 유사하지만, 일부 사소한 차이점이 있다.
+데이터를 직접 문서화하는 대신에 데이터셋 명칭을 문서화한다.
+예를 들어, `ggplot2`에 있는 다이아몬드 데이터를 문서화하는데 사용된 `roxygen2` 블록은 다음과 같다:
+
 
 ```{r, eval = FALSE}
 #' Prices of 50,000 round cut diamonds.
@@ -81,62 +99,77 @@ Objects in `data/` are always effectively exported (they use a slightly differen
 "diamonds"
 ```
 
-There are two additional tags that are important for documenting datasets:
+데이터셋을 문서화하는데 중요한 부가적인 태그가 두개 있다:
 
-* `@format` gives an overview of the dataset. For data frames, you 
-  should include a definition list that describes each variable. It's usually
-  a good idea to describe variables' units here.
-  
-* `@source` provides details of where you got the data, often a `\url{}`.
 
-Never `@export` a data set.
+* `@format` 태그는 데이터에 대한 전반적인 설명을 전달한다. 데이터프레임에 대해서,
+  각 변수를 기술하는 정의 리스트를 포함해야 된다. 
+  변수 단위(unit)를 여기서 기술하는 것이 대체로 좋은 접근법이다.
 
-## Internal data {#data-sysdata}
 
-Sometimes functions need pre-computed data tables. If you put these in `data/` they'll also be available to package users, which is not appropriate. Instead, you can save them in `R/sysdata.rda`. For example, two coloured related packages, [munsell](https://github.com/cwickham/munsell) and [dichromat](http://cran.r-project.org/web/packages/dichromat/index.html), use `R/sysdata.rda` to store large tables of colour data.
+* `@source` 태그는 데이터 출처에 대한 자세한 사항을 전달한다. 흔히 `\url{}`을 사용한다.
 
-You can use `devtools::use_data()` to create this file with the argument `internal = TRUE`:
+`@export` 태그로 절대 데이터셋을 내보내지 마라.
+
+
+## 내부 데이터 {#data-sysdata}
+
+종종 미리 연산처리된 데이터 테이블을 함수가 필요로 한다.
+`data/` 디렉토리에 내부 데이터를 넣게 되면, 팩키지 사용자에게도 이용가능하게 되는데 적절하지 못하다.
+대신에, `R/sysdata.rda` 파일에 저장할 수 있다.
+예를 들어, 연관된 두 색상 팩키지 [munsell](https://github.com/cwickham/munsell) 과 [dichromat](http://cran.r-project.org/web/packages/dichromat/index.html)는 `R/sysdata.rda`을 사용해서
+대형 색상 데이터 테이블을 저장한다.
+
+`devtools::use_data()`을 사용해서 인자를 `internal = TRUE`로 두면 이런 파일을 생성할 수 있다:
 
 ```{r, eval = FALSE}
 x <- sample(1000)
 devtools::use_data(x, mtcars, internal = TRUE)
 ```
 
-Again, to make this data reproducible it's a good idea to include the code used to generate it. Put it in `data-raw/`.
+다시 한번, 데이터를 재현가능하게 만들기 위해서, 데이터를 생성하는데 사용된 코드를 포함하는 것이 훌륭한 생각이 된다. 코드는 `data-raw/` 디렉토리에 넣는다.
 
-Objects in `R/sysdata.rda` are not exported (they shouldn't be), so they don't need to be documented. They're only available inside your package.
+`R/sysdata.rda`에 있는 객체는 내보내기가 안된다 (내보내지면 안된다). 그래서 문서화할 필요가 없다.
+작성한 팩키지 내부에서만 이용가능하다.
 
-## Raw data {#data-extdata}
+## 원데이터(Raw data) {#data-extdata}
 
-If you want to show examples of loading/parsing raw data, put the original files in `inst/extdata`. When the package is installed, all files (and folders) in `inst/` are moved up one level to the top-level directory (so they can't have names like `R/` or `DESCRIPTION`). To refer to files in `inst/extdata` (whether installed or not), use `system.file()`. For example, the [testdat](https://github.com/ropensci/testdat) package uses `inst/extdata` to store a UTF-8 encoded csv file for use in examples:
+원데이터를 적재하고 파싱하는 예제를 보여주려면, 원 파일을 `inst/extdata` 디렉토리에 넣어둔다.
+팩키지가 설치될 때, `inst/` 디렉토리에 있는 모든 파일 (그리고 폴더)은 한단계 올라 최상위 디렉토리로 이동된다
+(그래서 `R/` 혹은 `DESCRIPTION` 같은 명칭을 갖지는 않는다).
+`inst/extdata` 디렉토리에 있는 파일을 참조하려면 (설치여부에 관계없이), `system.file()` 명령어를 사용한다.
+예를 들어, [testdat](https://github.com/ropensci/testdat) 팩키지는 `inst/extdata`를 사용해서 UTF-8 인코딩된 csv 파일로 저장해서 예제로 사용한다:
+
 
 ```{r}
 system.file("extdata", "2012.csv", package = "testdat")
 ```
 
-Beware: if the file does not exist, `system.file()` does not return an error - it just returns the empty string:
+주의: 만약 파일이 존재하지 않으면, `system.file()`은 오류를 반환하지 않는다 - 빈 문자열만 반환한다:
 
 ```{r}
 system.file("extdata", "2010.csv", package = "testdat")
 ```
 
-## Other data {#other-data}
+## 다른 데이터 {#other-data}
 
-* Data for tests: it's ok to put small files directly in your test directory.
-  But remember unit tests are for testing correctness, not performance, so keep
-  the size small.
+* 테스트용 데이터: 테스트 디렉토리에 직접 작은 파일을 넣어두는 것은 괜찮다.
+  하지만, 단위 테스트는 성능이 아니라 정확성을 테스트하는 것이다. 그래서 크기를 작게 유지하라.
   
-* Data for vignettes. If you want to show how to work with an already loaded 
-  dataset, put that data in `data/`. If you want to show how to load raw data, 
-  put that data in `inst/extdata.`
+* 소품문용 데이터: 이미 적재된 데이터셋으로 동작하는 것을 시연하려면, 
+  해당 데이터를 `data/` 디렉토리에 넣어 두어라.
+  만약 원데이터를 적재하는 방법을 시연하려면, 해당 데이터를 `inst/extdata` 디렉토리에 넣어 두어라.
 
-## CRAN notes {#data-cran}
+## CRAN 주의사항 {#data-cran}
 
-Generally, package data should be smaller than a megabyte - if it's larger you'll need to argue for an exemption. This is usually easier to do if the data is in its own package and won't be updated frequently. You should also make sure that the data has been optimally compressed:  
+일반적으로 팩키지 데이터는 1 메가바이트보다 작아야 된다 - 만약 초과한다면, 예외로 인정을 구해야 된다.
+만약 데이터가 자체 팩키지 용도로만 사용되고, 자주 갱신되지 않는다면 대체로 더 쉬울 수 있다.
+데이터가 또한 최적으로 압축되었는지 확실히 해야 된다:
 
-1. Run `tools::checkRdaFiles()` to determine the best compression for each file.
+1. `tools::checkRdaFiles()` 명령어를 실행해서 각 파일마다 최고 수준 압축이 되도록 한다.
 
-2. Re-run `devtools::use_data()` with `compress` set to that optimal value.
-   If you've lost the code for recreating the files, you can use 
-   `tools::resaveRdaFiles()` to re-save in place.
+2. 최적값으로 설정된 `compress`로 `devtools::use_data()` 명령어를 재실행한다.
+   만약 파일을 재생성하는데 코드를 분실했다면, 
+   `tools::resaveRdaFiles()` 명령어로 그 자리에서 다시 저장할 수 있다.
 
+   
