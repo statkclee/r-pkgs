@@ -250,27 +250,36 @@ R로부터 C 함수를 호출하는 방법은 두가지다: `.C()`와 `.Call()`.
 
 ### Getting started with `.Call()`
 
-To call a C function from R, you first need a C function! In an R package, C code lives in `.c` files in `src/`. You'll need to include two header files:
+R로부터 C 함수를 호출하려면, 먼저 C 함수가 필요하다! R 팩키지에서 C 코드는 `src/` 디렉토리에 
+`.c` 파일 형태로 존재한다. 헤더파일 두개를 포함할 필요가 있다.
 
 ```c
 #include <R.h>
 #include <Rinternals.h>
 ```
+(맞습니다. `<Rinternals.h>`을 포함하는 것은 나쁜 형태처럼 보입니다.
+이것에 더해서, 몇가지 추가 플래그 설정을 하지 않으면, 그와 같은 방식으로 "internal" 내부 API에 실제로 접근할 수가 없다. 단지 디폴트 기본만 "public" 내부 API에 접근할 수 있게 하는데 필요하기도 하고 보안을 위해서 
+그렇게 한다. 맞습니다. 이 방법은 혼동을 불러일으키기에 충분하다.)
 
-(Yes, including `<Rinternals.h>` seems like bad form. On top of that, doing so doesn't actually give you access to the "internal" internal API unless you set some additional flags. The default just gives you access to the "public" internal API, which is both necessary and done for safety's sake. Yes, this is confusing.)
+상기 헤더를 통해서 R의 C API에 접근할 수 있다.
+불행하게도, 해당 API는 문서화가 잘 되어있지 않다.
+저자가 작성한 [R's C interface](http://adv-r.had.co.nz/C-interface.html)에 있는 주석으로 시작해보는 것을 추천한다. 그 다음에 "R 확장 작성하기 (Writing R Extensions)"에 있는 "[The R API](http://cran.rstudio.com/doc/manuals/r-devel/R-exts.html#The-R-API)"를 읽어본다. 
+내보내기 함수 일부가 문서화되지 않아서 자세한 사항을 이해하기 위해서 실제 [R 소스코드](https://github.com/wch/r-source)를 읽어볼 필요도 있다.
 
-These headers allow you to access R's C API. Unfortunately this API is not well documented. I'd recommend starting with my notes at [R's C interface](http://adv-r.had.co.nz/C-interface.html). After that, read "[The R API](http://cran.rstudio.com/doc/manuals/r-devel/R-exts.html#The-R-API)" in "Writing R Extensions". A number of exported functions are not documented, so you'll also need to read the [R source code](https://github.com/wch/r-source) to figure out the details.
 
-Here's the bare minimum you need to know: C functions that talk to R must use the `SEXP` type for both inputs and outputs. `SEXP`, short for S expression, is the C struct used to represent every type of object in R. A C function typically starts by converting `SEXP`s to atomic C objects, and ends by converting C objects back to a `SEXP`. (The R API is designed so that these conversions often don't require copying.) The following table lists the functions that convert length one R vectors to and from C scalars:
+여기에 알아야 될 최소 지식을 적어봤다: R과 대화하는 C 함수는 입력과 출력 모두 `SEXP` 자료형을 사용해야 된다.
+S 표현식(S expression)을 간략하게 줄인 `SEXP`는 C 구조체로 R에 있는 모든 객체 자료형을 표현하는데 사용된다.
+일반적으로 C 함수는 `SEXP` 자료형을 (원자, atomic) C 객체로 변환해서 시작해서, C 객체를 다시 `SEXP` 자료형으로 변환해서 끝맺는다. (R API가 설계되서 이와 같은 변환에 복사는 필요하지 않게 되었다.)
+다음 표에 길이가 1인 R 벡터를 C 스칼라로, 혹은 역으로 변환하는 함수 목록이 나와 있다:
 
-R type      | C type      | R -> C            |  C -> R 
-------------|-------------|-------------------|-------------------
-integer     | int         | `asInteger(x)`    | `ScalarInteger(x)`
-numeric     | double      | `asReal(x)`       | `ScalarReal(x)`
-logical     | int         | `asLogical(x)`    | `ScalarLogical(x)`
-character   | const char* | `CHAR(asChar(x))` | `mkString(x)`
+  구분      | R 자료형    | C 자료형    | R -> C            |  C -> R 
+------------|-------------|-------------|-------------------|-------------------
+ 정수형     | integer     | int         | `asInteger(x)`    | `ScalarInteger(x)`
+ 부동소수형 | numeric     | double      | `asReal(x)`       | `ScalarReal(x)`
+ 논리형     | logical     | int         | `asLogical(x)`    | `ScalarLogical(x)`
+ 문자형     | character   | const char* | `CHAR(asChar(x))` | `mkString(x)`
 
-We now have enough information to write a simple C function that can add two numbers:
+이제 두 숫자를 더할 수 있는 간단한 C 함수를 작성할 충분한 정보를 갖게 되었다:
 
 ```c
 #include <R.h>
@@ -286,20 +295,23 @@ SEXP add_(SEXP x_, SEXP y_) {
 }
 ```
 
-We call this from R with `.Call()`: 
+`.Call()` 으로 R로부터 상기 함수를 호출한다.
+
 
 ```{r}
 #' @useDynLib mypackage add_
 add <- function(x, y) .Call(add_, x, y)
 ```
 
-Where does the first argument to `.Call()`, `add_`, come from? It comes from `@useDynLib`, which creates a line in the NAMESPACE that looks like:
+`.Call()` 함수에 첫번째 인자, `add_`는 어디서 왔을까?
+`@useDynLib`에서 왔는데 네임스페이스에 다음과 같은 행을 생성한다:
+
 
 ```
 useDynLib(mypackage, add_)
 ```
 
-This directive instructs R to create an object called `add_` which describes a C function pointer:
+상기 지시어는 R에게 하여금 C 함수 포인터를 기술하는 `add_` 라고 불리는 객체를 생성하게끔 한다:
 
 ```{r, eval = FALSE}
 mypackage:::add_
@@ -315,13 +327,23 @@ mypackage:::add_
 #> [1] "NativeSymbolInfo"
 ```
 
-`.Call()` takes the pointer to a C function and calls it. All R objects have the same C type (the `SEXP`) you need to make sure the arguments are of the type you expect. Either do that in the R function, in the C function, or just accept that R will crash every time you accidentally supply the wrong type of input.
+`.Call()`는 C 함수에 포인터를 받아서 호출한다.
+모든 R 객체는 동일한 C 자료형 (`SEXP`) 을 갖는데 인자가 예상한 자료형이라는 것을 확실히 할 필요가 있다.
+R 함수에서 혹은 C 함수에서도, 우연히 틀린 자료형이 입력값으로 넘겨질 때마다 R이 시스템 충돌로 말미암아 정상 동작하지 못한다는 것을 받아드려라. 
 
-The most complicated part of working with the `.Call()` interface is memory-management. Whenever you create an R-level data structure, you must `PROTECT()` it so the garbage collector doesn't try and free it, then `UNPROTECT()` it at the end of the function. This topic is beyond the scope of this chapter, but you can learn more about it at <http://adv-r.had.co.nz/C-interface.html#c-vectors>.
+`.Call()` 인터페이스를 작업할 때 가장 복잡한 부분이 메모리 관리다.
+R-수준에서 자료구조를 생성할 때마다,
+`PROTECT()` 함수로 보호해서 쓰레기 수집기(garbage collector)가 동작하지 못하게 해야된다. 그리고 나서, 함수 마지막에 `UNPROTECT()` 함수로 보호를 풀어준다.
+이 주제는 이번 장 범위 밖이다. 하지만 <http://adv-r.had.co.nz/C-interface.html#c-vectors>에서 좀더 많은 사항을 학습할 수 있다.
 
-### Getting starting with `.C()`
 
-`.C()` is simpler than `.Call()` and can be useful if you already have standard C code. Since you never create R objects in `.C()`, you never need to worry about memory management. To use it, you first write a void C function, using in-place modification of function parameters to return values:
+### `.C()`으로 시작하기
+
+`.C()`는 `.Call()` 보다 더 단순하다. 만약 표준 C 코드가 있다면 유용할 수 있다.
+`.C()`에 R 객체를 결코 생성할 수 없기 때문에,
+메모리 관리는 걱정할 필요가 전혀 없다.
+`.C()`을 사용하려면, 빈 보이드(void) C 함수를 먼저 작성한다. 값을 반환하기 위해서 함수 매개변수 제자리(inplace) 변형을 사용한다: 
+
 
 ```c
 void add_(double* x, double* y, double* out) {
@@ -329,7 +351,8 @@ void add_(double* x, double* y, double* out) {
 }
 ```
 
-Then like `.Call()` you create an R wrapper:
+그리고 나서, `.Call()` 처럼, R 포장(wrapper)함수를 생성한다:
+
 
 ```{r, eval = FALSE}
 #' @useDynLib mypackage add_
@@ -338,48 +361,69 @@ add <- function(x, y) {
 }
 ```
 
-(Here we extract the 3rd element of the result because that corresponds to the out parameter.)
+(여기서 out 매개변수에 대응되기 때문에 연산결과 세번째 요소를 추출한다.)
 
-`.C()` automatically converts back and forth between R vectors and their C equivalents:
+`.C()`는 자동으로 R 벡터와 상응하는 C 자료형을 왔다갔다 하면서 변환한다:
 
-R type      | C type   
-------------|----------
-logical     | `int*`
-integer     | `int*`
-double	    | `double*`
-character	  | `char**`
-raw	        | `unsigned char*`
 
-Note that `.C()` assumes your function doesn't know how to deal with missing values and will throw an error if any arguments contain an NA. If it can correctly handle missing values, set `NAOK = TRUE` in the call to `.C()`. 
+    구분        |   R 자료형    | C 자료형
+----------------|---------------|----------
+ 논리형         |   logical     | `int*`
+ 정수형         |   integer     | `int*`
+부동소수형      |   double	    | `double*`
+  문자형        |   character   | `char**`
+부호없는 문자형 |   raw	        | `unsigned char*`
 
-You can learn more about `.C()` in its help, `?.C` and in [R-extensions](http://cran.rstudio.com/doc/manuals/r-devel/R-exts.html#Interface-functions-_002eC-and-_002eFortran).
+`.C()`는 함수가 결측값 처리방법을 알지 못한다고 가정해서 만약 특정 인자가 NA를 포함하면 오류를 던지는데 주의한다.
+결측값을 올바르게 처리하려면, `.C()` 호출에 `NAOK = TRUE` 를 설정한다.
 
-### Workflow {#c-workflow}
+`.C()` 관한 더 많은 정보는 `?.C` 도움말과 [R-extensions](http://cran.rstudio.com/doc/manuals/r-devel/R-exts.html#Interface-functions-_002eC-and-_002eFortran)에서 찾을 수 있다.
 
-The usual workflow still applies:
 
-1.  Modify the C code.
-1.  Build and reload the package with Ctrl/Cmd + Shift + B
-1.  Experiment at the console.
+### 작업흐름 {#c-workflow}
 
-The first time you add `@useDynLib`, you'll also need to run `devtools::document()` (Ctrl/Cmd + Shift + D) and reload the package.
+여전히 일반적인 작업흐름이 여기서도 적용된다:
 
-### Exporting C code {#c-export}
+1.  C 코드를 변현한다.
+1.  Ctrl/Cmd + Shift + B 단축키로 팩키지를 빌드하고 다시 적재한다.
+1.  콘솔에서 실험해 나간다.
 
-R packages need to provide DLLs that can be relocated; DLLs that work regardless of where they live on disk. This is because most R users don't build packages from source. Instead, they get binaries from CRAN that can get installed in many different places. This need for relocatable DLLs adds a few more steps to the job of importing and exporting C code for R packages (the same problem arises for C++, but Rcpp attributes automate the manual steps described below). 
+`@useDynLib` 태그를 처음으로 추가할 때, `devtools::document()` (단축키는 Ctrl/Cmd + Shift + D) 명령어도 실행해서 팩키지를 다시 적재할 필요가 있다.
 
-R solves this problem using __function registration__. To export a `.Call()` C function, you register it with `R_RegisterCCallable()`. To import a `.Call()` C function, you get a pointer to it with `R_GetCCallable()`. Similar techniques are available for `.C()` C functions, but are beyond the scope of this book. As we'll see below, a user-friendly package will do both these tasks, so users of the package can ignore the details and simply include a header a file.
 
-[Sidebar: Confusingly, there's another type of function registration. Instead of registering C functions using the namespace (i.e. `@useDynLib pkg fun`), you can register them with `R_registerRoutines()` and `@useDynLib mypackage, .registration = TRUE`. To learn the details read [Registering native extensions](http://cran.r-project.org/doc/manuals/R-exts.html#Registering-native-routines) in "Writing R extensions".]
+### C 코드 내보내기 {#c-export}
 
-To register a function, call `R_RegisterCCallable()`, defined in `<R_ext/Rdynload.h>`. Function registration should be done in a function called `R_init_<mypackage>`. This function is called automatically when the "mypackage" DLL is loaded. `R_RegisterCCallable()` has three arguments:
+R 팩키지는 재배치(relocate)될 수 있는 DLLs을 제공할 필요가 있다: 하드디스크 위치에 관계없이 동작하는 DLLs.
+이유는 R 사용자 대부분이 소스코드에서 팩키지를 빌드하지는 않기 때문이다.
+대신에, 사용자는 통상 다양한 장소에서 설치될 수 있는 바이너리를 CRAN에서 얻는다.
+재배치될 수 있는 DLLs에 대한 필요로 말미암아 R 팩키지에 C 코드를 가져오고 내보내기하는 작업에 몇 단계가 추가된다
+(동일한 문제가 C++에도 발생하지만, Rcpp 속성을 통해서 다음에 기술되는 수작업 단계를 자동화한다).
 
-* A pointer to the DLL.
-* The name of the function.
-* A pointer to the function, cast as `DL_FUNC` (i.e. a **d**ynamically 
-  **l**oaded **func**tion).
 
-The following code registers the `add()` function defined above:
+__함수등록(function registration)__을 사용해서 R에서는 이 문제를 해결한다.
+`.Call()` C 함수를 내보내려면, `R_RegisterCCallable()` 명령어로 함수를 등록한다.
+`.Call()` C 함수를 가져오려면, `R_GetCCallable()` 명령어로 해당하는 포인터를 가져온다.
+유사한 기법이 `.C()` C 함수에도 가능하지만, 이 책 범위를 벗어난다.
+다음에 살펴보듯이, 사용자 친화적인 팩키지는 이런 작업을 모두 수행한다. 그래서,
+세부사항을 팩키지 사용자는 무시하고 넘어갈 수 있고 단지 헤더 파일만 포함한다.
+
+
+[관련 기사: 혼동스럽게도, 또다른 유형의 함수 등록이 있다.
+네임스페이스를 사용해서 C 함수를 등록(예를 들어, `@useDynLib pkg fun`)하는 대신에, 
+C 함수를 `R_registerRoutines()`와 `@useDynLib mypackage, .registration = TRUE`으로 등록할 수 있다.
+자세한 사항을 학습하기 위해서 "R 확장 작성하기 (Writing R extensions)"에 나와있는 [Registering native extensions](http://cran.r-project.org/doc/manuals/R-exts.html#Registering-native-routines)을 읽어본다.
+
+
+함수를 등록하려면, `<R_ext/Rdynload.h>`에 정의된 `R_RegisterCCallable()`을 호출한다.
+함수등록은 `R_init_<mypackage>`로 불리는 함수에서 수행되어야 된다.
+작성중인 "mypackage" DLL이 적재될 때 이 함수가 자동으로 호출된다.
+`R_RegisterCCallable()`는 인자가 세개 있다:
+
+* DLL을 향한 포인터
+* 함수 명칭
+* `DL_FUNC`(즉, **d**ynamically **l**oaded **func**tion)으로 자료형 변환되는 함수를 향한 포인터. 
+
+다음 코드는 위에서 정의한 `add()` 함수를 등록한다:
 
 ```c
 #include "add.h"
@@ -390,9 +434,11 @@ void R_init_mypackage(DllInfo *info) {
 }
 ```
 
-It doesn't matter where this code lives, but it's usually put in a file called `src/mypackage-init.c`. 
+상기 코드 위치는 문제되지 않지만, 일반적으로 `src/mypackage-init.c` 라는 파일에 넣어둔다.
 
-To access a registered function from another package, call `R_GetCCallable()`. It has two arguments, the function name and the package name. It returns a function pointer. The function pointer has no type information, so it should always be wrapped in a helper function that defines the inputs:
+또다른 팩키지로부터 등록된 함수에 접근하려면, `R_GetCCallable()` 함수를 호출한다.
+함수명칭과 팩키지 명칭, 인자를 두개 갖고, 함수 포인터를 반환한다.
+함수 포인터는 자료형에 대한 정보가 없다. 그래서, 입력값을 정의하는 도움말 함수에 항상 포장되어 감싸져야(wrap)만 된다:
 
 ```c
 #include <R_ext/Rdynload.h>
@@ -407,9 +453,14 @@ SEXP add_(SEXP x, SEXP y) {
 }
 ```
 
-Rather than relying on each package that imports your C code to do this correctly, you should instead do it for them. Write `inst/include/mypackageAPI.h` which provides a wrapper function for each exported function. A popular package that does that is [xts](http://cran.r-project.org/web/packages/xts/). Download the source package and look in the `include/` directory to see what it does.
+이 작업을 올바르게 수행하도록 작성한 C 코드를 가져오는 각 팩키지에 의존하기 보다,
+대신에 그 작업을 수행해야 한다.
+가져온 각 함수에 포장 함수(wrapper function)를 제공하는 `inst/include/mypackageAPI.h` 파일을 작성한다.
+이 작업을 수행하는 대중적인 팩키지가 [xts](http://cran.r-project.org/web/packages/xts/)다.
+소스코드 팩키지를 다운로드해서 무슨 작업을 수행하는지 `include/` 디렉토리 내부를 들여다 보라.
 
-### Importing C code {#c-import}
+
+### C 코드 가져오기 {#c-import}
 
 Using C code from another package varies based on how the package is implemented:
 
