@@ -6,31 +6,37 @@ output: bookdown::html_chapter
 
 # 컴파일된 코드 {#src}
 
-고급, 표현 언어가 R이다. 하지만, 이러한 풍부한 표현성이 공짜로 오는 것은 아니다: 속도.
+고급, 표현 언어가 R이다. 하지만, 이러한 풍부한 표현성이 공짜로 오는 것은 아니라 댓가가 있다: 속도. 이것이 C 나 C++같은 저수준 컴파일 언어로 R 코드를 강력하게 보완하는 이유다.
+C 와 C++ 언어로 동일한 문제를 해결하려면 더 많은 코드와 더 깊은 사고력을 필요하지만,
+R보다 몇자리수가 더 빠르다.
 
-
-R is high-level, expressive language. But that expressivity comes at a price: speed. That's why incorporating a low-level, compiled language like C or C++ can powerfully complement your R code. While C and C++ often require more lines of code (and more careful thought) to solve the same problem, they can be orders of magnitude faster than R. 
-
-Unfortunately, teaching you how to program in C or C++ is beyond the scope of the book. If you'd like to learn, I recommend starting with C++ and the Rcpp package. Rcpp makes it easy to connect C++ to R. I'd also recommend using RStudio because it has many tools that facilitate the entire process. Start by reading my ["High performance functions with Rcpp"](http://adv-r.had.co.nz/Rcpp.html), a freely available book chapter from [Advanced R](http://amzn.com/1466586966?tag=devtools-20): it gently introduces the language by translating examples of familiar R code into C++. Next, check out the [Rcpp book](http://www.rcpp.org/book) and the other resources listed in [learning more](http://adv-r.had.co.nz/Rcpp.html#rcpp-more).
+불행하게도, C나 C++로 프로그램을 작성하는 방법을 가르치는 것은 이번 책 범위 밖이다.
+만약 학습하고자 한다면, 저자는 C++와 Rcpp 팩키지로 시작하는 것을 추천한다.
+Rcpp를 통해서 쉽게 C++와 R을 연결할 수 있다.
+RStudio를 저자는 추천하는데 이유는 전체 과정을 원활히하는 많은 도구를 지원하기 때문이다. 
+저자가 집필한 무료로 이용가능한 [고급 R (Advanced R)](http://amzn.com/1466586966?tag=devtools-20)에서 ["High performance functions with Rcpp"](http://adv-r.had.co.nz/Rcpp.html) 장으로 시작하라: 
+친숙한 R 코드를 C++ 코드로 변환하면서 부드럽게 언어를 소개한다.
+다음으로 [Rcpp book](http://www.rcpp.org/book)와 [learning more](http://adv-r.had.co.nz/Rcpp.html#rcpp-more)에 등재된 다른 참고서를 학습해 나간다.
 
 ## C++ {#cpp}
 
-To set up your package with Rcpp, run:
+Rcpp로 작성한 팩키지 환경설정을 하려면, 다음을 실행한다:
 
 ```{r, eval = FALSE}
 devtools::use_rcpp()
 ```
 
-This will:
+상기 명령어 실행결과는 다음과 같다:
 
-* Create a `src/` directory to hold your `.cpp` files.
 
-* Add `Rcpp` to the `LinkingTo` and `Imports` fields in the `DESCRIPTION`.
+* 작성한 `.cpp` 파일을 보관할 `src/` 디렉토리를 생성한다.
 
-* Set up a `.gitignore` file to make sure you don't accidentally check in
-  any compiled files (learn more about this in [git](#git)).
+* `DESCRIPTION` 파일에 `LinkingTo` 와 `Imports` 필드에 `Rcpp`를 추가한다.
 
-* Tell you the two roxygen tags you need to add to your package:
+* `.gitignore` 파일에 환경설정해서 실수로 컴파일된 코드가 말아올려져
+  체크인(check-in)되지 않도록 확실히 한다 ([git](#git)에서 자세한 사항 학습예정).
+
+* 작성한 팩키지에 추가할 필요가 있는 roxygen 태그 2개를 알려준다:
 
     ```{r}
     #' @useDynLib your-package-name
@@ -38,17 +44,17 @@ This will:
     NULL
     ```
 
-### Workflow {#cpp-workflow}
+### 작업흐름 {#cpp-workflow}
 
-Once you're set up, the basic workflow should now be familiar:
+설정을 마치면, 이제는 기본 작업흐름이 친숙할 것이다:
 
-1.  Create a new C++ file:
+1.  신규 C++ 파일을 생성한다:
 
     ```{r, echo = FALSE}
     bookdown::embed_png("screenshots/new-cpp.png", dpi = 220)
     ```
 
-    The default template looks like this:
+    디폴트 기본 템플릿은 다음과 같다:
     
     ```cpp
     #include <Rcpp.h>
@@ -66,37 +72,39 @@ Once you're set up, the basic workflow should now be familiar:
     }
     ```
     
-    It includes a basic function and some instructions to get started. The
-    two most important parts are the header `#includes`, and the special
-    attribute `// [[Rcpp::export]]`.
+    기본함수와 시작에 필요한 기본 안내지침을 포함되어 있다.
+    가장 중요한 두 부분은 헤더 `#includes`와 특수 속성 `// [[Rcpp::export]]`이다.
 
-1.  Generate the necessary modifications to your `NAMESPACE` by documenting
-    them with Ctrl/Cmd + Shift + D.
+1. Ctrl/Cmd + Shift + D 단축키를 눌러 문서화해서 `NAMESPACE`에 필요한 변경사항을 생성한다.
 
-1.  Click Build & Reload in the build pane, or press Ctrl/Cmd + Shift + B. You can
-    continue to use the standard `devtools::load_all()` process but it is more
-    risky. Because you're loading and unloading C code, the chances of 
-    corrupting memory are high, and you're better off with the safer, but
-    slower, "Build & Reload" which installs the package then restarts R.
+1.  빌드 창에서 `Build & Reload`을 클릭하거나, Ctrl/Cmd + Shift + B 단축키를 누른다.
+    표준 `devtools::load_all()` 명령어를 사용해서 계속할 수 있지만 더 위험하다.
+    C 코드를 메모리에 적재해서 올리고 내리기 때문에 메모리를 손상시킬 가능성이 높다.
+    그리고 `safer`로 나아질 수는 있지만 느리다. 
+    왜냐하면, "Build & Reload"은 팩키지를 설치하고 나서 R을 다시 시작하기 때문이다.
 
-1.  Run `timesTwo(10)` from the console to check that it works.
+1.  콘솔에서 `timesTwo(10)`을 실행해서 정상적으로 동작되는지 확인하라.
 
-Behind the scenes, "Build and reload" is doing a lot of work for you. They:
+무대뒤에서, "Build and reload"는 개발자를 위해서 엄청난 작업을 수행한다:
 
-* Set up your R environment to compile code and warn you if you're missing 
-  necessary pieces.
-  
-* Call `Rcpp::compileAttributes()`. This inspects your `.cpp` functions 
-  looking for __attributes__ of the form `// [[Rcpp::export]]`. When it finds 
-  one, it generates the code needed to make the function available in 
-  R, and creates `src/RcppExports.cpp` and `R/RcppExports.R`. You should never 
-  modify these files by hand.
-  
-* Build a DLL (dynamically linked library) and make it available to R.
 
-### Documentation {#cpp-man}
+* 코드를 컴파일하는데 필요한 R 환경을 설정하고, 
+  만약 필요한 부분을 놓쳤다면 경고를 준다.
 
-Each exported C++ function automatically gets a wrapper function (it will be located in `R/RcppExports.R`). For example, the R `timesTwo()` function looks like:
+
+* `Rcpp::compileAttributes()`을 호출한다. `.cpp` 함수를 점검해서 
+  `// [[Rcpp::export]]` 양식에서 __속성(attributes)__을 찾는다.
+  속성을 찾게되면, R 에서 코드를 생성해서 함수를 이용가능하게 만들고,
+  `src/RcppExports.cpp`와 `R/RcppExports.R` 파일을 생성한다.
+  절대로 수작업으로 이런 파일을 변경해서는 안된다.
+
+
+* DLL (dynamically linked library, 동적 링크 라이브러리)를 빌드해서 R에서 이용가능하게 만든다.
+
+
+### 문서화 {#cpp-man}
+
+각기 내보내진 C++ 함수는 자동으로 포장함수(wrapper function)를 얻는다 (`R/RcppExports.R`에 위치한다). 예를 들어, R `timesTwo()` 함수는 다음과 같이 생겼다:
 
 ```{r}
 timesTwo <- function(x) {
@@ -104,7 +112,9 @@ timesTwo <- function(x) {
 }
 ```
 
-This uses the base function `.Call()` to execute the C function `timesTwo` provided by "mypackage". You can use roxygen2 to document this like a regular R function. But instead of using `#'` for comments use `//'`, the C++ convention:
+`.Call()` 기저 함수 (base function)을 사용해서 작성한 팩키지 `timesTwo` C 함수를 실행한다.
+roxygen2를 사용해서 정규 R 함수처럼 문서화할 수 있다.
+하지만, 주석으로 `#'`을 사용하는 대신에 C++에서 관례로 사용되는 `//'`을 사용한다:
 
 ```cpp
 //' Multiply a number by two
@@ -117,7 +127,7 @@ int timesTwo(int x) {
 }
 ```
 
-That generates roxygen comments in `R/RcppExports.R`:
+상기 실행결과는 `R/RcppExports.R` 파일에 roxygen 주석을 생성한다:
 
 ```{r}
 #' Multiply a number by two
@@ -129,62 +139,70 @@ timesTwo <- function(x) {
 }
 ```
 
-The distinctions between the two export directives is important:
+두 내보내기 지시어 간에 차이점은 중요하다:
 
-* `[[Rcpp::export]]` makes the C++ function available to R. If you have
-  trouble remembering the exact details, note that everything comes in 
-  twos: Two `/`, two `[`, two `:` and two `]`.
 
-* `@export` makes the R wrapper function available outside your package by
-  adding it to the `NAMESPACE`.
+* `[[Rcpp::export]]`은 R에 C++ 함수를 이용가능하게 한다. 
+  만약 정확한 세부사항을 기억하는데 어려움이 있다면, 
+  모든 것이 twos에 온다는데 주목한다: Two `/`, two `[`, two `:` and two `]`.
 
-### Exporting C++ code {#cpp-export}
+* `NAMESPACE` 파일에 `@export` 태그를 추가해서 작성한 팩키지 외부에 R 포장함수를 
+  이용할 수 있게 만든다.
 
-To make your C++ code callable from C++ code in other packages, add:
+### C++ 코드 내보내기 {#cpp-export}
+
+다른 팩키지에서 있는 C++ 코드로부터 C++ 코드를 호출할 수 있게 만들려면, 
+다음을 추가한다:
+
 
 ```cpp
 // [[Rcpp::interfaces(r, cpp)]]
 ```
 
-This will generate a header file, `inst/include/mypackage.h` that can be included by other packages (The low-level details are described in [Exporting C code]{#c-export}). See "[Rcpp Attributes](http://dirk.eddelbuettel.com/code/rcpp/Rcpp-attributes.pdf)" for more details, including how to combine hand-written and automatically generated header files.
+상기 명령어는 다른 팩키지에 포함될 수 있는 헤더파일, `inst/include/mypackage.h`을 생성한다 (저수준 상세내용은 [Exporting C code]{#c-export}에 기술되어 있다).
+수작업을 작성한 헤더파일과 자동으로 생성된 헤더파일을 조합하는 방법을 포함한 보다 상세한 내용은 "[Rcpp Attributes](http://dirk.eddelbuettel.com/code/rcpp/Rcpp-attributes.pdf)"을 참조한다.
 
-### Importing C++ code {#cpp-import}
+### C++ 코드 가져오기 {#cpp-import}
 
-To use C++ code from another package:
+또다른 팩키지로부터 C++ 코드를 사용하기 위해서는:
 
-1. In `DESCRIPTION`, add `LinkingTo: otherPackage`. Confusingly this has nothing
-   to do with the linker. It's called `LinkingTo` because it adds 
-   `otherPackage/include` to the include path, allowing you to dynamically
-   "link to" other code via the headers.
 
-1. In the C++ file, add:
+1. `DESCRIPTION` 파일에 `LinkingTo: otherPackage`을 추가한다.
+  혼동스럽게도 링커(linker)와 아무 관련이 없다.
+  `LinkingTo`라고 불리는 이유는 경로에 `otherPackage/include`를 추가해서
+  동적으로 헤더를 통해 다른 코드에 "링크(link to)"되도록 하기 때문이다.
+
+1. C++ 파일에 다음을 추가한다:
 
     ```cpp
     #include <otherPackage.h>
     ```
 
-1. C++ functions from otherPackage will be included in the `otherPackage`
-   namespace. Use `otherPackage::foo()` to access functions, or make 
-   them available globally with `using namespace otherPackage`.
+1. 다른 팩키지(otherPackage)에 있는 C++ 함수가 `otherPackage` 네임스페이스에 포함된다.
+   함수에 접근하려면, `otherPackage::foo()`을 사용하거나, 
+   `using namespace otherPackage` 명령어로 전역에서 이용할 수 있게 만든다.
 
-### Best practices {#cpp-best-practices}
+### 모범사례 (Best practices) {#cpp-best-practices}
 
-* To print output use `Rcout << ...` (not `cout << ...`). This prints to 
-  the right place, which might be a GUI console or a file (if `sink()` 
-  is active)
+* 출력결과를 출력하려면 (`cout << ...`이 아닌) `Rcout << ...`을 사용하라.
+  GUI 콘솔 혹은 (만약 `sink()`가 활성화되었다면) 파일에, 이것을 통해 
+  올바른 위치에 출력한다.
 
-* In long-running loops, regularly run `Rcpp::checkUserInterrupt()`. This 
-  aborts your C++ if the user has pressed Ctrl + C or Escape in R.
 
-* Use `.h` extension for headers and include files. (If you don't
-  `R CMD check` will complain).
-  
-* Follow Martyn Plummer's recommendations on 
-  [Portable C++ for R packages](http://journal.r-project.org/archive/2011-2/RJournal_2011-2_Plummer.pdf).
+* 오랜 시간이 걸리는 반복 루프(loop)에 대해서, 
+  정기적으로 `Rcpp::checkUserInterrupt()`을 실행한다.
+  이른 통해서 사용자가 Ctrl + C 단축키를 누르게 되면 C++ 실행을
+  중단하거나 R에서 빠져나오게 한다.
 
-* Whenever you use C++ code in your package, you need to clean up after 
-  yourself when your package is unloaded. Do this by writing a `.onUnload()` 
-  function that unloads the DLL:
+* 헤더에 `.h` 확장자를 사용하고 파일에 포함하라.
+  (만약 그렇지 않으면, `R CMD check` 명령어를 실행하면 불평이 터져 나온다).
+
+* [R 팩키지를 위한 이식성 높은 C++ (Portable C++ for R packages)](http://journal.r-project.org/archive/2011-2/RJournal_2011-2_Plummer.pdf)에 나오는 마틴 플러머(Martyn Plummer) 권장사항을 따른다.
+
+* 적성한 팩키지에서 C++ 코드를 사용할 때마다, 
+  팩키지를 적재하지 않고 내릴 때 본인 스스로 청소를 할 필요가 있다.
+  DLL 파일을 적재하지 않고 내리는 `.onUnload()` 함수를 작성해서 해당 작업을 수행한다:
+
 
     ```{r}
     .onUnload <- function (libpath) {
@@ -192,20 +210,21 @@ To use C++ code from another package:
     }
     ```
 
-* Use `clang` instead of `gcc` to compile your C++ code: it gives much 
-  better error messages. You can make `clang` the default by creating a
-  `.R/Makevars` (linux and mac) or `.R/Makevars.win` (windows) file in 
-  your home directory that contains:
+* C++ 코드를 컴파일하는데 `gcc` 대신에 `clang`을 사용한다:
+  이유는 훨씬 더 좋은 오류 메시지를 전달한다.
+  홈디렉토리에 다음을 포함하는 파일을 리눅스와 맥에서는 `.R/Makevars` (linux and mac),
+  윈도우에서는 `.R/Makevars.win` 이름으로 생성해서 `clang`을 디폴트 기본설정한다:
+
 
     ```bash
     CXX=clang++
     ```
     
-    (If you don't know where your home directory is `path.expand("~")` will
-    tell you.)
+    (만약 본인 홈디렉토리를 알지 못한다면, `path.expand("~")` 명령어를 통해서
+    확인할 수 있다.)
 
-* To speed up compilation on linux or mac, install `ccache`, then replace 
-  `~/.R/Makevars` with:
+* 리눅스 혹은 맥에서 컴파일 속도를 높이기 위해서 `ccache`를 설치하고 나서,
+  `~/.R/Makevars` 파일을 다음으로 대체한다. 
 
     ```bash
     CC=ccache clang -Qunused-arguments
@@ -215,12 +234,19 @@ To use C++ code from another package:
 
 ## C {#clang}
 
-If you're writing new compiled code, it's almost always better to use Rcpp. It's less work, more consistent, better documented, and it has better tools. However, there are some reasons to choose C:
+만약 신규로 컴파일된 코드를 작성하려면, Rcpp를 사용하는 것이 거의 항상 더 낫다.
+이유는 더 적은 작업과, 더 일관성을 갖고, 문서화도 더 잘 되고, 더 좋은 도구도 있기 때문이다. 하지만, C를 선택해야되는 사유가 몇가지 있다:
 
-* You're working with an older package that already uses the C API.
-* You're binding to an existing C library.
 
-There are two ways to call C functions from R: `.C()` and `.Call()`. `.C()` is a quick and dirty way to call an C function that doesn't know anything about R because `.C()` automatically converts between R vectors and the corresponding C types. `.Call()` is more flexible, but more work: your C function needs to use the R API to convert its inputs to standard C data types.
+* 이미 C API를 사용하고 있는 이전 팩키지를 가지고 작업할 때.
+* 기존 C 라이브러리에 바인딩될 때.
+
+R로부터 C 함수를 호출하는 방법은 두가지다: `.C()`와 `.Call()`.
+`.C()`는 R에 관해 어떤 것도 알지못하는 C 함수를 호출하는 약식으로 간편한 방식이다. 
+왜냐하면 `.C()`를 통해 R 벡터를 자동으로 해당 C 자료형으로 전환하기 때문이다.
+`.Call()`은 좀더 유연하지만, 조금더 작업이 요구된다: 
+작성한 C 함수가 R API를 사용해서 입력값을 표준 C 자료형으로 전환한다.
+
 
 ### Getting started with `.Call()`
 
