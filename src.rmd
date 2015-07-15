@@ -191,7 +191,7 @@ timesTwo <- function(x) {
 
 * 오랜 시간이 걸리는 반복 루프(loop)에 대해서, 
   정기적으로 `Rcpp::checkUserInterrupt()`을 실행한다.
-  이른 통해서 사용자가 Ctrl + C 단축키를 누르게 되면 C++ 실행을
+  이를 통해서 사용자가 Ctrl + C 단축키를 누르게 되면 C++ 실행을
   중단하거나 R에서 빠져나오게 한다.
 
 * 헤더에 `.h` 확장자를 사용하고 파일에 포함하라.
@@ -462,45 +462,52 @@ SEXP add_(SEXP x, SEXP y) {
 
 ### C 코드 가져오기 {#c-import}
 
-Using C code from another package varies based on how the package is implemented:
+팩키지 구현 방식에 따라 또다른 팩키지로부터 C 코드를 사용방법은 다양하다: 
 
-* If it uses the system described above, all you need is `LinkingTo: otherPackage` 
-  in the `DESCRIPTION`, and `#include otherPackageAPI.h` in the C file. (Remember 
-  `LinkingTo` is not about the linker, but actually affects the include path).
-   
-* If it registers the functions, but doesn't provide a header file, you'll
-  need to write the wrapper yourself. Since you're not using any header
-  files from the package, use `Imports` and not `LinkingTo`. You also need to 
-  make sure the package is loaded. You can do this by importing any function 
-  with `@importFrom mypackage foo`, or by adding `requireNamespace("mypackage", 
-  quietly = TRUE)` to `.onLoad()`.
-  
-* If it doesn't register the functions, you can't use them. You'll have to
-  ask the maintainer nicely or even provide a pull request.
 
-### Best practices {#c-best-practices}
+* 만약 상기 기술된 시스템을 사용한다면, 필요한 모든 것은 `DESCRIPTION` 파일에 
+  `LinkingTo: otherPackage`와 C 파일에 `#include otherPackageAPI.h`가 전부다.
+  (기억할 점은 `LinkingTo`은 링커(linker)에 관한 것이 아니라
+  실질적으로 포함 경로(include path)에 영향을 준다).
 
-* Avoid calls to `assert()`, `abort()` and `exit()`: these will kill the 
-  R process, not just your C code. Instead, use `error()` which is 
-  equivalent to calling `stop()` in R.
+* 만약 함수를 등록만하고 헤더 파일은 제공하지 않는다면,
+  포장함수(wrapper)는 직접 작성해야 한다.
+  팩키지에서 어떤 헤더 파일도 사용하지 않기 때문에,
+  `LinkingTo`말고, `Imports`를 사용하라.
+  또한 팩키지가 적재되었는지도 확실히 할 필요가 있다.
+  `@importFrom mypackage foo`로 임의 함수를 가져오거나,
+  `.onLoad()`에 `requireNamespace("mypackage", quietly = TRUE)`를 추가해서 구현할 수 있다.
 
-* To print output use `Rprintf()`, not `printf()`. Doing so always prints to 
-  the right place, whether it's the GUI console or a file (if `sink()` is 
-  active).
+* 만약 함수를 등록하지 않았다면, 함수를 사용할 수는 없다.
+  유지보수 관리자에게 정중하게 요청하거나, 심지어 풀 요청(pull request)을 보내야 한다.
 
-* In long-running loops, regularly call `R_CheckUserInterrupt()` to allow
-  the user to interrupt the C code.
 
-* Don't use C's random number generators (like `rand()` or `random()`), 
-  instead use the C API to R's rngs: `unif_rand()`, `norm_rand()`, etc. 
-  Note the caveats in ["Random number generation"](http://cran.rstudio.com/doc/manuals/r-devel/R-exts.html#Random-numbers) - you must call `GetRNGstate()` before and 
-  `PutRNGstate()` after.
+### 모범사례 (Best practices) {#c-best-practices}
 
-* Use R macros `ISNAN(x)` and `R_FINITE(x)` to check for NaNs and infinite
-  values. These work on more platforms than the C99 `isnan()` and `isfinite()`.
 
-* Like with C++, whenever you use C code in your package, you should unload the 
-  DLL when the package is unloaded:
+* `assert()`, `abort()`, `exit()`에 호출을 피하라:
+  이 함수들은 작성한 C 코드만 죽이는 것이 아니라, R 프로세스도 죽인다.
+  대신에, R 에서 `stop()`을 호출하는 것과 대응되는 `error()`를 사용한다.
+
+* 출력결과를 출력하는데는 `printf()` 말고, `Rprintf()`를 사용하라.
+  GUI 콘솔 혹은 (만약 `sink()`가 활성화되었다면) 파일에, 이것을 통해 
+  올바른 위치에 출력한다.
+
+* * 오랜 시간이 걸리는 반복 루프(loop)에 대해서, 
+  정기적으로 `R_CheckUserInterrupt()`을 실행한다.
+  이를 통해서 사용자가 C 코드를 중간에 끼어들어 중단하게 인터럽트(interrupt)를 걸 수 있게 한다.
+
+* C 난수생성기(예를 들어, `rand()` 혹은 `random()`)는 사용하지 마라.
+  대신에 R 난수생성기에 대응하는 C API를 사용한다: `unif_rand()`, `norm_rand()` 등등.
+  ["난수생성기(Random number generation)"](http://cran.rstudio.com/doc/manuals/r-devel/R-exts.html#Random-numbers)에 주의사항에 주목한다 -
+  사용하기 전에 `GetRNGstate()` 함수를 호출하고, 사용한 뒤에 `PutRNGstate()`을 호출한다.
+
+* R 매크로 `ISNAN(x)` 와 `R_FINITE(x)`을 사용해서 결측값(NaNs)과 무한값을 점검한다.
+  C99 `isnan()`와 `isfinite()` 보다 더 많은 플랫폼에서 동작한다.
+
+* C++ 처럼, 작성한 팩키지에서 C 코드를 사용할 때마다, 팩키지를 메모리에서 내릴 때(unload), 
+  DLL도 함께 내려야 된다:
+
 
     ```{r}
     .onUnload <- function (libpath) {
@@ -508,19 +515,21 @@ Using C code from another package varies based on how the package is implemented
     }
     ```
 
-* Use `clang` instead of `gcc` to compile your C code: it gives much 
-  better error messages. You can make `clang` the default by creating a
-  `~/.R/Makevars` that contains:
+* * C 코드를 컴파일하는데 `gcc` 대신에 `clang`을 사용한다:
+  이유는 훨씬 더 좋은 오류 메시지를 전달한다.
+  홈디렉토리에 다음을 포함하는 `.R/Makevars` 파일을 생성해서 `clang`을 디폴트 기본설정한다:
 
     ```bash
     C=clang
     ```
 
-## Debugging compiled code {#src-debugging}
+## 컴파일된 코드 디버깅 {#src-debugging}
 
-It's possible, with a little extra work, to use an interactive debugger to debug your C/C++ in the same way that you can use `browser()` and `debug()` to debug your R code. Unfortunately you won't be able to use RStudio, you'll have to run R from the command line. 
+약간의 추가 노력으로 R 코드를 `browser()`, `debug()`를 사용해서 디버그하는 것과 동일한 방식으로,
+작성한 C/C++ 코드를 디버그하는데 인터랙티브 디버거를 사용하는 것도 가능하다.
+불행하게도 RStudio를 사용할 수는 없다. 명령라인 인터페이스에서 R을 실행해서 디버깅해야 한다.
 
-Open a shell (e.g. with Tools | Shell...) and start R by typing:
+쉘을 열고 (예를 들어, Tools | Shell...), 다음을 실행해서 R을 시작한다:
 
 ```bash
 # If you compile with clang
@@ -529,11 +538,18 @@ R --debugger=lldb
 R --debugger=gdb
 ```
 
-This will start either [lldb](http://lldb.llvm.org) or [gdb](http://www.gnu.org/software/gdb/), the debuggers that work with code produced by `clang` or `gcc` respectively. Like R, `lldb` and `gdb` provide a REPL, a run-eval-print loop where you enter commands and then look at the results. In the examples below I'll show the results of `lldb`, which is what I use (the output from `gdb` is similar). For each interactive command I'll tell you the explicit, but long, `lldb` command and the short, but cryptic, `gdb` command. Because `lldb` understand all `gdb` commands, you can use choose to be explicit of terse.
+상기 명령어는 각각 `clang` 혹은 `gcc`으로 생성된 코드로 동작되는 디버거, [lldb](http://lldb.llvm.org) 혹은 [gdb](http://www.gnu.org/software/gdb/)를 시작시킨다.
+R과 마찬가지로, `lldb`와 `gdb` 모두 실행-평가-출력 루프(Run-Eval-Print-Loop), REPL 기능을 제공한다.
+따라서, 명령어를 입력하고 결과를 살펴보는 과정을 반복할 수 있다.
+다음 예제에서 `lldb` 실행결과를 보여주는데, 저자가 직접 사용한 사례다 (`gdb` 출력결과도 유사하다).
+각 인터랙티브 명령에 대해서 명시적이지만, 장문인 `lldb` 명령어와 짧지만 암호스러운 `gdb` 명령을 함께 보여줄 것이다.
+`lldb`가 모든 `gdb` 명령어를 이해하기 때문에, 명백히 간결한 것을 골라 사용할 수 있다.
 
-Once you've started the debugger, start R by typing `process start` (lldb) or `run` (gdb). Now when your C/C++ code crashes you'll be dumped into an interactive debugger instead of getting a cryptic error message and a crash. 
+디버거를 사용하려면, `process start` (lldb) 혹은 `run` (gdb) 명령어를 타이핑해서 R을 시작한다.
+지금부터 C/C++ 코드가 크래쉬(crash)하면, 암호화된 오류 메시지와 크래쉬 보고서를 살펴보는 대신에,
+인터랙티브 디버거에 맡기면 된다.
 
-Let's start with a simple C++ function that writes to memory it doesn't "own":
+"소유하지" 않는 메모리에 정보를 쓰는 간단한 C++ 함수로 시작해 보자:
 
 ```{r, eval = FALSE}
 Rcpp::cppFunction("
@@ -547,8 +563,9 @@ bool mistake() {
 mistake()
 ```
 
-
-Use `devtools::load_all()` to load the current package. Then copy and paste the code that creates the bug. Here's a crash report from a package I was working on:
+`devtools::load_all()`을 사용해서 현재 팩키지를 적재한다.
+그리고 나서, 버그 생성 코드를 복사해서 붙여넣는다.
+저자가 작업한 팩키지에서 나온 크래쉬 보고서가 다음에 나와 있다:
 
 ```
 Process 32743 stopped
@@ -563,119 +580,143 @@ Process 32743 stopped
    57
 ```
 
-It tells us that the crash occurred because of a `EXC_BAD_ACCESS` - this is one of the most common types of crash in C/C++ code. Helpfully, lldb shows exactly which line of C++ code caused the problem: `vw-distance.cpp:54`. Often just knowing where the problem occurs is enough to fix it. But we're also now at an interactive prompt. There are many commands you can run here to explore what's going on. The most useful are listed below:
+상기 보고서에 `EXC_BAD_ACCESS` 때문에 크래쉬가 발생했다고 나와 있다 -
+C/C++ 코드에서 가장 흔한 크래쉬 유형중 하나다.
+도움이 되는 점은 `lldb`가 정확하게 C++ 몇번 줄에서 문제가 발생했는지 보여준다: `vw-distance.cpp:54`.
+종종 문제가 발생한 위치만 아는 것으로 오류를 고치는 것이 충분하다.
+하지만, 지금 인터랙티브 프롬프트 상에 있기도 하다.
+많은 명령어를 실행해서 무슨 일이 진행되고 있는지 탐색하는 것도 가능하다.
+가장 유용한 명령어가 다음 목록에 나와 있다:
 
-* See a list of all commands: `help`.
+* 모든 명령어 목록을 살펴본다: `help`.
 
-* Show your location on the callstack with `thread backtrace`/`bt`. This
-  will print a list of calls leading up to the error, much like `traceback()`
-  does in R. Navigate the callstack with `frame select <n>`/`frame <n>`, or 
-  `up` and `down`.
+* `thread backtrace`/`bt` 를 통해서 콜스택에 작성중인 코드 위치가 나와 있다.
+  R에서 `traceback()`과 유사하게, 오류까지 이르게 한 호출 목록을 출력한다.
+  `frame select <n>`/`frame <n>`, `up`, `down` 으로 콜스택을 탐색한다.
+  
+* `thread step-over`/`next` 를 통해서 다음 표현식을 평가하거나, 
+  `thread step-in`/`step`으로 내부로 들어가 본다.
+  `thread step-out`/`finish`를 통해서 나머지 코드를 실행을 계속한다.
 
-* Evaluate the next expression with `thread step-over`/`next`, or step into it
-  with `thread step-in`/`step`. Continue executing the rest of the code with
-  `thread step-out`/`finish`
+* `frame variable`/ `info locals` 를 통해서 현재 프레임에 정의된 모든 변수를 살펴본다.
+  혹은 `frame variable <var>`/`p <var>` 를 통해서 단일 변수 값을 출력해 본다.
 
-* Show all variables defined in the current frame with `frame variable`/
-  `info locals`, or print the value of a single variable with 
-  `frame variable <var>`/`p <var>`.
+크래쉬 발생을 기다리는 대신에, 코드에 중단점(breakpoint)을 설정할 수 있다.
+이를 위해서, 디버거를 시작하고 R을 실행한다. 그리고 나서:
 
-Instead of waiting for a crash to occur you can also set breakpoints in your code. To do so, start the debugger, run R, then:
+1. `Ctrl + C` 단축키를 누른다.
 
-1. Press `Ctrl + C`
+1. `breakpoint set --file foo.c --line 12`/`break foo.c:12` 을 타이핑한다.
 
-1. Type `breakpoint set --file foo.c --line 12`/`break foo.c:12`.
+1. R 콘솔로 되돌아 가려면, `process continue`/`c`을 타이핑한다.
+   이제 관심을 둔 C 코드를 실행하면, 특정한 줄에 도달했을 때, 디버거가 중단시킬 것이다.
 
-1. `process continue`/`c` to go back to the R console. Now run the C code
-   you're interested in, and the debugger will stop when it gets to the 
-   specified line.
-
-Finally, you can also use the debugger if your code is stuck in an infinite loop. Press `Ctrl + C` to break into the debugger and you'll see which line of code is causing the problem.
+마지막으로, 코드가 무한루프에 빠졌을 때도 디버거를 사용할 수 있다.
+`Ctrl + C` 단축키를 눌러 디버거 모드로 들어가서 코드 몇번째 줄에서 문제를 일으키는지 알 수 있다.
 
 ## Makefiles {#make}
 
-While makefiles are beyond the scope of this book, they are a useful tool. A good, gentle introduction with a focus on reproducible research is Karl Broman's ["Minimal make"](http://kbroman.org/minimal_make/).
+makefiles은 이책 범위 밖이지만, 유용한 도구임에 틀림없다.
+재현가능 연구에 집중한 좋고 부드러운 소개로 칼 브로만(Karl Broman)이 저술한 ["최소 메이크(Minimal make)"](http://kbroman.org/minimal_make/)가 있다.
 
-Generally, R packages should avoid a custom `Makefile`. Instead, use `Makevars`. `Makevars` is a make file that overrides the default make file generated by R (which is located at `file.path(R.home("etc"), "Makeconf")`). This allows you to take advantage of R's default behaviour (it's over 150 lines, and battle-tested across many years and many systems, so you want to!) while being able to set the flags you need. The most commonly used flags are:
+일반적으로, R 팩키지에서는 사용자 정의 `Makefile`을 피해야 된다.
+대신에 `Makevars`을 사용한다.
+`Makevars`은 R에서 생성된 디폴트 기본설정 make 파일을 재정의하는 make 파일이다.
+(`file.path(R.home("etc"), "Makeconf")`에 위치한다).
+이렇게 함으로써, 필요한 플래그를 설정할 수 있게 하면서
+R 디폴트 기본설정 행동(150줄 이상으로, 수년동안 수많은 실전 시스템에서 테스트되어, 누구나 원하는 것이기도 하다!)도 활용할 수 있게 한다.
+가장 흔히 사용되는 플래그는 다음과 같다:
 
-* `PKG_LIBS`: Linker flags. A common use is `PKG_LIBS = $(BLAS_LIBS)`. This
-  allows you to use the same BLAS library as R.
 
-* `PKG_CFLAGS` & `PKG_CXXFLAGS`: C and C++ flags. Most commonly used to set 
-  define directives with `-D`.
+* `PKG_LIBS`: 링커 플래그. 일반적인 사용법은 `PKG_LIBS = $(BLAS_LIBS)`. 
+  이 설정을 통해서 R과 동일하게 BLAS 라이브러리를 사용할 수 있게 한다.
 
-* `PKG_CPPFLAGS`: Pre-processor flags (not C++ flags!). Most commonly used to
-  set include directories with `-I`. Any package listed in the `LinkingTo` field
-  in the `DESCRIPTION` will be automatically included - you do not need to
-  explicitly add it.
+* `PKG_CFLAGS` & `PKG_CXXFLAGS`: C 와 C++ 플래그. 
+  가장 흔히 `-D`로 지시어를 정의하는데 사용된다.
 
-To set flags only on Windows, use `Makevars.win`. To build a `Makevars` with `configure`, use `Makevars.in`.
+* `PKG_CPPFLAGS`: 전처리 플래그 (C++ 플래그는 아님!).
+  `-I`로 디렉토리 포함 설정할 때 사용된다.
+  `DESCRIPTION` 파일 `LinkingTo` 필드 목록에 올라온 어떤 팩키지도 자동으로 포함된다 
+  - 명시적으로 팩키지를 추가할 필요가 없다.
 
-By default, R will use the system make, which is not always GNU compatible (i.e. on Solaris). If you want to use GNU extensions (which are extremely common), add `SystemRequirements: GNU make` to `DESCRIPTION`. If you're not sure if you're using GNU extensions, play it safe and add it to the system requirement.
+윈도우에서만 플래그를 설정하려면, `Makevars.win`을 사용한다.
+`configure`로 `Makevars`를 빌드하려면, `Makevars.in`을 사용한다.
 
-## Other languages {#src-other}
+디폴트 기본설정으로, R에서 시스템 make를 사용하는데 항상 GNU 호환성을 갖는 것은 아니다 (예를 들어, 솔라리스).
+GNU 확장판(extension)을 사용하려면 (극단적으로 흔한), `DESCRIPTION` 파일에 `SystemRequirements: GNU make`를 추가한다.
+만약 GNU 확장판을 사용하는지 확실치 않다면, 안전책을 강구하고, 시스템 요구사항에 추가한다.
 
-It is possible to connect R to other languages, but the interfaces are not as nice as the one for C++:
 
-* __Fortran__: It's possible to call Fortran subroutines directly with 
-  `.Fortran()`, or via C or C++ with `.Call()`. See `?.Fortran` and 
+## 다른 언어 {#src-other}
 
-* __Java__: The [rJava](https://github.com/s-u/rJava) package makes it 
-  possible to call Java code from within R. Note that unlike with C and C++,
-  passing an R object to a Java call will involve a copy operation, something 
-  which has serious performance implications.
+다른 언어에 R을 연결하는 것이 가능하지만, 인터페이스가 C++ 만큼 훌륭하지는 않다.
 
-## Licensing {#src-licensing}
 
-Because it's common to use other peoples' libraries when writing compiled code, you need to make sure that your package license is compatible with the licenses of all included code:
+* __포트란(Fortran)__: `.Fortran()`를 통해서 직접, 혹은 `.Call()`을 통해서
+  C 혹은 C++를 경유해서 포트란 서브 루틴 호출이 가능하다. 자세한 사항은 `?.Fortran`을 참조한다.
 
-* The simplest solution is to use the same license as the included code. Since 
-  you can't relicense someone else's code, you may need to change your license.
 
-* If you don't want to use the same license, you're best sticking
-  with common cases where the interactions are well known. For example, 
-  [Various Licenses and Comments about Them](https://www.gnu.org/licenses/license-list.html)
-  describes what licenses are compatible with the GPL license.
+* __자바(Java)__: [rJava](https://github.com/s-u/rJava) 팩키지가 R 내부에서 자바 코드 호출을 가능하게 한다.
+  C 와 C++와 달리, R 객체를 자바 호출에 전달하면 복사 연산이 관여한다. 심각한 속도 저하를 불러 일으킬 수도 있다.
+
+## 라이선스 (Licensing) {#src-licensing}
+
+컴파일된 코드를 작성할 때, 다른 개발자 라이브러리를 사용하는 것이 일반적이기 때문에,
+작성한 팩키지 라이선스가 모든 코드가 포함된 라이선스와 호환성을 갖도록 확실히 한다:
+
+
+* 가장 간단한 해결방법은 포함된 모든 코드와 동일한 라이선스를 사용하는 것이다.
+  다른 개발자 코드를 다시 라이선스할 수 없기 때문에, 개발한 팩키지 라이선스를 변경할 필요가 있을 수 있다.
+
+
+* 동일한 라이선스를 사용할 수 없다면, 라이선스 간에 인터랙션이 잘 알려진 일반적인 사례를 참조하여 따른다.
+  예를 들어, [다양한 라이선스와 라이선스에 관한 논평](https://www.gnu.org/licenses/license-list.html)에서 
+  GPL 라이선스와 어떤 라이선스가 호화되는지 기술하고 있다.
+
+  이와 같이, 라이선스를 기술하는 경우에 `License: <main license> + FILE license`를 포함해야 되고,
+  `<main license>`가 전체 팩키지(R 및 컴파일된 코드 모두)에 유효하며, 
+  `license` 파일은 개별 컴포넌트 라이선스를 기술하게 한다.
   
-  In this case your description should contain 
-  `License: <main license> + FILE license` where `<main license>` is a license 
-  that is valid for the entire package (both R and compiled code), and the 
-  `license` file describes the licenses of individual components.
+* 표준적인 사례가 아닌 경우에, 변호사와 상의하라.
 
-* For non-standard cases, you'll need to consult a lawyer.
+어떤 경우에도, 최초 코드로부터 저작권과 라이선스 기재를 확실히 포함한다.
 
-In all cases, make sure you include copyright and license statements from the original code.
+## 개발 작업흐름 {#src-workflow}
 
-## Development workflow {#src-workflow}
+C 혹은 C++ 코드를 개발할 때, `devtools::load_all()` 대신에 RStudio에 있는 Build & Reload 기능을 사용하는 것이 더 낫다.
+만약 재적재되는 기간동안 지속되는 C 객체를 갖거나 자료구조가 변경된다면 그렇다.
 
-When developing C or C++ code, it's usually better to use RStudio's Build & Reload instead of `devtools::load_all()`. If you have C objects that persist between reloads, and you change the data structure, then it's 
+## CRAN 이슈 {#src-cran}
 
-## CRAN issues {#src-cran}
+컴파일된 코드를 갖는 팩키지가 그렇지 않는 팩키지보다 CRAN 등록에 더 많은 어려움을 맞이할 듯 하다.
+이유는?
+작성한 팩키지가 주요 플랫폼 (리눅스, 맥, 윈도우)에서 소스코드부터 빌드되어야 되기 때문이다.
+정말 쉽지 않다!
 
-Packages with compiled code are much more likely to have difficulties getting on CRAN than those without. The reason? Your package must build from source on all major platforms (Linux, Mac and Windows). This is hard! 
 
-* CRAN provides an automated service for checking R packages on windows: 
-  [win-builder](http://win-builder.r-project.org). You can easily access this
-  by running `devtools::build_win()`, which builds and uploads a package bundle.
+* 윈도우 R 팩키지를 점검하는 자동화 서비스를 CRAN에서 제공한다: [win-builder](http://win-builder.r-project.org)
+  팩키지 번들을 빌드하고 업로드하는 `devtools::build_win()`을 실행해서 쉽게 서비스에 접근할 수 있다.
+
+* 저자는 이번 장에서 가장 중요한 조언을 포함하려고 한다.
+  하지만, "R 확장 작성하기 (Writing R extensions)"에 나와 있는 
+  [이식성 높은 C와 C++ 코드 작성(writing portable C and C++ code)](http://cran.rstudio.com/doc/manuals/r-devel/R-exts.html#Portable-C-and-C_002b_002b-code) in 
+  에 대한 전체 절을 꼼꼼히 읽도록 저자는 추천한다.
   
-* I've tried to include the most important advice in this chapter, but I'd
-  recommend reading the entire section on [writing portable C and C++ code](http://cran.rstudio.com/doc/manuals/r-devel/R-exts.html#Portable-C-and-C_002b_002b-code) in "Writing
-  R extensions".
+* 윈도우 전용 같은 예외적인 경우에, 교차 사용이 가능(cross-platform)한 요구사항을 뺄 수도 있지만, 
+  이를 관철시키기 위해서 강력한 사례를 만들어 준비해야만 된다.
 
-* In exceptional circumstances, like binding to Windows-only functionality, 
-  you may be able to opt-out of cross-platform requirement, but be prepared    
-  to make a strong case for it.
+CRAN 자동화와 수작업 점검 사이 인터페이스는 컴파일된 코드에 대해 특히 불만스럽다.
+요구사항이 어떤 유지보수 담당자가 배정되느냐, 담당자가 얼마나 많은 시간을 갖느냐에 따라 제출할 때마다 다르다.
+일관성없는 규칙이 적용되지만, 만약 팩키지가 통과되지 않으면, 이를 악물고 변경을 사항을 고치는 편이 
+논쟁하는 것보다 낫다:
 
-The interface between CRAN's automated and manual checking can be particularly frustrating for compiled code. Requirements vary from submission to submission, based on which maintainer you get and how much free time they have. The rules are inconsistently applied, but if your package doesn't pass, it's better to bite the bullet and make the change rather than trying to argue about it:
 
-  * Sometimes you will need to list all authors and copyright holders of included 
-    code in the DESCRIPTION. 
+  * 종종 DESCRIPTION 파일에 포함된 코드의 모든 저자와 저작권자를 목록에 올릴 필요가 있다.
   
-  * Sometimes your package will need to work on Solaris. But due to the difficulty 
-    of accessing a computer running Solaris, fixing Solaris issues can be hard. 
-    However, you will be in a stronger negotiating position if the package has no 
-    problems on other platforms. 
-  
-    One common gotcha: gcc/clang flags `-Wall`, `-pedantic` and `-O0` do not work 
-    with the default compiler on Solaris.
+  * 종종 작성한 팩키지가 솔라이스 위에서 동작할 필요가 있다. 하지만,
+    솔라리스가 돌고 있는 컴퓨터에 대한 접근성 때문에, 솔라리스 이슈를 고치는 것은 어렵다.
+    하지만, 팩키지가 다른 플랫폼에서 문제없이 돌아간다면 훨씬 더 강한 협상 위치에 서게 된다.
+    
+    한가지 알아낸 사항: gcc/clang `-Wall`, `-pedantic`, `-O0` 플래그는 솔라리스 디폴트 기본설정 컴파일러와 
+    잘 돌아가지 않는다.
 
