@@ -4,53 +4,53 @@ title: Other components
 output: bookdown::html_chapter
 ---
 
-# Other components {#misc}
+# 다른 컴포넌트(components) {#misc}
 
-There are four other directories that are valid top-level directories. They are rarely used:
+유효한 최상위 디렉토리에 디렉토리가 4개 더 있다. 거의 사용되지는 않는다:
 
-* `demo/`: for package demos. These were useful prior to the introduction
-  of vignettes, but are no longer recommended. See below.
 
-* `exec/`: for executable scripts. Unlike files placed in other directories, files in 
-  `exec/` are automatically flagged as executable.
 
-* `po/`: translations for messages. This is useful but beyond the scope of this 
-  book. See the [Internationalization][internationalization] chapter of 
-  "R extensions" for more details.
+* `demo/`: 팩키지 시연(demo) 용도. 소품문이 소개되기 전에 유용했지만, 더 이상 추천되지는 않는다. 아래 참조.
 
-* `tools/`: auxiliary files needed during configuration, or for sources that need
-  to generate scripts.
+* `exec/`: 실행가능한 스크립트. 다른 디렉토리에 위치한 파일과 달리,
+  `exec/` 디렉토리에 위치한 파일은 자동으로 실행가능한 파일로 플래그 된다.
 
-## Demos {#demo}
+* `po/`: 메시지 번역용. 유용한 디렉토리지만, 이 책 범위 밖이다.
+  자세한 사항은 "R 확장(R extensions)"에 [국제화(Internationalization)][internationalization]를 참조한다.
 
-A demo is an `.R` file that lives in `demo/`. Demos are like examples but tend to be longer. Instead of focussing on a single function, they show how to weave together multiple functions to solve a problem.
+* `tools/`: 환경설정에 필요한 보조 파일. 혹은 스크립트를 생성하는데 필요한 소스 파일.
 
-You list and access demos with `demo()`:
 
-* Show all available demos: `demo()`.
-* Show all demos in a package: `demo(package = "httr")`.
-* Run a specific demo: `demo("oauth1-twitter", package = "httr")`.
-* Find a demo: `system.file("demo", "oauth1-twitter.R", package = "httr")`.
+## 시연(Demos) {#demo}
 
-Each demo must be listed in `demo/00Index` in the following form: `demo-name  Demo description`. The demo name is the name of the file without the extension, e.g. `demo/my-demo.R` becomes `my-demo`.
+시연(demo)은 `demo/` 디렉토리에 존재하는 `.R` 파일이다.
+시연은 예제같지만, 코드가 좀더 긴 경향이 있다.
+단일 함수에 집중하는 대신에, 문제를 해결하는데 다수 함수를 엮어 사용하는 방법을 보여준다.
 
-By default the demo asks for human input for each plot: "Hit <Return> to see next plot: ". 
-This behaviour can be overridden by adding `devAskNewPage(ask = FALSE)` to the demo file.
-You can add pauses by adding: `readline("press any key to continue")`.
+`demo()` 명령어로 시연(demo) 목록을 살펴보고 접근한다.
 
-Generally, I do not recommend using demos. Instead, consider writing a vignette:
 
-* Demos are not automatically tested by `R CMD check`. This means that they can 
-  easily break without your knowledge.
+* 이용가능한 모든 시연목록을 보여준다: `demo()`.
+* 팩키지에 있는 모든 시연목록을 보여준다: `demo(package = "httr")`.
+* 특정 시연항목을 실행한다: `demo("oauth1-twitter", package = "httr")`.
+* 시연목록을 찾는다: `system.file("demo", "oauth1-twitter.R", package = "httr")`.
 
-* Vignettes have both input and output, so readers can see the results 
-  without having to run the code themselves.
+각 시연목록은 다음과 같은 형태로 `demo/00Index` 디렉토리에 등재된다: `demo-name  Demo description`.
+시연 명칭(demo name)은 확장자가 없는 파일 명칭이 된다. 예를 들어, `demo/my-demo.R`은 `my-demo`와 같이 된다.
 
-* Longer demos need to mingle code with explanation, and RMarkdown is better
-  suited to that task than R comments.
+디폴트 기본설정으로 시연할 때 각 플롯에 대해서 사용자 입력을 요청한다: "Hit <Return> to see next plot: ".
+시연 파일에 `devAskNewPage(ask = FALSE)`을 추가해서 상기 행동을 재정의해서 입력없이 시연을 진행하게도 할 수 있다.
+`readline("press any key to continue")`을 추가해서 잠시 멈춤 기능도 넣을 수 있다.
 
-* Vignettes are listed on the CRAN package page. This makes it easier for 
-  new users to discover them.
+일반적으로, 시연(demos)을 저자는 추천하지 않는다. 대신에 소품문 작성을 고려해보라:
 
+* 시연은 `R CMD check` 명령어로 테스트 자동화가 되지 않는다.
+  개발자 지식이 없다면 시연이 쉽게 망가질 수 있다는 의미를 함축한다.
+
+* 소품문은 입력과 출력을 갖는다. 그래서 독자가 코드를 직접 실행하지 않고도 결과를 볼 수 있다.
+
+* 긴 시연을 하려면 코드와 설명을 뒤섞어야 된다. RMarkdown이 R 주석보다 이런 유형 작업에 더 적합하다.
+
+* 소품문은 CRAN 팩키지 페이지 목록으로 등재된다. 이러한 점이 신규 사용자가 소품문을 발견하기 용이하게 한다.
 
 [internationalization]:http://cran.rstudio.com/doc/manuals/r-devel/R-exts.html#Internationalization

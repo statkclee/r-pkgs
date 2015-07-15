@@ -4,65 +4,75 @@ title: Installed files
 output: bookdown::html_chapter
 ---
 
-# Installed files {#inst}
+# 설치된 파일 {#inst}
 
-When a package is installed, everything in `inst/` is copied into the top-level package directory. In some sense `inst/` is the opposite of `.Rbuildignore` - where `.Rbuildignore` lets you remove arbitrary files and directories to the top level, `inst/` lets you add them. You are free to put anything you like in `inst/` with one caution: because `inst/` is copied into the top-level directory, you should never use a subdirectory with the same name as an existing directory. This means that you should avoid `inst/build`, `inst/data`, `inst/demo`, `inst/exec`, `inst/help`, `inst/html`, `inst/inst`, `inst/libs`, `inst/Meta`, `inst/man`, `inst/po`, `inst/R`, `inst/src`, `inst/tests`, `inst/tools` and `inst/vignettes`.
+팩키지가 설치될 때, `inst/` 디렉토리에 있는 모든 것이 최상위 팩키지 디렉토리로 복사된다.
+어떤 의미에서 `inst/` 디렉토리는 `.Rbuildignore`와 정반대다 - `.Rbuildignore` 는 최상위 수준으로
+임의 파일과 디렉토리를 제거하는 반면에, `inst/`는 파일과 디렉토리를 추가한다.
+한가지만 조심하면 `inst/` 디렉토리에 원하는 어떤 것이든지 자유로이 넣을 수 있다:
+`inst/`가 최상위 디렉토리로 복사되기 때문에, 기존 디렉토리와 동일한 명칭을 갖는 하위디렉토리는 절대로 사용하면 안된다.
+이것이 의미하는 바는 `inst/build`, `inst/data`, `inst/demo`, `inst/exec`, `inst/help`, `inst/html`, `inst/inst`, `inst/libs`, `inst/Meta`, `inst/man`, `inst/po`, `inst/R`, `inst/src`, `inst/tests`, `inst/tools`, `inst/vignettes` 사용은 피한다.
 
-This chapter discusses the most common files found in `inst/`:
+이번 장에서 `inst/` 디렉토리에서 발견되는 가장 흔한 파일을 다룬다:
 
-* `inst/AUTHOR` and `inst/COPYRIGHT`. If the copyright and authorship of a 
-  package is particularly complex, you can use plain text files 
-  `inst/COPYRIGHTS` and `inst/AUTHORS` to provide more information.
+* `inst/AUTHOR` 와 `inst/COPYRIGHT`. 만약 팩키지 저작권자와 저자가 특히 복잡하다면,
+  일반 텍스트 파일을 사용해서 `inst/COPYRIGHTS` 와 `inst/AUTHORS`에 좀더 많은 정보를 제공한다.
 
-* `inst/CITATION`: how to cite the package, see 
-  [package citation](#inst-citation) for details.
+* `inst/CITATION`: 팩키지 인용방법. 자세한 사항은 [package citation](#inst-citation)을 참조한다.
 
-* `inst/docs`: This is an older convention for vignettes, and should be avoided 
-   in modern packages.
+* `inst/docs`: 소품문(vignette)에 대응되는 이전 관례. 최신 팩키지에서는 회피한다.
 
-* `inst/extdata`: additional external data for examples and vignettes. 
-  See [external data](#data-extdata) for more detail.
+* `inst/extdata`: 소품문과 예제에 대한 외부 추가 데이터. 
+  좀더 자세한 사항은 [external data](#data-extdata)를 참조한다.
 
-* `inst/java`, `inst/python` etc. See [other languages](#inst-other-langs).
+* `inst/java`, `inst/python` 등. [other languages](#inst-other-langs)를 참조한다.
 
-To find a file in `inst/` from code use `system.file()`. For example, to find `inst/extdata/mydata.csv`, you'd call `system.file("extdata", "mydata.csv", package = "mypackage")`. Note that you omit the `inst/` directory from the path. This will work if the package is installed, or if it's been loaded with `devtools::load_all()`.
+코드로부터 `inst/` 디렉토리에 있는 파일을 찾으려면, `system.file()`을 사용한다.
+예를 들어, `inst/extdata/mydata.csv` 파일을 찾으려면, `system.file("extdata", "mydata.csv", package = "mypackage")`을 호출한다. 경로명에 `inst/` 디렉토리를 생략한 것에 주목한다.
+팩키지가 설치되거나, `devtools::load_all()` 명령어로 적재되었다면 잘 동작할 것이다.
 
-## Package citation {#inst-citation}
+## 팩키지 인용 {#inst-citation}
 
-The `CITATION` file lives in the `inst` directory and is intimately connected to the `citation()` function which tells you how to cite R and R packages.  Calling `citation()` without any arguments tells you how to cite base R:
+`CITATION` 파일은 `inst` 디렉토리에 존재하고 `citation()` 함수와 긴밀하게 연결되어 있어서 R과 R 팩키지 인용방법을 일러준다. 어떤 인자도 없이 `citation()` 함수를 호출하게 디면 R 베이스 인용방법을 일러준다:
+
 
 ```{r}
 citation()
 ```
 
-Calling it with a package name tells you how to cite that package:
+팩키지 명칭을 갖고 호출하게 되면 해당 팩키지를 인용하는 방법을 일러준다:
 
 ```{r}
 citation("lubridate")
 ```
 
-To customise the citation for your package, add a `inst/CITATION` that looks like this:
+작성한 팩키지 인용을 사용자 정의로 변경하려면, 다음과 같아 보이는 `inst/CITATION` 파일을 추가한다:
 
 ```{r, echo = FALSE, comment = ""}
 citation <- readLines(system.file("CITATION", package = "lubridate"))
 cat(citation, sep = "\n")
 ```
 
-You need to create `inst/CITATION`. As you can see, it's pretty simple: you only need to learn one new function, `citEntry()`. The most important arguments are:
+`inst/CITATION` 파일을 추가할 필요가 있따. 보시다시피, 매우 간단하다: 신규 함수 `citEntry()`, 하나만 배우기만 하면 된다. 가장 중요한 인자는 다음과 같다:
 
-* `entry`: the type of citation, "Article", "Book", "PhDThesis" etc.
+* `entry`: 인용 유형, "Article", "Book", "PhDThesis" 등.
 
-* The standard bibliographic information like `title`, `author` (which should 
-  be a `personList()`), `year`, `journal`, `volume`, `issue`, `pages`, ...
-  
-A complete list of arguments can be found in `?bibentry`.
+* `title`, `author` (`personList()`가 되어야 한다), `year`, `journal`, `volume`, `issue`, `pages`, ...
+  같은 표준 서지 정보.
 
-Use `citHeader()` and `citFooter()` to add additional exhortations.
+인자 전체 목록은 `?bibentry` 명령어로 확인한다.
 
-## Other languages {#inst-other-langs}
+`citHeader()`와 `citFooter()`을 사용해서 부가 권고사항을 추가한다.
 
-Sometimes a package contains useful supplementary scripts in other programming languages. Generally, you should avoid these, because it adds an additional extra dependency, but it may be useful when wrapping substantial amounts of code from another language. For example, [gdata](http://cran.r-project.org/web/packages/gdata/index.html) wraps the Perl module [Spreadsheet::ParseExcel](http://search.cpan.org/~dougw/Spreadsheet-ParseExcel-0.65/) to read excel files into R.
 
-The convention is to put scripts of this nature into a subdirectory of `inst/`, `inst/python`, `inst/perl`, `inst/ruby` etc. If these scripts are essential to your package, make sure you also add the appropriate programming language to the `SystemRequirements` field in the `DESCRIPTION`. (This field is for human reading so don't worry about exactly how you specify it.)
+## 다른 언어 {#inst-other-langs}
 
-Java is a special case because you need to include both the source code (which should go in `java/` and be listed in `.Rinstignore`), and the compiled jar files (which should go in `inst/java`). Make sure to add `rJava` to `Imports`.
+종종, 다른 언어로 작성된 유용한 보충 스크립트가 팩키지에 담겨진다.
+일반적으로, 이것은 피해야 되는데 이유는 추가적인 의존성을 부가하기 때문이다.
+하지만, 또다른 팩키지에서 나온 상당량 코드를 포장하여 감쌀(wrapping) 때는 유용할 수 있다.
+예를 들어, [gdata](http://cran.r-project.org/web/packages/gdata/index.html)는 펄 모듈 [Spreadsheet::ParseExcel](http://search.cpan.org/~dougw/Spreadsheet-ParseExcel-0.65/)을 감싸서 엑셀 파일을 R로 불러왔다.
+
+관례로 이런 유형의 스크립트를 `inst/`, `inst/python`, `inst/perl`, `inst/ruby` 하위 디렉토리에 넣는다.
+만약 이러한 스크립트가 중요하다면, `DESCRIPTION` 파일 `SystemRequirements` 필드에 적절한 프로그래밍 언어를 확실히 추가한다. (이 필드는 사람이 읽는 용도로 정확하게 명세하는 방법에 대해서는 걱정하지 않아도 된다.)
+
+자바는 특별해서 소스코드(`java/` 디렉토리에 위치하고, `.Rinstignore` 파일에도 등재)와 컴파일된 jar 파일(`inst/java` 디렉토리에 위치한다)을 모두 포함할 필요가 있다. `rJava`를 `Imports`에 확실히 추가한다.
