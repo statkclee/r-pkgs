@@ -57,17 +57,26 @@ Git 기능을 활용하는 하도록 프로젝트를 설정하면, 새로운 창
 하지만, 150+ Git 명령어 일부만 RStudio에서 사용할 수 있기 때문에, __쉘(shell)__(명령라인 인터페이스 혹은 콘솔로도 알려짐)로
 Git을 사용하는 방법에 친숙해질 필요가 있다. 쉘에서 Git 사용에 친숙해질 필요가 있는데 이유는 막히게 되면 Git 명령어를 통해서 해결책을 강구해야될 때가 많기 때문이다.
 
-The easiest way to get to a shell from RStudio is Tools > Shell. This will open a new shell located in the root directory of your project. (NB: on Windows, this opens up a _bash_ shell, the standard Linux shell, which behaves a little differently from the usual `cmd.exe` shell.)
+RStudio로부터 쉘에 접속하는 가장 쉬운 방법은 `Tools > Shell` 메뉴를 클릭한다.
+이 방법으로 프로젝트 루트 디렉토리에 신규 쉘을 열게 된다.
+(주의: 윈도우에서는 상기 방법을 통해 리눅스 표준쉘, _배쉬(bash)_ 쉘을 열게 되는데, 보통 `cmd.exe` 쉘과는 약간 다르게 행동하니 주의한다.)
 
-Don't worry if you've never used the shell before because it's very similar to using R. The main difference is that instead of functions, you call commands, which have a slightly different syntax. For example, in R you might write `f(x, y = 1)`, where in the shell you'd write `f x --y=1` or `f x -y1`. Also, while shell commands are even less regular than R functions, you fortunately only need to be familiar with a few. In this chapter, you won't be doing much in the shell apart from running Git commands. However, it's a good idea to learn the three most important shell commands:
+이전에 쉘을 전혀 사용하지 않았다면 걱정할 필요는 없다. 왜냐하면 R 을 사용하는 것과 매우 유사하다.
+주된 차이점은 함수를 사용하는 대신에 명령어(command)를 호출하는데, 약간 다른 구문을 갖는다.
+예를 들어, R에서 `f(x, y = 1)`처럼 함수를 작성하는 반면에, 쉘에서 `f x --y=1` 혹은 `f x -y1` 방식으로 작성한다. 또한 쉘 명령어는 R 함수보다 심지어 덜 정규성을 갖지만, 다행스럽게도 일부와 친숙해지면 된다. 이번장에서 Git 명령어 실행을 제외하고 쉘로 그다지 많은 것을 수행하지 않을 것이다. 하지만, 가장 중요한 쉘 명령어 3개를 배워두는 것이 좋다:
 
-* `pwd`: print working directory. This tells you which directory you're currently in.
-* `cd <name>`: change directory. Use `cd ..` to move up the directory hierarchy.
-* `ls`: list files. Shows all files in the current directory.
 
-If you've never used the shell before, I recommend playing [Terminus](http://web.mit.edu/mprat/Public/web/Terminus/Web/main.html). It's a fun way to learn the basics of the shell. I also recommend taking a look at Philip Guo's [Basic Unix-like command line tutorial](http://pgbovine.net/command-line-tutorial.htm) videos, and at <http://www.ee.surrey.ac.uk/Teaching/Unix/unix1.html> and <https://p1k3.com/userland-book/>.
+* `pwd`: 작업 디렉토리를 출력한다. 현재 위치한 디렉토리를 알려준다.
+* `cd <name>`: 디렉토리를 변경한다. `cd ..` 명령어를 사용해서 상위 디렉토리로 이동한다.
+* `ls`: 파일 목록을 출력한다. 현재 디렉토리에 있는 모든 파일을 보여준다.
 
-## Initial set up {#git-init}
+쉘을 이전에 결코 사용하지 않았다면, [Terminus](http://web.mit.edu/mprat/Public/web/Terminus/Web/main.html)를 실행해 보는 것을 추천한다. 쉘 기초사항을 즐겁게 배울 수 있다. 
+필립 궈(Philip Guo) [기초 유닉스 명령어 사용지침](http://pgbovine.net/command-line-tutorial.htm) 동영상 감상과, <http://www.ee.surrey.ac.uk/Teaching/Unix/unix1.html>,  <https://p1k3.com/userland-book/> 웹사이트 방문도 저자는 추천한다. 
+
+
+## 초기 환경설정 {#git-init}
+
+
 
 If you've never used Git or GitHub before, start by installing Git and creating a GitHub account. Then, link the two together:
 
