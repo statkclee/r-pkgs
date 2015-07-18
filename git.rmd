@@ -76,246 +76,267 @@ RStudio로부터 쉘에 접속하는 가장 쉬운 방법은 `Tools > Shell` 메
 
 ## 초기 환경설정 {#git-init}
 
+Git 혹은 GitHub을 전에 결코 사용한 적이 없다면, Git을 설치하고 GitHub 계정을 생성해서 시작해보라.
+그리고 나서 Git과 GitHub을 연결시킨다:
 
 
-If you've never used Git or GitHub before, start by installing Git and creating a GitHub account. Then, link the two together:
+1.  Git 설치:
 
-1.  Install Git:
+    * 윈도우즈: <http://git-scm.com/download/win>.
+    * 맥 OS X: <http://git-scm.com/download/mac>.
+    * 데비안/우분투: `sudo apt-get install git-core`.
+    * 다른 리눅스 배포판: <http://git-scm.com/download/linux>.
 
-    * Windows: <http://git-scm.com/download/win>.
-    * OS X: <http://git-scm.com/download/mac>.
-    * Debian/Ubuntu: `sudo apt-get install git-core`.
-    * Other Linux distros: <http://git-scm.com/download/linux>.
-
-1.  Tell Git your name and email address. These are used to label each commit
-    so that when you start collaborating with others, it's clear who made 
-    each change. In the shell, run:
+1.  Git에 성함과 전자우편주소를 알려준다. 매번 커밋(commit)할때마다 라벨 역할을 한다.
+    그래서 다른 개발자와 협업할 때, 누가 어떤 변경을 했는지 명확히 할 수 있다.
+    쉘에서 다음 명령어를 실행한다:
 
     ```bash
     git config --global user.name "YOUR FULL NAME"
     git config --global user.email "YOUR EMAIL ADDRESS"
     ```
 
-    (You can check if you're set up correctly by running 
-    `git config --global --list`.)
+    (`git config --global --list` 명령어를 입력해서 올바르게 설정했는지 점검할 수 있다.)
 
-1.  Create an account on GitHub, <https://github.com> (the free plan is fine). 
-    Use the same email address as above.
+1.  GitHub, <https://github.com> 에 계정을 생성한다 (무료사용도 좋다).
+    상기 적용한 동일한 전자우편을 사용한다.
     
-1.  If needed, generate a SSH key. SSH keys allow you to securely 
-    communicate with websites without a password. There are two parts to 
-    an SSH key: one public, one private. People with your public key can 
-    securely encrypt data that can only be read by someone with your 
-    private key. 
+1.  필요하다면, SSH 키를 생성한다. SSH키를 사용해서 비밀번호 없이도 안전하게 웹사이트와 
+    의사소통을 가능케 한다. SSH 키는 두 부분으로 구성된다: 개인키, 공개키.
+    공개키를 갖는 사람이 안전하게 데이터를 암호화할 수 있는데,
+    상응하는 비밀키를 갖고 있는 사람만 암호화된 데이터를 해독할 수 있다.
     
-    You can check if you already have an SSH key-pair by running:
-    
+    다음 명령어를 실행해서 SSH 키 짝을 이미 갖고 있는지 점검할 수 있다:
+
+
     ```{r, eval = FALSE}
     file.exists("~/.ssh/id_rsa.pub")
     ```
 
-    If that returns `FALSE`, you'll need to create a new key. You can either follow the 
-    [instructions on GitHub](https://help.github.com/articles/generating-ssh-keys) 
-    or use RStudio. Go to RStudio preferences, choose the Git/SVN panel, and 
-    click "Create RSA key...":
+    만약 상기 실행결과 `FALSE`가 반환되면, 신규 키를 생성할 필요가 있다.
+    [GitHub 안내지침](https://help.github.com/articles/generating-ssh-keys)을 따르거나,
+    RStudio를 사용할 수도 있다. RStudio 개인설정(Preference)으로 들어가서,
+    Git/SVN 창을 선택하고, "Create RSA key..."을 클릭한다:
     
+
     ```{r, echo = FALSE}
     bookdown::embed_png("screenshots/git-config-2.png", dpi = 220)
     ```
     
-1.  Give GitHub your SSH public key: <https://github.com/settings/ssh>.
-    The easiest way to find the key is to click "View public key" in
-    RStudio's Git/SVN preferences pane.
+1.  GitHub에 SSH 공캐키를 전달한다: <https://github.com/settings/ssh>.
+    키를 찾는 가장 쉬운 방법은 RStudio Git/SVN 개인설정창에서 "View public key"를 클릭하는 것이다.
 
-## Create a local Git repository {#git-init}
+## 로컬 Git 저장소 생성하기 {#git-init}
 
-Now that you have installed and configured Git, you can use it! To use GitHub with your package, you'll need to initialise a local repository, or __repo__ for short. This creates a `.git` directory that stores configuration files and a database that records changes to your code. A new repo exists only on your computer; you'll learn how to share it with others shortly.
+Git을 설치하고 환경설정을 했기 때문에, 이제부터 사용할 수 있다!
+팩키지 작성에 GitHub을 사용하려면, 먼저 줄여서 __repo__라고 부르는 로컬 저장소(repository)를 초기화한다. 초기화되면, `.git` 디렉토리가 생성되는데 환경설정 파일과 코드 변경내역을 기록하는 데이터베이스가 그곳에 저장된다. 신규 저장소는 개발자 본인 컴퓨터에만 존재하게 된다; 곧 다른 개발자와 저장소를 공유하는 방법을 학습할 것이다.
 
-To create a new repo:
+신규 저장소를 생성하기 위해서:
 
-  * In RStudio, go to project options, then to the Git/SVN panel. Change the 
-    "Version control system" from "None" to "Git":
+
+  * RStudio에서 `project options`로 들어가서, Git/SVN 창을 클릭한다.
+    "버젼제어시스템(Version control system)"을 "None"에서 "Git"로 변경한다:
     
     ```{r, echo = FALSE}
     bookdown::embed_png("screenshots/git-proj-config.png", dpi = 220)
     ```
     
-    You'll then be prompted to restart RStudio.
-
-  * In a shell, run `git init`. Restart RStudio and reopen your package.
-
-Once Git has been initialised, you'll see two new components:
-
-  * The __git pane__, at the top-right, shows you what files have 
-    changed and includes buttons for the most important Git commands:
+    그러면 RStudio를 제시작하라는 메시지가 뜬다.
     
+
+  * 쉘에서, `git init`을 실행한다. RStudio를 재시작하고 팩키지를 작성한 팩키지를 다시 연다.
+  
+
+Git이 초기화되면, 신규 컴포넌트 두개를 볼 수 있다:
+
+  * 우측 상단에 __Git 창(pane)__에서 무슨 파일이 변경되었는지 알 수 있고,
+    가장 중요한 Git 명령어 버튼도 포함돼 있다:
+  
     ```{r, echo = FALSE}
     bookdown::embed_png("screenshots/git-pane.png", dpi = 220)
     ```
+
+  * 툴바에서 찾을 수 있는 __Git 드롭다운(dropdown)__는 현재 파일에 적용할 수 있는
+    Git과 GitHub 명령어가 포함되어 있다:
     
-  * The __git dropdown__ menu, found in the toolbar, includes Git and GitHub commands
-    that apply to the current file:
-  
     ```{r, echo = FALSE}
     bookdown::embed_png("screenshots/git-dropdown.png", dpi = 220)
     ```
 
-## See what's changed {#git-status}
+## 변경된 사항 살펴보기 {#git-status}
 
-The first benefit of Git is that you can easily see the changes you've made. I find this really helpful, as I often accidentally mistype keyboard shortcuts, leaving stray characters in my code. The RStudio Git pane lists every file that's been added, modified or deleted. The icon describes the change:
+첫번째 Git 사용 장점은 개발하면서 만든 변경사항을 쉽게 볼 수 있다는 것이다.
+우연히 키보드 단축키를 잘못 눌러서 코드에 길 잃은 문자를 코드에 넣었을 때, 저자는 이 기능이 정말 도움이 된다고 본다. 
+RStudio Git 창에는 추가되고, 변경되고, 삭제된 모든 파일 목록이 나와 있다.
+각 아이콘이 변경된 내역을 기술한다:
 
 * `r bookdown::embed_png("screenshots/git-modified.png", dpi = 220)`, 
-  __Modified__. You've changed the contents of the file.
+  __Modified__. 파일 내용이 변경되었다.
 
 * `r bookdown::embed_png("screenshots/git-unknown.png", dpi = 220)`, 
-  __Untracked__. You've added a new file that Git hasn't seen before.
+  __Untracked__. Git 시스템이 이전에 본적이 없는 신규 파일이 추가되었다.
 
 * `r bookdown::embed_png("screenshots/git-deleted.png", dpi = 220)`, 
-  __Deleted__. You've deleted a file.
+  __Deleted__. 파일이 삭제되었다.
 
-You can get more details about modifications with a "diff", `r bookdown::embed_png("screenshots/git-diff.png", dpi = 220)`. This opens a new window showing the detailed **diff**erences:
+
+"diff", `r bookdown::embed_png("screenshots/git-diff.png", dpi = 220)` 명령어로
+변경사항에 대한 좀더 상세한 내역을 볼 수 있다. 신규 창을 열어 구체적인 차이(**diff**erences)를 보여준다:
 
 ```{r, echo = FALSE}
 bookdown::embed_png("screenshots/git-diff-window.png", dpi = 220)
 ```
 
-The background colours tells you whether the text has been added (green) or removed (red). (If you're colourblind you can use the line numbers in the two columns at the far left as a guide: a number in the first column identifies the old version, a number in second column identifies the new version.) The grey lines of code above and below the changes give you additional context.
+배경색을 통해서 텍스트가 추가(녹색)되었는지 삭제(적색)되었는지 알 수 있다.
+(만약 색맹이라면, 가장 왼쪽에 두 칼럼에 행번호로 알 수 있다: 첫번째 칼럼 숫자는 이전 버젼, 두번째 칼럼 숫자는 신규 버젼을 나타낸다.)
+변경사항 위아래 코드 회색줄은 추가적인 내용을 전달한다.
 
-In the shell, use `git status` to see an overview of changes and `git diff` to show detailed differences.  
+쉘에서, `git status` 명령어를 사용해서 전반적인 변경사항을 확인할 수 있고,
+`git diff`를 사용해서 차이분에 대한 자세한 사항을 볼 수도 있다.
 
-## Record changes {#git-commit}
+## 변경사항 기록 {#git-commit}
 
-The fundamental unit of work in Git is a __commit__. A commit takes a snapshot of your code at a specified point in time. Using a Git commit is like using anchors and other protection when climbing. If you're crossing a dangerous rock face you want to make sure you've used protection to catch you if you fall. Commits play a similar role: if you make a mistake, you can't fall past the previous commit. Coding without commits is like free-climbing: you can travel much faster in the short-term, but in the long-term the chances of catastrophic failure are high! Like rock climbing protection, you want to be judicious in your use of commits. Committing too frequently will slow your progress; use more commits when you're in uncertain or dangerous territory. Commits are also helpful to others, because they show your journey, not just the destination.
+Git에서 작업 기본 단위는 __커밋(commit)__이다.
+커밋은 특정 시점에 작성한 코드에 대한 짧은 묘사정보(스냅샷, Snapshot)를 기록한다.
+Git 커밋을 사용하는 것은 등반할 때 앵커와 기타 보호장구를 사용하는 것과 같다.
+만약 위험한 바위를 가로지를 때, 추락하게 되면 잡아줄 보호장치가 확실히 필요할 것이다.
+커밋이 유사한 역할을 한다: 만약 실수를 하게 되면, 이전 커밋 이후로 추락되지 않게 된다.
+커밋이 없는 코딩은 도구 없이 하는 (암벽) 등반같다: 
+단시간에 훨씬 더 빨리 이동할 수 있지만, 장기적으로 보면 비극적 실패 가능성도 높다!
+암벽등반 보호장구처럼, 커밋을 사용할 때 신중히 판단해야 된다.
+너무 자주 커밋하게 되면 진행을 더디게 한다; 불확실하고 위험한 영역에 있을 때는 커밋을 더 많이 사용하라. 커밋은 다른 사람에게도 도움이 된다. 왜냐하면, 목적지 뿐만 아니라 여행경로도 볼 수 있기 때문이다.
 
-There are five key components to every commit:
+매번 커밋할 때마다 5가지 주요한 구성요소가 있다:
 
-* A unique identifier, called a SHA (short for secure hash algorithm).
+* 유일무이한 식별자, SHA라고 불림 (secure hash algorithm의 약자로 보안 해쉬 알고리즘).
 
-* A changeset that describes which files were added, modified and deleted.
+* 무슨 파일이 추가, 변경, 삭제되었는지 기술하는 변경집합(changeset).
 
-* A human-readable commit message.
+* 사람이 읽을 수 있는 커밋 메시지.
 
-* A parent, the commit that came before this one. (There are two exceptions to 
-  this rule: the initial commit doesn't have a parent, and merges, which you'll
-  learn about later, have two parents.)
+* 부모 커밋, 해당 커밋 이전 커밋. (이 규칙에는 예외가 두가지 있다:
+  최초 커밋은 부모가 없고, 나중에 학습할 병합(merge)은 부모가 둘이다.)
 
-* An author.
+* 저자(author)
 
-You create a commit in two stages:
+두 단계로 나누어서 커밋을 생성한다:
 
-1.  You __stage__ files, telling Git which changes should be included in the
-    next commit. 
-  
-1.  You __commit__ the staged files, describing the changes with a message.
+1.  __준비(staging)__ 단계에서, 다음번 커밋에 어떤 변경사항이 포함되어야 하는지 Git에게 일러준다.
 
-In RStudio, staging and committing are done in the same place, the commit window, which you can open by clicking `r bookdown::embed_png("screenshots/git-commit.png", dpi = 220)` or by pressing Ctrl + Alt + m.
+
+1. __커밋(commit)__ 단계에서, 준비된 파일을 메시지로 변경사항을 기술하고 커밋한다.
+
+RStudio에서, 준비(staging)와 커밋(commit)은 동일 장소에서 수행된다.
+`r bookdown::embed_png("screenshots/git-commit.png", dpi = 220)`을 클릭하거나, Ctrl + Alt + m 단축키를 누르면 커밋 윈도우가 나온다.
 
 ```{r, echo = FALSE}
 bookdown::embed_png("screenshots/git-commit-window.png", dpi = 220)
 ```
 
-The commit window is made up of three panes:
+커밋 윈도우는 창(pane) 세개로 구성된다:
 
-* The top-left pane shows the current status in the way as the Git pane in the 
-  main RStudio window.
+* 좌측 상단 창(pane)에 현재 상태정보가 있는데 RStudio 윈도우 Git 창(pane)에 있는 것과 같다.
 
-* The bottom pane shows the diff of the currently selected file.
+* 아래 창(pane)에는 현재 선택된 파일 차이(diff) 정보가 나와 있다.
 
-* The top-right pane is where you'll enter the commit message, a human 
-  readable message summarising the changes made in the commit. More on 
-  that shortly.
+* 우측 상단 창(pane)에는 커밋할 때 변경 내용을 요약해서 사람이 읽을 수 있는 
+  메시지를 입력하는 곳이다. 좀더 자세한 사항에 대해서 곧 다시 다룰 예정이다.
+  
+(그렇다, `r bookdown::embed_png("screenshots/git-diff.png", dpi = 220)` 를 클릭할 때,
+나타나는 창과 정확하게 동일하다!)  
 
-(Yes, this is exactly the same window you see when clicking `r bookdown::embed_png("screenshots/git-diff.png", dpi = 220)`!)
+신규 커밋을 생성하기 위해서:
 
-To create a new commit:
 
-1.  __Save your changes__.
+1.  __변경사항을 저장한다__.
 
-1.  __Open the commit window__ by clicking 
-    `r bookdown::embed_png("screenshots/git-commit.png", dpi = 220)` or 
-    pressing `Ctrl + Alt + m`.  
+1.  `r bookdown::embed_png("screenshots/git-commit.png", dpi = 220)`을 클릭하거나 
+    `Ctrl + Alt + m` 단축키를 눌러 __커밋 윈도우를 연다__.
 
-1.  __Select files__.  To stage (select) a single file for inclusion, tick its
-    check box. To stage all files, press Ctrl/Cmd + A, then click 
-    `r bookdown::embed_png("screenshots/git-stage.png", dpi = 220)`. 
+1.  __파일을 선택한다__. 포함시킬 파일을 준비(staging)시키려면, 확인란(check box)를 선택한다.
+    모든 파일을 준비(staging)시키려면, Ctrl/Cmd + A 단축키를 누르고 나서, 
+    `r bookdown::embed_png("screenshots/git-stage.png", dpi = 220)`을 클릭한다.
+
+    각 파일을 준비시킬 때, 상태가 변경되는 것을 알아챘을 것이다.
+    아이콘이 오른쪽(준비되지 않은 상태, unstaged)에서 왼쪽(준비된 상태, staged)으로 
+    칼럼을 변경한다. 그리고 다음 신규 아이콘 두개중 하나를 볼 수도 있다.
     
-    As you stage each file, you'll notice that its status changes. The icon
-    will change columns from right (unstaged status) to left (staged status),
-    and you might see one of two new icons:
 
-      * Added: `r bookdown::embed_png("screenshots/git-added.png", dpi = 220)`: 
-        after staging an untracked file, Git now knows that you want to add it 
-        to the repo.
+      * 추가(added): `r bookdown::embed_png("screenshots/git-added.png", dpi = 220)`: 
+        추적되지 않은 파일을 준비상태로 올린 후에, 개발자가 신규 파일을 저장소에 추가하고자 
+        한다는 것을 Git 시스템이 이제는 알고 있다.
       
-      * Renamed: `r bookdown::embed_png("screenshots/git-renamed.png", dpi = 220)`:
-        If you rename a file, Git initially sees it as a deletion and addition.
-        Once you stage both changes, Git will recognise that it's a rename.
-        
-    Sometimes you'll see a status in both columns, e.g. 
-    `r bookdown::embed_png("screenshots/git-modified-staged.png", dpi = 220)`.
-    This means that you have both staged and unstaged changes in the same file.
-    This happens when you've made some changes, staged them, and then made some 
-    more. Clicking the staged checkbox will stage your new changes, clicking
-    it again will unstage both sets of changes.
-
-1.  __Stage files__, as above.
-
-1.  __Write a commit message__ (top-right panel)  which describes the changes
-    that you've made. The first line of a commit message is called the subject 
-    line and should be brief (50 characters or less). For complicated commits, 
-    you can follow it with a blank line and then a paragraph or bulleted list 
-    providing more detail. Write messages in imperative, like you're telling 
-    someone what to do: "fix this bug", not "fixed this bug" or 
-    "this bug was fixed".
+      * 이름 변경(renamed): `r bookdown::embed_png("screenshots/git-renamed.png", dpi = 220)`:
+        만약 파일 이름을 변경하면, 처음에 Git은 파일을 삭제하고 추가한 것으로 본다.
+        두 변경사항을 준비단계로 올리게 되면, Git이 이름변경을 인지한다.
     
-1.  __Click Commit__.
+    종종, 두 칼럼에 걸친 상태 아이콘을 보게 된다, 예를 들어, `r bookdown::embed_png("screenshots/git-modified-staged.png", dpi = 220)`.
+    동일한 파일이 준비상태기도 하고 준비되지 않은 상태이고도 하다는 것을 의미한다.
+    일부 변경을 하고 준비상태로 올려놓은 다음에, 일부 변경을 할 때 이런 경우가 발생한다.
+    준비상태 체크박스를 클릭하면 신규 변경사항이 준비상태로 올라가고,
+    다시 체크박스를 클릭하면, 양쪽 변경사항 모두 준비상태에서 풀려 내려온다.
+    
 
-Staging files is a little more complicated in the shell. You use `git add` to stage new and modified files, and `git rm` to stage deleted files. To create the commit, use `git commit -m <message>`.
+1.  위와 마찬가지로 __파일을 준비상태로 올린다__.
 
-## Commit best practices {#commit-best-practices}
+1.  __커밋 메시지를 작성한다__ (우측 상단 창), 메시지에는 변경사항을 기술한다.
+    커밋 메시지 첫번째 행을 제목란으로 불리는데 간결해야 된다 (문자 50개 이하).
+    복잡한 커밋에는, 빈줄을 넣고 나서 문단 혹은 글머리표를 통해 상세한 내용을 적는다.
+    누군가에게 무엇을 수행하라고 지시하는 것처럼, 명령조로 메시지를 작성하라:
+    "이 버그를 고쳤다(fixed this bug)" 혹은 
+    "이 버그는 고쳐졌다(this bug was fixed)"가 아니라 "이 버그를 고쳐라(fix this bug)".
 
-Ideally, each commit should be _minimal_ but _complete_:
+1.  __커밋(Commit)을 클릭한다__.
 
-* __Minimal__: A commit should only contain changes related to a single
-  problem. This will make it easier to understand the commit at a glance, and to 
-  describe it with a simple message. If you should discover a new problem, you 
-  should do a separate commit.
+파일을 준비단계로 올리는 것은 쉘에서 다소 복잡하다.
+`git add`를 사용해서 신규, 변경된 파일을 준비단계로 올린다. `git rm`를 사용해서 준비단계에 올라간 파일을 삭제한다. 커밋을 생성하려면, `git commit -m <message>` 명령어를 사용한다.
 
-* __Complete__: A commit should solve the problem that it claims to solve.
-  If you think you've fixed a bug, the commit should contain a unit test
-  that confirms you're right.
+## 커밋 모범사례 {#commit-best-practices}
 
-Each commit message should:
+이상적인 것은 각 커밋은 _최소(minimal)_지만 _완결(complete)_되야 된다:
 
-* __Be concise, yet evocative__. At a glance, you should be able to see 
-  what a commit does. But there should be enough detail so you can remember
-  (and understand) what was done.
 
-* __Describe the why, not the what__. Since you can always retrieve the diff 
-  associated with a commit, the message doesn't need to say exactly what 
-  changed. Instead it should provide a high-level summary that focuses on the 
-  reasons for the change.
+* __최소(Minimal)__: 한 커밋에는 단일문제에 연관된 변경사항만 담겨져야 된다.
+  이렇게 함으로써 한번에 커밋된 것을 이해하고 간단한 메시지로 기술하기도 더 쉽게 된다.
+  만약 새로운 문제를 발견한다면, 구별되는 별도 커밋을 수행해야 된다.
 
-If you do this:
+* __완결(Complete)__: 해결하려고 주장하는 문제를 한 커밋으로 해결한다.
+  만약 버그를 고쳤다고 생각하면, 커밋은 단위 테스트를 포함해서 주장이 맞다는 사실을 확인해야 한다.
 
-* It'll be easier to work with others. For example, if two people have changed 
-  the same file in the same place, it'll be easier to resolve conflicts if the 
-  commits are small and it's clear why each change was made.
+각 커밋 메시지는 다음과 같아야 된다:
+
+* __간략하지만, 연상시켜야 된다__. 한눈에, 커밋이 무엇을 했는지 알 수 있어야 된다.
+  하지만, 충분히 구체적인 사항이 녹아져서 무엇이 수행되었는지 기억할 (그리고 이해할) 수
+  있어야 된다.
+
+* __대상(what)이 아니라 이유(why)를 기술하라__. 커밋과 연관된 차이(diff)를 항상 불러올 수 
+  있기 때문에, 메시지에 정확하게 무엇이 변경되었는지 적을 필요는 없다.
+  대신에, 변경에 대한 이유에 집중한 높은 수준의 요약정보를 제공해야 된다.
+
+만약 상기 사항을 잘 수행한다면:
+
+
+* 다른 개발자와 공동작업하기가 더 쉽다. 예를 들어, 만약 두 사람이 같은 곳에서 같은 파일을
+  변경했다면, 충돌을 해결하기 더 쉽다. 왜냐하면, 커밋 단위가 작고, 
+  각 변경에 대한 사유가 명확하기 때문이다.
+
+* 프로젝트 신규 참가자도 커밋 로그를 읽으면 지나온 이력을 더 쉽게 이해할 수 있다.
+
+* 개발이력을 따라 특정 지점에서 작성한 팩키지를 적재하고 실행할 수 있다.
+  [bisectr](https://github.com/wch/bisectr)같은 도구를 함께 사용하면 매우 유용하다.
+  이진 검색을 사용해서 신속하게 버그가 주입된 커밋을 색출할 수 있다.
   
-* Project newcomers can more easily understand the history by reading the commit 
-  logs.
-  
-* You can load and run your package at any point along its development history. 
-  This can be tremendously useful with tools like
-  [bisectr](https://github.com/wch/bisectr), which allow you to use binary
-  search to quickly find the commit that introduced a bug.
+* 언제 버그가 주입되었는지 정확하게 알 수 있게 되면, 
+  무엇을 수행하면 되는지 (그리고 왜!) 쉽게 이해할 수 있다.
 
-* If you can figure out exactly when a bug was introduced, you can easily 
-  understand what you were doing (and why!).
+어떤 누구도 개발하고 있는 저장소를 살펴보지 않을 것이기 때문에, 좋은 커밋 메시지를 작성하는 것이 노력대비 가치가 없을 것으로 생각할지도 모른다.
+하지만, 매우 중요한 공동작업자가 있다는 것을 명심하라: 미래의 당신!
+만약 지금 커밋 메시지에 약간 공을 드리면, 버그에 대한 부검을 한다면 그리고 부검을 할 필요가 있다면
+미래의 당신이 매우 고마워할 것이다.
 
-You might think that because no one else will ever look at your repo, that writing good commit messages is not worth the effort. But keep in mind that you have one very important collaborator: future-you! If you spend a little time now polishing your commit messages, future-you will thank you if and when they need to do a post-mortem on a bug. 
-
-Remember that these directives are aspirational. You shouldn't let them get in your way. If you look at the commit history of my repositories, you'll notice a lot of them aren't that good, especially when I start to get frustrated that I __still__ haven't managed to fix a bug. Strive to follow these guidelines, and remember it's better to have multiple bad commits than to have one perfect commit.
+이러한 지시사항은 단지 열망을 담고 있다고 기억하기 바란다.
+이러한 것이 방해가 되서는 않된다.
+만약 여러분이 저자 저장소 커밋 이력을 본다면, 많은 부분은 그다지 훌륭하지 못하다는 것을 알아챘을 것이다. 특히, __여전히__ 어떻해서든지 버그를 고쳐보려고 하지 못할 정도로 좌절이 시작될 때 더욱 그렇다. 상기 안내지침을 따르려고 노력하고, 하나의 완전한 커밋보다는 다수 불완전한 커밋이 더 낫다.
 
 ## Ignoring files {#git-ignore}
 
