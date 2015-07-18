@@ -6,44 +6,56 @@ output: bookdown::html_chapter
 
 # Git 와 GitHub {#git}
 
-If you're serious about software development, you need to learn about Git. Git is a _version control system_, a tool that tracks changes to your code and shares those changes with others. Git is most useful when combined with [GitHub](http://github.com), a website that allows you to share your code with the world, solicit improvements via pull requests and track issues. Git + GitHub is the most popular version control system for developers of R packages (witness the thousands of R packages hosted on GitHub).
+만약 소프트웨어 개발에 진지하게 임하려면, Git을 배울 필요가 있다.
+Git은 _버젼제어시스템(version control system)_으로, 코드 변경사항을 추적하고 다른 개발자와 변경사항을 공유한다. Git이 [GitHub](http://github.com)와 조합되어 사용될 때 그 유용성은 배가된다. [GitHub](http://github.com)을 통해서 코드를 전세계 개발자와 공유하고 풀요청(pull request)와 이슈 추적을 통해 개선을 이어나간다. Git + GitHub 조합이 R 팩키지 개발자를 위한 가장 인기있는 버젼제어시스템이다. (GitHub에 올려진 수천개 R 패키지를 목도하라).
 
-Git and GitHub are generally useful for all software development and data analysis, not just R packages. I've included it here, because it is so useful when you're making a package. There's no way I could be as productive without Git and GitHub at my back, enabling me to rapidly spot mistakes and easily collaborate with others. 
 
-Why use Git + GitHub?
+Git 과 GitHub 조합이 단지 R 팩키지에만 유용한 것이 아니라, 모든 소프트웨어 개발과 자료분석에도 일반적으로 유용하다. 이 책에서 Git 과 GitHub 포함했는데 이유는 팩키지 개발에 매우 유용하기 때문이다. 저자 등 뒤에서 신속하게 잘못된 것을 찾아내고 다른 개발자와 쉽게 협업이 가능하게 한다. Git 과 GitHub을 통하지 않고 더 생산성을 높이는 다른 방법은 없다. 
 
-  * It makes sharing your package easy. Any R user can install your package with 
-    just two lines of code:
-    
+왜 Git + GitHub를 사용할까?
+
+
+  * 팩키지 공유를 쉽게 만든다. 그리고, R 사용자는 다음 코드 두줄로 팩키지를 설치할 수 있다:
+  
+
     ```{r, eval = FALSE}
     install.packages("devtools")
     devtools::install_github("username/packagename")
     ```
     
-  * GitHub is a great way to make a barebones website for your package. Readers 
-    can easily browse code, and read documentation (via Markdown). They can 
-    report bugs, suggest new features with [GitHub issues][gh-issues], and 
-    propose improvements to your code with pull requests.
-    
-  * Have your ever tried to collaboratively write code with someone by sending 
-    files back and forth via email or a Dropbox folder? It takes a lot of effort 
-    just to make sure that the two of you aren't working on the same file and 
-    overwriting each others' changes. With Git, both of you can work on the 
-    same file at the same time. Git will either combine your changes 
-    automatically, or it will show you all the ambiguities and conflicts.
+  * GitHub을 통해 작성한 팩키지에 대한 핵심사항만 담긴 웹사이트를 쉽게 생성할 수 있다.
+    독자가 쉽게 코드를 탐색하고 (마크다운으로) 문서를 읽을 수도 있다.
+    독자가 코드를 읽고 버그를 보고하고, GitHub 이슈를 통해 신규 기능을 제안할 수 있다.
+    [GitHub issues][gh-issues]. 그리고 풀요청으로 작성한 코드에 기능향상을 제안할 수 있다.
+  
 
-  * Have you ever accidentally pressed `s` instead of Cmd + S to save your
-    file? It's very easy to accidentally introduce a mistake that takes a few
-    minutes to track down. Git makes this problem easy to spot because it 
-    allows you to see exactly what's changed and undo any mistakes.
+  * 전자우편 혹은 드롭박스 폴더로 파일을 주고받으면서 누군가 코드를 협업해서 개발한 적이 있는가?
+    두 개발자가 동일한 파일에 동시 작업하지 않고, 
+    다른 개발자 변경사항을 덮어쓰기 해서 문제없이 하는데도 상당한 노력이 소요된다.
+    Git가 있으면, 두 개발자 모두 편안하게 동시에 동일한 파일에 작업할 수 있다.
+    Git가 변경사항을 자동으로 결합하거나, 모호한 부분과 충돌나는 것을 모두 보여준다.
+  
 
-You can do many of these same things with other tools (like [subversion](https://subversion.apache.org) or [mercurial](http://mercurial.selenic.com)) and other websites (like [gitlab](https://about.gitlab.com) and [bitbucket](https://bitbucket.org)). Git is most useful in conjunction with GitHub, and vice versa, so I'll make no effort to distinguish between features that belong to Git and those that belong to GitHub. But I think Git + GitHub is the most user-friendly system (especially for new developers), not least because its popularity means that the answer or solution to every possible question or problem can be found on StackOverflow. 
+  * 파일을 저장할 때 Cmd + S 대신에 `s`만 우연히 누른적이 있는가?
+    추적하는데 몇분 걸리는 실수 혹은 버그를 우연히 만들어내는 것은 무척이나 쉽다.
+    Git는 이러한 문제를 쉽게 탐지하기 한다. 왜냐하면 정확하게 변경된 것을 알아내서 
+    어떤 변경사항도 실행취소(undo)할 수 있게 하기 때문이다.
+  
+동일한 작업을 많은 다른 제품([subversion](https://subversion.apache.org) 혹은 [mercurial](http://mercurial.selenic.com))과 웹사이트 서비스(like [gitlab](https://about.gitlab.com) and [bitbucket](https://bitbucket.org))로 수행할 수 있다.
+Git이 GitHub와 함께 혹은 GitHub가 Git과 연결되어 함께 사용될 때 가장 유용해서 Git에 속한 기능과 GitHub에 속한 기능을 정확히 구별하는 것은 무의미하다.
+하지만, 저자는 생각에는 Git + GitHub 조합이 가장 사용자 친화적 시스템이라고 본다 (특히 신규 개발자에게 그렇다). 대중성으로 인해 가능한 모든 질문 혹은 문제가 StackOverflow에 올려졌다는 것 때문만은 아니다.
 
-This is not to say that Git is easy to learn. Your initial experiences with Git are likely to be frustrating and you will frequently curse at the strange terminology and unhelpful error messages. Fortunately, there are many tutorials available online, and while they aren't always well written (many provide a lot of information but little guidance about what to do with it or why you need to care), you can absolutely master Git with a little practice. Don't give up! Persevere and you'll unlock the super-power of code collaboration.  
+그렇다고 Git이 배우기 쉽다는 것을 의미하지는 않는다.
+Git과 첫 조우는 좌절을 줄 수도 있고, 이상한 용어와 그다지 도움이 되지 않는 오류 메시지에 저주를 퍼붓는다. 다행스럽게도 인터넷에 많은 사용지침서가 나와 있다.
+(상당한 정보를 제공하지만 무엇을 수행할 수 있고 왜 관심을 가져야 하는 이유에 대해서는 거의 안내정보가 나와 있지 않아서) 그다지 잘 작성되어 있지는 않지만, 조금 실습하면 Git을 확실히 통달할 수 있다. 포기하지 마라! 인내를 갖고 전진하면, 코드 협업의 초강력 힘의 비밀을 해제할 것이다.
 
-## RStudio, Git and GitHub {#git-rstudio}
+## RStudio, Git, GitHub {#git-rstudio}
 
-RStudio makes day-to-day use of Git simpler. Once you've set up a project to use Git, you'll see a new pane and toolbar icon. These provide shortcuts to the most commonly used Git commands. However, because only a handful of the 150+ Git commands are available in RStudio, you also need to be familiar with using Git from the __shell__ (aka the command line or the console). It's also useful to be familiar with using Git in a shell because if you get stuck you'll need to search for a solution with the Git command names.
+RStudio는 일상적인 Git 사용을 더 쉽게 했다.
+Git 기능을 활용하는 하도록 프로젝트를 설정하면, 새로운 창(pane)과 툴바 아이콘이 생긴다.
+가장 자주 사용되는 Git 명령어로 바로가는 단축키 기능을 제공한다.
+하지만, 150+ Git 명령어 일부만 RStudio에서 사용할 수 있기 때문에, __쉘(shell)__(명령라인 인터페이스 혹은 콘솔로도 알려짐)로
+Git을 사용하는 방법에 친숙해질 필요가 있다. 쉘에서 Git 사용에 친숙해질 필요가 있는데 이유는 막히게 되면 Git 명령어를 통해서 해결책을 강구해야될 때가 많기 때문이다.
 
 The easiest way to get to a shell from RStudio is Tools > Shell. This will open a new shell located in the root directory of your project. (NB: on Windows, this opens up a _bash_ shell, the standard Linux shell, which behaves a little differently from the usual `cmd.exe` shell.)
 
