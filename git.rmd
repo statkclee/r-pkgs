@@ -472,11 +472,11 @@ RStudio는 이러한 점을 특히 쉽게 만들었다:
 
 작성한 코드가 정확하다는 것을 확실히 하려면, 저자는 항상 코드를 푸시하지 전에 `R CMD check` 명령어 실행을 추천한다 ([automated checking](#check)에서 배울 주제).
 (아직) 정상 동작하지 않는 코드를 게시하려면, 다음 [branching](#git-branch)에서 학습할 예정인,
-분기(branch) 사용을 추천한다.
+브랜치(branch) 사용을 추천한다.
 
 
 로컬 저장소를 GitHub에 연결하게 되면, Git 창(pane)에 GitHub에 푸쉬되지 않고 로컬 저장소에 커밋된 정보를 보여준다: `r bookdown::embed_png("screenshots/git-local-commits.png", dpi = 220)`.
-이 메시지가 나타내는 것은 로컬(분기)에 커밋이 1개 있는데 GitHub("origin/master")에는 올라가지 않았다는 것이다.
+이 메시지가 나타내는 것은 로컬(브랜치)에 커밋이 1개 있는데 GitHub("origin/master")에는 올라가지 않았다는 것이다.
 
 
 ## GitHub 사용에 따른 혜택 {#github-benefit}
@@ -615,46 +615,71 @@ RStudio에서 현재 병합 충돌에 도움이 되는 어떤 도구도 제공�
 
 ## 이슈사항 (Issues) {#github-issues}
 
+모든 GitHub 저장소에는 이슈사항을 추적하는 페이지가 딸려온다.
+사용해라! 또다른 프로젝트에 작업하다가 버그와 조우하게 되면, 이슈 페이지에 노트해 적어둬라.
+조금더 작은 프로젝트를 갖고 있다면, 이정표를 세우고, 태그달고, 특정 개발자에게 이슈를 배정하는 것에 대해 너무 걱정하지 마라. 한 페이지에 걸친 이슈를 처리해야 되면 (>50), 이러한 면이 더 유용하게 된다. 그 지점에 도달하게 되면, 이슈에 대한 GitHub 안내서를 읽어보라: <https://guides.github.com/features/issues/>.
 
+유용한 기술은 커밋 메시지로 이슈를 마감하는 것이다.
+커밋 메시지 어딘가에 `Closes #<issue number>` 만 넣으면,
+다음번 푸쉬할 때 GitHub이 알아서 이슈를 마감해준다.
+이러한 방식으로 이슈를 마감하게 되면 가장 좋은 점이
+커밋과 이슈에 연결 링크를 생성하는 것이다.
+만약 버그로 다시 되돌아와서 버그를 고치려고 무슨 작업을 했는지 확인하고자 할 때 유용하게 사용된다.
+마감하지 않고 이슈에 연결 링크를 걸 수도 있다; `#<issue number>` 참조를 넣는다.
 
-Every GitHub repo comes with a page for tracking issues. Use it! If you encounter a bug while working on another project, jot a note down on the issues page. When you have a smaller project, don't worry too much about milestones, tags and assigning issues to specific people. Those are more useful once you get over a page of issues (>50). Once you get to that point, read the GitHub guide on issues: <https://guides.github.com/features/issues/>.
+[NEWS.md](#news)에서 더 많이 학습할 것으로, 이슈사항을 마감할 때마다 `NEWS.md` 파일에 글머리표를 추가하는 것이 좋다. 글머리표는 이슈사항을 사용자가 이해하는 용어로 기술해야 된다. 커밋 메시지가 개발자를 위해 작성된 것과 반대다.
 
-A useful technique is closing issues from a commit message. Just put `Closes #<issue number>` somewhere in your commit message and GitHub will close the issue for you when you next push. The best thing about closing issues this way is that it makes a link from the issue to the commit. This is useful if you ever have to come back to the bug and want to see exactly what you did to fix it. You can also link to issues without closing them; just refer to `#<issue number>`.
+## 브랜치 (Branches) {#git-branch}
 
-As you'll learn about in [NEWS.md](#news), it's a good idea to add a bullet to `NEWS.md` whenever you close an issue. The bullet point should describe the issue in terms that users will understand, as opposed to the commit message which is written for developers.
+종종 개발 주요 흐름을 방해하지 않으면서 코드에 큰 변경을 가하고 싶을 때가 있다.
+아마도 코드를 간단한 다수 커밋으로 쪼개서 쉽게 변경사항을 추적하게 만들 수 있다.
+변경사항이 최선의 선택인지 확신하지 못한다면 누군가에게 부탁해서 코드 검토를 받고 싶을 지도 모른다.
+혹은, 일부 실험을 진행하고 싶을지도 모른다 (만약 실험이 성공했들 때만 병합작업을 수행한다).
+이러한 상황에는 브랜치(branch)와 풀 요청(pull request)이 강력한 도구가 된다.
 
-## Branches {#git-branch}
+인식하고 있지 못했을 수도 있지만, 이미 브랜치를 사용하고 있다.
+디폴트 기본설정 브랜치(branch)를 __마스터(master)__라고 부른다;
+이곳이 작성한 커밋을 저장하는 장소가 된다.
+만약 작성한 코드를 GitHub과 동기화시키면, __오리진/마스터(origin/master)__ 브랜치를 갖게 된다:
+GitHub에 전체 커밋한 로컬 복사본으로, 풀 명령어로 끌어올 때 동기화된다.
+`git pull` 명령어는 두가지 작업을 수행한다:
 
-Sometimes you want to make big changes to your code without having to disturb your main stream of development. Maybe you want to break it up into multiple simple commits so you can easily track what you're doing. Maybe you're not sure what you've done is the best approach and you want someone else to review your code. Or, maybe you want to try something experimental (you can merge it back only if the experiment succeeds). Branches and pull requests provide powerful tools to handle these situations.
-
-Although you haven't realised it, you're already using branches. The default branch is called __master__; it's where you've been saving your commits. If you synchronise your code to GitHub you'll also have a branch called __origin/master__: it's a local copy of all the commits on GitHub, which gets synchronised when you pull. `git pull` does two things:
-
-1.  `git fetch origin master` to update the local `origin/master` branch with
-    the latest commits from GitHub.
+1.  `git fetch origin master` 명령어는 GitHub으로부터 가장 최신 커밋으로 
+    로컬 `origin master` 브랜치를 갱신한다.
   
-1.  `git merge orgin/master` to combine the remote changes with your changes.
+1.  `git merge orgin/master` 명령어는 원격 변경사항과 로컬 작업한 변경사항을 결합한다.
 
-It's useful to create your own branches when you want to (temporarily) break away from the main stream of development. You can create a new branch with `git checkout -b <branch-name>`. Names should be in lower case letters and numbers, with `-` used to separate words. 
-  
-Switch between branches with `git checkout <branch-name>`. For example, to return to the main line of development use `git checkout master`. You can also use the branch switcher at the top right of the Git pane:
+(임시로) 주요 개발 흐름에서 벗어날 때 자신만의 개발 브랜치를 생성하는 것이 유용하다.
+`git checkout -b <branch-name>` 명령어로 신규 브랜치를 생성할 수 있다.
+명칭은 소문자와 숫자로 `-`를 사용해서 단어를 구분한다.
+
+`git checkout <branch-name>` 명령어로 브랜치를 전환한다.
+예를 들어, 다시 주 개발흐름으로 돌아가려면 `git checkout master` 명령어를 사용한다.
+또한, Git 창(pane) 우측 상단에 브랜치 전환자(switcher)를 사용해도 된다:
   
 ```{r, echo = FALSE}
 bookdown::embed_png("screenshots/git-branch.png", dpi = 220)
 ```
 
-If you've forgotten the name of your branch in the shell, you can use `git branch` to list all existing branches. 
+만약 쉘에서 브랜치 명칭을 잊어버렸다면, `git branch` 명령어를 사용해서 존재하는 모든 브랜치 목록을 볼 수 있다.
 
-If you try to synchronise this branch to GitHub from inside RStudio, you'll notice that push and pull are disabled: `r bookdown::embed_png("screenshots/git-no-remote.png", dpi = 220)`. To enable them, you'll need to first tell Git that your local branch has a remote equivalent:
+만약 RStudio 내부로부터 해당 브랜치를 GitHub과 동기화하려면,
+풀과 푸쉬가 모두 비활성화된 것을 알아챘을 것이다: `r bookdown::embed_png("screenshots/git-no-remote.png", dpi = 220)`.
+비활성화된 것을 활성화시키려면, 로컬브랜치가 동등한 원격브랜치가 있다는 사실을 Git에게 먼저 일러줘야만 된다:
 
 ```bash
 git push --set-upstream origin <branch-name>
 ```
 
-After you've done that once, you can use the pull and push buttons as usual.
+상기 명령어로 한번 수행하고 나면, 일상으로 돌아와 다시 풀과 푸쉬 버튼을 사용할 수 있다.
 
-If you've been working on a branch for a while, other work might have been going on in the master branch. To integrate that work into your branch, run `git merge master`. You will need to resolve any merge conflicts (see above). It's best to do this fairly frequently - the less your branch diverges from the master, the easier it will be to merge.
+한동안 브랜치에서 작업을 수행하면, 다른 작업은 마스터 브랜치에서 진행될 수 있다.
+해당 작업을 브랜치와 통합하려면, `git merge master` 명령어를 실행한다.
+(위에서 살펴본) 병합충돌을 해결할 필요는 여전히 남아있다.
+상당히 자주 병합충돌 해소작업을 수행하는 것이 최선이다 - 마스터에서 브랜치가 덜 분기해 나갈수록,
+병합작업을 수행하는 것이 더 쉬워진다.
 
-Once you're done working on a branch, merge it back into the master, then delete the branch:
+브랜치에서 작업을 완료하면, 마스터 브랜치에 다시 작업결과를 병합하고 나서, 해당 브랜치를 삭제한다:
 
 ```bash
 git checkout master
@@ -662,163 +687,199 @@ git merge <branch-name>
 git branch -d <branch-name>
 ```
 
-(Git won't let you delete a branch unless you've merged it back into the master branch. If you do want to abandon a branch without merging it, you'll need to force delete with `-D` instead of `-d`. If you accidentally delete a branch, don't panic. It's usually possible to get it back. See the advice about undoing mistakes).
+(마스터 브랜치에 병합작업을 수행하지 않으면, 해당 브랜치를 삭제하지 못하는 역할을 Git이 수행한다.
+만약 병합하지 않고 해당 브랜치를 버릴려면, `-d` 옵션 대신에 `-D` 옵션으로 강제로 삭제할 필요가 있다. 만약 우연히 브랜치를 삭제했다면 당황하지 마라. 대체로 다시 되돌리는 것이 가능하다. 실수를 실행취소하는 조언을 참고하라).
 
-## Making a pull request {#git-pullreq}
 
-A pull request is a tool for proposing and discussing changes before merging them into a repo. The most common use for a pull request is to contribute to someone else's code: it's the easiest way to propose changes to code that you don't control. 
+## 풀 요청하기 {#git-pullreq}
 
-Below, you'll learn about pull requests to make changes to your own code. This may seem a bit pointless because you don't _need_ them, as you can directly modify your code. But pull requests are surprisingly useful because they allow you to get feedback on proposed changes. We use them frequently at RStudio to get feedback before merging major changes.
+풀 요청(pull request)은 저장소에 변경사항을 병합하기 전에 변경사항을 제안하고 논의하는데 사용되는 도구다. 가장 일반적인 풀요청을 사용례는 다른 개발자 코드에 기여하는 것이다:
+본인이 제어권한이 없는 코드에 변경사항을 제안하는 가장 쉬운 방법이다.
 
-GitHub has some good documentation on using pull requests: <https://help.github.com/articles/using-pull-requests/>. In this chapter, I'll focus on the basics you need to know to use pull requests effectively, and show you how they fit in with the Git commands you've learned so far.
+아래에서 본인 자신의 코드를 변경하는데 사용되는 풀요청을 학습할 것이다.
+직접적으로 작성한 코드를 변경할 수 있어, 이러한 과정이 _필요하지 않기_ 때문에 다소 무의미하게 보일 수도 있다. 하지만, 풀요청은 놀랍게도 유용한데 이 과정을 통해서
+제안된 변경사항에 대한 피드백을 얻을 수 있기 때문이다.
+저자가 속한 팀에서 RStudio에 이러한 기능을 사용해서 주요 변경사항을 병합하기 전에 피드백을 받는다.
 
-To create a pull request, you create a branch, commit code, then push the branch to GitHub. When you next go to the GitHub website you'll see a header that invites you to submit a pull request. You can also do it by:
+GitHub 사이트에 풀 요청 사용법에 대한 좋은 문서가 있다: <https://help.github.com/articles/using-pull-requests/>.
+이번 장에서, 저자는 풀 요청을 효과적으로 사용하는데 알아야 되는 기본기에 초점을 맞췄다.
+지금까지 학습한 Git 명령어로 어떻게 엮어서 사용하는지 보여줬다.
 
-1.  Switching branches: 
+풀 요청을 생성하려면, 브랜치를 생성하고, 코드를 커밋하고 나서, 브랜치를 GitHub에 푸쉬한다.
+다음번에 GitHub 웹사이트에 방문하면, 풀 요청을 제출하도록 초대하는 헤더 정보를 볼 수 있다.
+다음 방법으로 동일한 작업을 수행할 수도 있다:
+
+1.  브랜치를 전환한다:
 
     ```{r, echo = FALSE}
     bookdown::embed_png("screenshots/github-branches.png", dpi = 220)
     ```
 
-1.  Clicking `r bookdown::embed_png("screenshots/pr-create.png", dpi = 220)`
+1.  `r bookdown::embed_png("screenshots/pr-create.png", dpi = 220)`을 클릭한다.
 
-This will create a page that looks like this:
+상기 작업은 다음과 같은 페이지를 생성한다:
 
 ```{r, echo = FALSE}
 bookdown::embed_png("screenshots/pr.png", dpi = 220)
 ```
 
-This pull request, which fixes a couple of small problems, is one that was submitted to this book's GitHub site.
+상기 풀 요청은 작은 문제 몇개를 고치는 것으로 이 책 GitHub 사이트에 제출된 사례다.
 
-There are three parts to a pull request:
+풀 요청은 세가지 구성요소가 있다:
 
-* A __conversation__, 
+
+* __대화(conversation)__, 
   `r bookdown::embed_png("screenshots/pr-conversation.png", dpi = 220)`,
-  where you can discuss the changes as a whole.
+  여기서 변경사항을 토론할 수 있다.
   
-* The __commits__ view, 
+* __커밋(commits)__ 뷰, 
   `r bookdown::embed_png("screenshots/pr-commits.png", dpi = 220)`,
-  where you can see each individual commit.
+  여기서 각 개별 커밋을 볼 수 있다.
   
-* The __file changes__,
+* __파일 변경(file changes)__,
   `r bookdown::embed_png("screenshots/pr-changes.png", dpi = 220)`,
-  where you see the overall diff of the commits, and you can comment
-  on individual lines.
+  여기서 전체 커밋 차이(diff)와 함께 각 개별 행에 대한 주석을 볼 수 있다.
 
-Once you're done discussing a pull request, you either choose to merge it or delete it. Merging it is equivalent to running `git merge <branchname>` from the shell; deleting is equivalent to `git branch -r <branchname>`.
+풀 요청을 토론을 수행하면, 병합하거나 삭제할 수 있다.
+병합작업은 쉘에서 `git merge <branchname>` 명령어를 실행하는 것에 대응된다;
+삭제는 `git branch -r <branchname>` 명령어 실행에 대응된다.
 
-## Submitting a pull request to another repo {#pr-make}
+## 풀 요청 사항을 또다른 저장소에 제출하기 {#pr-make}
 
-To submit a pull request to a repo that you don't own, you first need to create a copy of the repo that you can own, called a __fork__, and then clone that fork on your own computer:
+본인이 소유하고 있지 않은 저장소에 풀 요청을 제출하려면,
+먼저 본인이 소유할 수 있는 __포크(fork)__로 불리는 저장소 사본을 생성할 필요가 있다.
+그리고 나서 본인 컴퓨터에 해당 포크를 복제(clone)한다.
 
-1.  __Fork__ the original repo by going to the repo on GitHub and clicking
-    `r bookdown::embed_png("screenshots/github-fork.png", dpi = 220)`. 
-    This creates a copy of the repo that belongs to you. 
 
-1.  __Clone__ the forked repo to create a local copy of the remote repo. 
-    It's possible to do this within RStudio (using "Create New Project" from 
-    "Version Control") but I think it's easier to do it from the shell:
+1.  __포크(Fork)__ 작업은 GitHub 저장소로 가서 `r bookdown::embed_png("screenshots/github-fork.png", dpi = 220)`를 클릭하면 된다.
+    이 작업을 통해 본인이 소유관리하는 저장소 사본이 생성된다.
+
+1.  __복제(Clone)__ 작업은 포크한 저장소를 복제하여 원격저장소와 똑같은 로컬 사본을 생성한다.
+    RStudio 내부에서 이 작업을 수행하는 것이 가능하다 
+    ("Version Control"에서 "Create New Project" 기능을 사용한다). 하지만,
+    쉘에서 동일한 작업을 수행하는 것이 좀더 쉽다고 저자는 판단한다:
     
     ```bash
     git clone git@github.com:<your-name>/<repo>.git
     cd <repo>
     ```
 
-A fork is a _static_ copy of the repo: once you've created it, GitHub does nothing to keep it in sync with the upstream repo. This is a problem because while you're working on a pull request, changes might occur in the original repo. To keep the forked and the original repo in sync, start by telling your repo about the upstream repo:
+포크는 저장소의 _정적(static)_ 복사본이다: 
+저장소 사본이 생성되면, GitHub은 상류 저장소와 동기화하는데 전혀 관여하지 않는다.
+이것이 문제가 되는데 이유는 풀요청 작업을 하는 동안에, 원래 저장소에 변경사항이 일어날 수도 있다.
+포크한 저장소와 원 저장소를 동기화 하려면, 상류 저장소에 관한 정보를 본인 저장소에 일러줘서 시작한다:
 
 ```bash
 git remote add upstream git@github.com:<original-name>/<repo>.git
 git fetch upstream
 ```
 
-Then you can merge changes from the upstream repo to your local copy:
+그리고 나서, 상류 저장소로부터 변경사항을 본인 로컬 사본과 병합한다:
 
 ```bash
 git merge upstream/master
 ```
 
-When working on a forked repo, I recommend that you don't work on the master branch. Because you're not really working on the main line of development for that repo, using your master branch makes things confusing. 
+포크뜬 저장소에 작업할 때, 마스터 브랜치에서 작업하지 않도록 저자는 추천한다.
+왜냐하면 해당 저장소 주요 개발선상에서 정말 작업하는 것이 아니기 때문에,
+마스터 브랜치를 사용하는 것이 혼란을 불러올 수 있다.
 
-If you always create pull requests in branches, you can make it a little easier to keep your local repo in sync with the upstream repo by running:
+
+만약 브랜치에서 풀 요청을 항상 생성하게 되면,
+상류 저장소와 로컬 저장소를 동기화하는게 다음 명령어를 실행해서 약간 더 쉽게 만들 수 있다:
 
 ```bash
 git branch -u upstream/master   
 ```
 
-Then you can update your local repo with the following code:
+그리고 나서, 다음 코드로 로컬 저장소를 갱신할 수 있다:
 
 ```bash
 git checkout master
 git pull
 ```
-
-Changes may occur while you're working on the pull request, so remember to merge them into your branch with:
+풀요청작업을 하는 동안에 변경사항이 발생할지도 모른다. 그래서 다음 명령어로 작업중인 브랜치에 병합하는 것을 명심하라:
 
 ```bash
 git checkout <my-branch>
 git merge master
 ```
 
-A pull request (PR) is a one-to-one mapping to a branch, so you can also use this technique to make updates based on the pull request discussion. Don't create a new pull request each time you make a change; instead you just need to push the branch that the PR is based on and the PR webpage will automatically update.
+풀 요청(pull request, PR)은 브랜치에 일대일 매핑이다. 그래서 
+이 기법을 사용해서 풀요청 토론에 기반해서 갱신할 수 있다.
+변경할 때마다 새로운 풀요청을 생성하지 마라; 
+대신에 PR이 기반한 브랜치에만 푸쉬하면 되고, PR 웹페이지는 자동으로 갱신된다.
 
-The diagram below illustrates the main steps of creating a pull request and updating the request as the upstream repo changes:
+다음 다이어그램에 상류 저장소가 변경될 때 풀 요청을 생성하고, 요청사항을 갱신하는 주요 단계가 그려져 있다:
 
 ```{r, echo = FALSE}
 bookdown::embed_png("diagrams/pull-request-process.png", dpi = 220)    
 ```
 
-## Reviewing and accepting pull requests {#pr-accept}
+## 풀 요청 검토와 승인 {#pr-accept}
 
-As your package gets more popular, you're likely to receive pull requests. Receiving a pull request is fantastic. Someone not only cares about your package enough to use it, they've actually read the source code and made an improvement!
+작성한 팩키지가 점점 인기가 많아지면, 풀요청을 다수 받을 것 같다.
+풀요청을 받는 것은 환상적이다.
+누군가 개발한 팩키지를 사용할만큼 관심을 가져줄 뿐만 아니라,
+실제로 소스코드를 읽고 개선도 해주다니 말이다!
 
-When you receive a pull request, I recommend reviewing it using the three step approach described by Sarah Sharp. I summarise the three phases below, but I highly recommend reading the full article at <http://sarah.thesharps.us/2014/09/01/the-gentle-art-of-patch-review/>:
+풀 요청을 받으면, 사라 샤프(Sarah Sharp)가 기술한 세단계 접근법을 사용해서 검토하는 것을 저자는 추천한다. 저자는 다음에 세단계를 다음과 같이 요약했다. 하지만,
+<http://sarah.thesharps.us/2014/09/01/the-gentle-art-of-patch-review/> 웹사이트에서 전체 기사를 읽어보는 것을 강력히 추천한다:
 
-1.  Is it a good idea? If you don't think the contribution is a good fit for 
-    your project, it's polite to let the contributor know as quickly as 
-    possible. Thank them for their work, and refocus them on a better area to 
-    work on.
+1.  좋은 생각인가? 만약 기여분이 본인 프로젝트와 잘 맞지 않는다고 생각되면,
+    기여하신 분께 가능하면 빨리 알 수 있게하는 것이 예의바른 행동이다.
+    기여하신 분께 감사의 말씀을 전하고 더 나은 곳에 다시 집중할 수 있도록 배려한다.
     
-1.  Is the overall approach sound? At this point you want to focus on the big
-    picture: have they modified the right functions in the right way? Avoid
-    nitpicking minor style problems (that's the final phase); instead just 
-    provide a pointer to your style preferences, e.g. 
+1.  전반적 접근방법이 올바른가? 이 지점에서 큰그림에 집중할 필요가 있다:
+    기여하신 분이 올바른 방식으로 올바른 함수를 변경했는가?
+    사소한 스타일 문제를 따지는 것은 피한다 (이점은 최종단계 이슈다);
+    대신에 프로젝트 스타일에 대한 환경설정 정보를 제공한다, 예를 들어, 
     <http://r-pkgs.had.co.nz/style.html>.
 
-1.  Is it polished? In the final review phase, make sure that the non-code
-    parts of the PR are polished. Prompt the contributor to update the 
-    documentation, point out spelling mistakes and suggest better wording.
-    
-    I recommend asking the contributor to include a bullet point in `NEWS.md`, 
-    briefly describing the improvement and thanking themselves with their GitHub 
-    username. More details to follow in  [post release](#post-release)).
+1.  깔끔히 정리되었는가? 마지막 검토 단계에서, PR 요청 코드가 아닌 부분이 깔끔히 정리되었는지 
+    확실히 한다. 기여하신 분께 맞춤법 검사와 더 나은 표현 제안을 통해서 문서를 갱신하게 한다.
 
-After discussion is complete, you can incorporate the changes by clicking the merge button. If the button doesn't work, GitHub provides some instructions on how to do it from the command line. While you've seen all the pieces before, it's useful to read through this just so you understand what exactly is happening.
+    `NEWS.md` 파일에 글머리표를 포함해서 개선사항을 기술하고 GitHub 사용자명을 넣어 
+    감사를 표시할 수 있게끔 기여하신 분께 요청하는 것을 저자는 추천한다.
+    좀더 자세한 사항은 [post release](#post-release)에 나와 있다.
+
+토의가 완료된 뒤에 병합 버튼을 클릭해서 변경사항을 반영한다.
+만약 버튼이 잘 동작하지 않는다면, 명령라인 인터페이스에서 동일한 작업을 수행하는 안내가 GitHub에 나와 있다. 앞에서 필요한 모든 부분을 살펴봤지만, 해당 문서를 읽어보는 것이 도움이 된다.
+그렇게 함으로써 정확하게 무슨 일이 일어나고 있는지 이해하게 된다.
 
 ```bash
-# Create a new branch, and sync it with the pull request
+# 신규 브랜치를 생성하고 풀 요청으로 동기화한다.
 git checkout -b <branch> master
 git pull https://github.com/<user>/<branch>.git patch-3
 
-# Merge the changes into the main line of development
+# 변경사항을 주요 개발선상에 병합한다.
 git checkout master
 git merge --no-ff <branch>
-# Resolve conflicts, stage and add.
+# 충돌을 해소하고, 준비단계로 올리고 추가한다.
 
-# Sync your local changes with GitHub
+# GitHub과 로컬 변경사항을 동기화한다.
 git push origin master
 ```
 
-## Learning more {#git-learning}
+## 추가 학습 {#git-learning}
 
-Git and GitHub are a rich and powerful set of tools, and there's no way this chapter has taught you everything you need to know. However, you should now have the basic knowledge to be effective, and you should be in a good position to learn more. Some good resources are:
-  
-* GitHub help, <https://help.github.com>, not only teaches you about
-  GitHub, but also has good tutorials on many Git features.
+Git과 GitHub은 풍부하고 강력한 도구 집합이다.
+다른 어떤 방식으로도 필요한 모든 것을 이번 장에서 가르칠 수는 없다.
+하지만, 효과적으로 기본 지식을 갖추었으니, 더 많은 학습을 이어나갈 좋은 위치에 섰다.
+훌륭한 교재가 다음에 나와 있다:
 
-* If you'd like to learn more about the details of Git, read 
-  [Pro Git](http://git-scm.com/book/en/v2) by Scott Chacon and Ben Straub.
 
-Finally, StackOverflow is a vital part of Git - when you have a problem that you don't know how to solve, StackOverflow should be your first resource. It's highly likely that someone has already had the same exact problem as you, and that there will be a variety of approaches and solutions to choose from.
+* GitHub 도움말, <https://help.github.com>, GitHub에 대한 사용법 뿐만 아니라,
+  많은 Git 기능에 대한 좋은 사용지침을 전달한다.
+
+
+* Git 에 대한 세부내용에 관해서 좀더 학습하려면, Scott Chacon 과 Ben Straub이 저술한
+  [Pro Git](http://git-scm.com/book/en/v2) 책을 탐독한다.
+
+마지막으로, 스택오버플로우(StackOverflow)는 그자체가 Git의 핵심부분이다 -
+해결방법을 모르는 문제를 갖게되면, 스택오버플로우가 첫 학습교재가 되야한다.
+누군가 이미 여러분과 정확하게 동일한 문제를 가졌을 확률이 많이 높고,
+다양한 접근방법과 더불어 고를 수 있는 선택지가 다수 있을 것이다.
 
 [gh-issues]:https://guides.github.com/features/issues/
 [gh-pr]: https://help.github.com/articles/using-pull-requests/
