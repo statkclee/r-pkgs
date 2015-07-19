@@ -494,34 +494,35 @@ RStudio는 이러한 점을 특히 쉽게 만들었다:
     devtools::install_github("<your_username>/<your_package>")
     ``` 
 
-1.  
-
-You can track the history of the project in the commit view, e.g. 
-    <https://github.com/hadley/testthat/commits/master>. When I'm working on 
-    a package with others, I often keep this page open so I can see what 
-    they're working on.  Individual commits show the same information that you 
-    see in the commit/diff window in RStudio.
-
-1.  It's easy to see the history of a file. If you navigate to a file and click 
-    __History__, you'll see every commit that affected that file. Another useful 
-    view is __Blame__; it shows the last change made to each line of code, who 
-    made the change, and the commit the change belongs to. This is tremendously 
-    helpful when you're tracking down a bug. 
+1.  커밋 보기에서 프로젝트 이력을 추적할 수 있다. 예를 들어, 
+    <https://github.com/hadley/testthat/commits/master>.
+    다른 개발자와 저자가 팩키지에 대한 작업을 할 때,
+    해당 페이지를 공개해서 다른 개발자가 작업하는 것을 볼 수 있다.
+    개별 커밋에는 RStudio commit/diff 창에서 보는 것과 
+    동일한 정보가 나타나 있다.
     
-    You can jump directly to these pages from RStudio with the Git dropdown in 
-    the main toolbar: 
+
+1.  파일 이력을 보는 것도 쉽다.
+    만약 파일을 탐색하고 __이력(History)__을 클릭하면,
+    파일에 영향을 준 모든 커밋 정보가 나와 있다.
+    또다른 유용한 관점은 __책임(Blame)__이다;
+    각 코드 라인에는 최종 변경정보, 변경작업한 개발자 정보, 변경사항이 속한 커밋정보가 
+    나와있다. 버그를 추적해서 좁혀갈 때, 엄청나게 도움이 된다.
+
+    RStudio 툴바에 있는 Git 드롭다운 메뉴를 통해서 해당 페이지로 바로 들어갈 수 있다: 
     
     ```{r, echo = FALSE}
     bookdown::embed_png("screenshots/git-dropdown.png", dpi = 220)
     ```
 
-1.  You can comment on commits. To comment on the commit as a whole, use the 
-    comment box at the bottom of the page. To comment on an individual line,
-    click the plus sign that appears when you mouse over a line number,
-    `r bookdown::embed_png("screenshots/github-comment-line.png", dpi = 220)`. 
-    This is a great way to let your collaborators know if you see a mistake or 
-    have a question. It's better than email because it's public so anyone 
-    working on the repo (both present and future) can see the conversation.
+1.  커밋에 주석을 달 수도 있다. 전체로 커밋에 주석을 달려면,
+    페이지 하단에 주석상자를 활용한다.
+    각 라인에 주석을 달려면, 해당 라인에 마우스를 갖다대면 더하기 기호가 생기는데 이를 클릭한다, 
+    `r bookdown::embed_png("screenshots/github-comment-line.png", dpi = 220)`.
+    실수한 것을 보거나 질문이 있을 때 동료개발자에게 정보를 제공하는 훌륭한 방법이다.
+    전자우편보다 더 좋은데 이유는 공개되어 있어
+    저장소에 작업하고 있는 (현재 혹은 미래) 누구나 대화내용을 볼 수 있기 때문이다.
+
 
 ## Working with others {#git-pull}
 
