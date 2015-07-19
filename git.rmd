@@ -338,143 +338,165 @@ bookdown::embed_png("screenshots/git-commit-window.png", dpi = 220)
 이러한 것이 방해가 되서는 않된다.
 만약 여러분이 저자 저장소 커밋 이력을 본다면, 많은 부분은 그다지 훌륭하지 못하다는 것을 알아챘을 것이다. 특히, __여전히__ 어떻해서든지 버그를 고쳐보려고 하지 못할 정도로 좌절이 시작될 때 더욱 그렇다. 상기 안내지침을 따르려고 노력하고, 하나의 완전한 커밋보다는 다수 불완전한 커밋이 더 낫다.
 
-## Ignoring files {#git-ignore}
+## 파일 무시하기 {#git-ignore}
 
-Often, there are files that you don't want to include in the repository. They might be transient (like LaTex or C build artefacts), very large, or generated on demand. Rather than carefully _not_ staging them each time, you should instead add them to `.gitignore`. This will prevent them from ever being added. The easiest way to do this is to right-click on the file in the Git pane and select `Ignore`:
+종종, 저장소에 포함하고 싶지 않은 파일이 있다.
+이러한 유형의 파일은 일시적이고(LaTeX 혹은 C 빌드 산출물), 매우 크거나, 요청시 생성되는 것이 포함된다. 매번 주의를 기울여 준비단계로 _올리지 않는_ 대신에, `.gitignore` 파일에 추가하면 된다.
+이 기능을 통해서 준비단계로 올려지는 것을 방지한다.
+가장 쉬운 방법은 Git 창(pane)에서 우클릭해서 `Ignore`를 선택한다:
+
 
 ```{r, echo = FALSE}
 bookdown::embed_png("screenshots/git-ignore.png", dpi = 220)
 ```
 
-If you want to ignore multiple files, you can use a wildcard "glob" like `*.png`. To learn more about the options, see [ignoring files](http://git-scm.com/book/ch2-2.html#Ignoring-Files) in Pro-Git.
+만약 파일 다수를 무시하려면, `*.png` 처럼 와일드카드 "글롭(glob)"을 사용할 수 있다.
+선택옵션에 관한 좀더 학습하려면, Pro-Git 책에 [파일 무시하기](http://git-scm.com/book/ch2-2.html#Ignoring-Files)를 참조한다.
 
-Some developers never commit derived files, files that can be generated automatically. For an R package this would mean ignoring the files in the `NAMESPACE` and `man/` directories because they're generated from comments. From a practical pespective, it's better to commit these files: R packages have no way to generate `.Rd` files on installation so ignoring derived files means that users who install your package from GitHub will have no documentation.
+일부 개발자는 파생파일을 절대로 커밋하지 않는다. 파생파일은 자동으로 생성될 수 있다.
+R 팩키지 개발에서는 `NAMESPACE` 파일과 `man/` 디렉토리에 담기는 파일이 버전관리에서 무시된다는 것을 의미한다. 왜냐하면 주석으로부터 만들어지기 때문이다. 실무적인 면에서는 이러한 파일도 커밋하는 것이 낫다: R 팩키지가 설치에 `.Rd` 파일을 만들어낼 방도가 없다. 그래서, 파생파일을 무시하게 되면 GitHub에서 작성한 팩키지를 설치한 사용자는 문서가 전혀없게 된다.
 
-## Undo a mistake {#git-undo}
+## 실수 실행취소(Undo) {#git-undo}
 
-The best thing about using commits is that you can undo mistakes. RStudio makes it particularly easy:
+커밋을 사용하게 되면 가장 좋은 점은 실수를 실행취소할 수 있다는 것이다.
+RStudio는 이러한 점을 특히 쉽게 만들었다:
 
-*   To undo the changes you've just made, right click on the file in the Git 
-    pane and select "revert". This will roll any changes back to the previous 
-    commit. Beware: you can't undo this operation!
-  
-    You can also undo changes to just part of a file in the diff window. Look 
-    for a __discard chunk__ button above the block of changes that you want to 
-    undo:`r bookdown::embed_png("screenshots/git-chunk.png", dpi = 220)`. You 
-    can also discard changes to individual lines or selected text.
 
-*   If you committed changes too early, you can modify the previous commit by 
-    staging the extra changes. Before you click commit, select 
-    `r bookdown::embed_png("screenshots/git-commit-amend.png", dpi = 220)`. 
-    (Don't do this if you've pushed the previous commit to GitHub - you're
-    effectively rewriting history, which should be done with care when you're 
-    doing it in public.)
-  
-If you didn't catch the mistake right away, you'll need to look backwards in history and find out where it occurred:
+*   방금 변경한 사항을 실행취소하려면, Git 창(pane)에서 파일을 우클릭하고 되돌리기 "revert"를
+    선택한다. 이러게 하면 이전 커밋으로 변경사항을 다시 되돌린다. 
+    주의: 이 작업을 다시 실행취소할 수는 없다!
 
-1.  Open the history window by clicking
-    `r bookdown::embed_png("screenshots/git-history.png", dpi = 220)` in the 
-    Git pane.
+    차이 (diff) 윈도우에 파일 일부만 실행취소할 수도 있다.
+    실행취소 하고자하는 변경 블록 상단에 __discard chunk__를 찾아봐라: 
+    `r bookdown::embed_png("screenshots/git-chunk.png", dpi = 220)`.
+    개별 행 혹은 선택한 텍스트에 변경사항도 폐기할 수 있다.
+    
+
+*   만약 너무 일찍 변경사항을 커밋했다면, 추가 변경사항을 준비단계로 올려서
+    이전 커밋을 변형할 수 있다. 커밋을 클릭하기 전에, 
+    `r bookdown::embed_png("screenshots/git-commit-amend.png", dpi = 220)`
+    체크박스를 선택하라. 
+    (이전 커밋을 GitHub에 푸쉬했다면, 이 기능을 사용하지 마라 -
+    이력(history)을 효과적으로 다시 작성하는 방법으로, 공공장소에서 작업을 할 때는
+    주의를 기울여야 한다.)
+
+즉석에서 실수를 잡아내지 못한다면, 이력을 거슬러 올라가서 살펴보고, 실수가 발생한 장소를 찾아낼 필요가 있다:
+
+
+1.  Git 창(pane)에서 `r bookdown::embed_png("screenshots/git-history.png", dpi = 220)` 을
+    클릭해서 이력(history) 윈도우를 연다.
     
     ```{r, echo = FALSE}
     bookdown::embed_png("screenshots/git-history-window.png", dpi = 220)
     ```
 
-    The history window is divided into two parts. The top part lists every
-    commit to your repo. The bottom part shows you the commit:
-    the SHA (the unique id), the author, the date, the parent and 
-    the changes in the commit.
-     
-1.  Navigate back in time until you find the commit where the mistake occurred.
-    Write down the parent SHA: that's the commit that occurred before the 
-    mistake so it will be good.
+    이력 윈도우는 두 부분으로 나뉘어진다.
+    상단 부분은 저장소에 모든 커밋 목록을 출력한다.
+    하단 부분은 커밋을 보여준다: SHA (유일무이한 id), 저자, 날짜, 부모, 커밋 변경사항.
     
-Now you can use that SHA in the shell:
+    
+1.  실수가 일어난 커밋을 찾아낼 때까지 시간을 거슬러 탐색한다.
+    부모 SHA 코드를 적는다: 실수를 저지르기 전 커밋으로 다시 작업하는 시점으로 적절할 것이다.
 
-*   See what the file looked like in the past so you can copy-and-paste the old
-    code:
-    
+
+이제 쉘에서 상기 SHA 코드를 사용한다:
+
+*   파일이 과거에 어땠는지 보고서 이전 코드를 복사해서 붙여넣을 수 있다:
+
     ```bash
     git show <SHA> <filename>
     ```
 
-*   Or copy the version from the past back in to the present:
+*   혹은 과거 버젼을 복사해서 현재로 가져온다:
 
     ```bash
     git checkout <SHA> <filename>
     ```
+
+상기 두가지 경우 모두 파일을 준비단계로 올리고 커밋해서 마무리할 필요가 있다.
     
-In both cases you'll need to finish by staging and committing the files.
+(마치 시간을 거슬러 올라가서 실수가 처음부터 발생하지 않은 것처럼 Git를 사용하는 것도 가능하다.
+이것이 __이력 리베이스(rebasing history)__로 불리는 고급기술이다. 상상하듯이, 과거를 변경하려고 시간을 거슬러 올라가면 현재에도 심오한 영향을 준다. 유용할 수 있지만, 극도로 조심해서 사용될 필요가 있다.)
 
-(It's also possible to use Git as if you went back in time and prevented the mistake from happening in the first place. This is an advanced technique called __rebasing history__. As you might imagine, going back in time to change the past can have a profound impact on the present. It can be useful, but it needs to be done with extreme care.)
+그래도 여전히 문제에 봉착했다면, <http://sethrobertson.github.io/GitFixUm/fixup.html> 혹은 <http://justinhileman.info/article/git-pretty/>을 참조한다.
+흔히 있는 (그다지 흔하지는 않음!) 많은 문제를 고치는데 단계별 접근법을 제시하고 있다.
 
-If you're still stuck, try <http://sethrobertson.github.io/GitFixUm/fixup.html> or <http://justinhileman.info/article/git-pretty/>. They give step-by-step approaches to fixing many common (and not so common!) problems.
+## GitHub과 동기화 {#github-init}
 
-## Synchronising with GitHub {#github-init}
+지금까지 로컬 컴퓨터에서만 작업을 해왔다. 커밋을 사용해서 프로젝트 진도를 추적하고 안전 검사점(checkpoint)도 찍었다. 하지만, Git이 정말 빛을 발할 때는 작성한 코드를 
+[GitHub](http://github.com)으로 다른 개발자와 공유하기 시작할 때다.
+다른 선택지가 있지만, 저자는 GitHub을 추천하는데 이유는 공개 소프트웨어 프로젝트에 대해서는 무료고, 필요한 모든 기능을 갖추고 있으며, R 개발자 세상에서는 가장 대중적인 선택이라서 그렇다.
 
-So far we've only been working locally, using commits to track the progress of a project and to provide safe checkpoints. However, Git really shines when you start sharing your code with others with [GitHub](http://github.com). While there are other choices, I recommend GitHub because it is free for open source projects, it has all the features you'll need, and is a popular choice in the R world. 
+작성한 코드를 GitHub에 게시, 즉 __푸시(push)__하려면:
 
-To publish, or __push__, your code to GitHub:
 
-1.  Create a new repo on GitHub: <https://github.com/new>. Give it the same
-    name as your package, and include the package title as the repo
-    description. Leave all the other options as is, then click Submit.
 
-1.  Open a shell, then follow the instructions on the new repo page. 
-    They'll look something like this:
+1.  GitHub에 신규 저장소를 생성한다: <https://github.com/new>.
+    작성한 팩키지와 동일한 명칭을 부여하고, 팩키지 제목을 저장소 설명으로 추가한다.
+    다른 선택옵션을 그대로 두고, 완료(Submit) 버튼을 클릭한다.
+
+1.  쉘을 열고 나서, 신규 저장소 페이지 안내절차를 따른다.
+    안내절차는 다음과 같을 것이다:
 
     ```bash
     git remote add origin git@github.com:hadley/r-pkgs.git
     git push -u origin master
     ```
     
-    The first line tells Git that your local repo has a remote version on 
-    GitHub, and calls it "origin". The second line pushes all your current 
-    work to that repo.
+    상기 첫번째 줄을 해석하면, 로컬 저장소가 GitHub에 원격 버젼 저장소를 갖고 있는데 
+    "origin"으로 칭한다. 두번째 줄은 현재 모든 작업결과를 원격 저장소에 밀어 넣는다는 
+    것을 의미한다.
 
-Now let's make a commit and verify that the remote repo updates:
+이제 커밋을 하고, 원격 저장소가 갱신되었는지 확인하자:
 
-1.  Modify `DESCRIPTION` to add `URL` and `BugReports` fields that link 
-    to your new GitHub site. For example, dplyr has:
+1.  `DESCRIPTION` 파일을 변경해서 `URL` 과 `BugReports` 필드를 추가해서
+    신규 GitHub 사이트에 연결한다. 예를 들어, `dplyr`은 다음과 같다:
 
     ```yaml
     URL: http://github.com/hadley/dplyr
     BugReports: http://github.com/hadley/dplyr/issues
     ```
 
-1.  Save the file and commit (with the message "Updating DESCRIPTION to add 
-    links to GitHub site").
+1.  파일을 저장하고 ("Updating DESCRIPTION to add 
+    links to GitHub site") 메시지를 넣어 커밋한다.
     
-1.  __Push__ your changes to GitHub by clicking 
-    `r bookdown::embed_png("screenshots/git-push.png", dpi = 220)`. (This is 
-    the same as running `git push` in the shell). 
+1.  `r bookdown::embed_png("screenshots/git-push.png", dpi = 220)`을 클릭해서 GitHub에
+   변경사항을 __푸쉬(Push)__한다. (쉘에서 `git push` 명령어를 실행한 것과 동일하다).
     
-1.  Go to your GitHub page and look at the `DESCRIPTION`.
+1.  GitHub 페이지로 돌아가서 `DESCRIPTION` 파일을 살펴본다.
 
-Usually, each push will include multiple commits. This is because you push much less often than you commit. How often you push versus commit is completely up to you, but pushing code means publishing code. So strive to push code that works. 
+대체로, 푸쉬 각각에는 다수 커밋이 포함된다.
+왜냐하면, 커밋하는 것보다 덜 푸쉬하기 때문이다.
+얼마나 자주 푸쉬 vs 커밋 비율을 갖는지는 완전히 개발자 본인에게 달려있다.
+하지만, 코드를 푸시는 코드를 출시한다는 의미가 된다. 그래서 정상 동작하는 코드를 푸쉬하려고 노력하라.
 
-To ensure your code is clean, I recommend always running `R CMD check` before you push (a topic you'll learn about in the chapter on [automated checking](#check)). If you want to publish code that doesn't work (yet), I recommend using a branch, as you'll learn about below in [branching](#git-branch).
+작성한 코드가 정확하다는 것을 확실히 하려면, 저자는 항상 코드를 푸시하지 전에 `R CMD check` 명령어 실행을 추천한다 ([automated checking](#check)에서 배울 주제).
+(아직) 정상 동작하지 않는 코드를 게시하려면, 다음 [branching](#git-branch)에서 학습할 예정인,
+분기(branch) 사용을 추천한다.
 
-Once you've connected your repo to GitHub, the Git pane will show you how many commits you have locally that are not on GitHub: `r bookdown::embed_png("screenshots/git-local-commits.png", dpi = 220)`. This message indicates that I have 1 commit locally (my branch) that is not on GitHub ("origin/master").
 
-## Benefits of using GitHub {#github-benefit}
+로컬 저장소를 GitHub에 연결하게 되면, Git 창(pane)에 GitHub에 푸쉬되지 않고 로컬 저장소에 커밋된 정보를 보여준다: `r bookdown::embed_png("screenshots/git-local-commits.png", dpi = 220)`.
+이 메시지가 나타내는 것은 로컬(분기)에 커밋이 1개 있는데 GitHub("origin/master")에는 올라가지 않았다는 것이다.
 
-1.  You get a decent website. The GitHub page for your project, e.g. 
-    <https://github.com/hadley/testthat> (the GitHub repo for testthat), lists 
-    all the files and directories in your package. `.R` files will be formatted 
-    with syntax highlighting, and `.md`/`.Rmd` files will be rendered as HTML.
-    And, if you include a `README.md` file in the top-level directory, it will 
-    be displayed on the homepage. You'll learn more about the benefits of 
-    creating this file in [README.md](#readme). 
 
-1.  It makes it easy for anyone to install your package (and to benefit from your 
-    hard work):
+## GitHub 사용에 따른 혜택 {#github-benefit}
+
+1.  괜찮은 웹사이트가 생김. 팩키지에 대한 GitHub 페이지에 팩키지에 대한 모든 파일과 디렉토리 
+    목록이 올라간다. 예를 들어, <https://github.com/hadley/testthat> (the GitHub repo for testthat). 
+    `.R` 파일은 구문 강조 기능으로 서식이 입혀지고, `.md`/`.Rmd` 파일은 HTML로 렌더링된다.
+    그리고, 만약 최상위 디렉토리에 `README.md` 파일을 포함하게 되면, 홈페이지로 화면에 출력된다.
+    [README.md](#readme)에서 이 파일 생성에 따른 혜택에 대해서 더 배울 예정이다.
+
+1.  작성한 팩키지를 다른 누군가 설치하기 쉽게 한다. 
+    (그리고 개발자의 노고에 대한 혜택도 포함된다):
 
     ```r
     devtools::install_github("<your_username>/<your_package>")
     ``` 
 
-1.  You can track the history of the project in the commit view, e.g. 
+1.  
+
+You can track the history of the project in the commit view, e.g. 
     <https://github.com/hadley/testthat/commits/master>. When I'm working on 
     a package with others, I often keep this page open so I can see what 
     they're working on.  Individual commits show the same information that you 
