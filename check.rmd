@@ -272,49 +272,54 @@ tools:::.check_package_CRAN_incoming
 ### R 코드
 
 <!-- https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L1226 -->
-* __Checking R files for non-ASCII characters__. For maximum portability (i.e.
-  so people can use your package on Windows) you should avoid using non-ASCII
-  characters in R files. It's ok to use them in comments, but object names 
-  shouldn't use them, and in strings you should use unicode escapes. See 
-  [`R/` CRAN notes](#r-cran) for more details.
+* __Checking R files for non-ASCII characters__. 
+  이식성을 극대화하기 위해서 (즉, 윈도우에서도 작성한 팩키지를 사용가능함),
+  R 파일에 비아스키(non-ASCII) 문자사용을 피한다.
+  주석에서 사용할 수도 있지만, 객체명칭에는 사용되면 안된다.
+  문자열에는 유니코드 이스케이프(unicode escape)를 사용해야 된다.
+  좀더 자세한 사항은 [`R/` CRAN notes](#r-cran)을 참조한다.
+
 
 <!-- https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L1258 -->
-* __Checking R files for syntax errors__. Obviously your R code must be valid.
-  You're unlikely to see this error if you're been regularly using 
-  `devtools::load_all()`.
-
-<!--- tools:::.check_packages_used --->
-* __Checking dependencies in R code__. Errors here often indicate that you've 
-  forgotten to declare a needed package in the `DESCRIPTION`. Remember that you 
-  should never use `require()` or `library()` inside a package - see 
-  [namespace imports](#imports) for more details on best practices.
+* __Checking R files for syntax errors__. 
+  명백하지만, 작성한 R 코드는 유효해야 된다.
+  정기적으로 `devtools::load_all()` 명령어를 사용한다면,
+  해당 오류를 마주할 것 같지는 않다.
   
-    Alternatively, you may have accidentally used `:::` to access an exported
-    function from a package. Switch to `::` instead.
+<!--- tools:::.check_packages_used --->
+* __Checking dependencies in R code__. 여기 오류사항은 
+  `DESCRIPTION` 파일에 필요한 팩키지 선언을 잊었다는 것을 나타낸다.
+  팩키지 내부에서 `require()` 혹은 `library()`는 결코 사용하지 말아야 된다는 사실을 기억하라
+  - 모범사례에 대한 좀더 자세한 사항은 [namespace imports](#imports)을 참조한다.
+  
+    대안으로, 우연히 팩키지에서 내보내기한 함수에 접근하려고 `:::`을 사용했을 수도 있다.
+    대신에 `::`으로 전환하라.
 
 <!--- tools::checkS3methods --->
-* __Checking S3 generic/method consistency__. S3 methods must have a compatible 
-  function signature with their generic. This means that the method must have the 
-  same arguments as its generic, with one exception: if the generic includes 
-  `...` the method can have additional arguments. 
-  
-    A common cause of this error is defining print methods, because the 
-    `print()` generic contains`...`:
-  
+* __Checking S3 generic/method consistency__. S3 메쏘드는 제네릭과 호환되는 함수 서명을 가져야 된다.
+  이것이 의미하는 바는 단 하나의 예외없이 메쏘드는 해당 제네릭과 동일한 인자를 가져야만 된다:
+  만약 제네릭이 `...`을 포함한다면, 메쏘드는 부가 인자를 가질 수 있다.
+
+    해당 오류에 대한 흔한 원인은 출력 메쏘드(print method) 정의에 있는데 이유는 
+    `print()` 제네릭이 `...`을 포함한다:
+    
+
     ```{r}
-    # BAD
+    # 나쁨
     print.my_class <- function(x) cat("Hi")
     
-    # GOOD
+    # 좋음
     print.my_class <- function(x, ...) cat("Hi")
     
-    # Also ok
+    # 또한 OK
     print.my_class <- function(x, ..., my_arg = TRUE) cat("Hi")
     ```
 
+
 <!-- tools::checkReplaceFuns -->
-* __Checking replacement functions__. Replacement functions (e.g. functions that
-  are called like `foo(x) <- y`), must have `value` as the last argument.
+* __Checking replacement functions__. (예를 들어 `foo(x) <- y` 처럼 호출되는 함수)
+  대체 함수는 마지막 인자로 `값(value)`을 가져야만 된다.
+
 
 <!-- https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L1373
      tools:::.check_package_code_shlib
@@ -328,45 +333,43 @@ tools:::.check_package_CRAN_incoming
      tools:::.check_package_code_data_into_globalenv
      tools:::.check_depdef
      -->
-* __Checking R code for possible problems__. This is a compound check for 
-    a wide range of problems:
+* __Checking R code for possible problems__. 매우 다양한 문제에 대한 복합 검사다:
 
-    * Calls to `library.dynam()` (and `library.dynam.unload()`) should look
-      like `library.dynam("name")`, not `library.dynam("name.dll")`. Remove
-      the extension to fix this error.
+
+    * `library.dynam()` (그리고 `library.dynam.unload()`)에 호출은 
+      `library.dynam("name.dll")`이 아니라, `library.dynam("name")` 같아야만 된다.
+      해당 오류를 수정하려면 확장자를 제거하라.
       
-    * Put `library.dynam()` in `.onLoad()`, not `.onAttach()`;
-      put `packageStartupMessage()` in `.onAttach()`, not `.onLoad()`.
-      Put `library.dynam.unload()` in `.onUnload()`. If you use any of 
-      these functions, make sure they're in the right place.
-  
-    * Don't use `unlockBinding()` or `assignInNamespace()` to modify objects
-      that don't belong to you. 
-      
-    * `codetools::checkUsagePackage()` is called to check that your functions
-      don't use variables that don't exist. This sometimes raises false 
-      positives with functions that use non-standard evaluation (NSE),
-      like `subset()` or `with()`. Generally, I think you should avoid NSE in 
-      package functions, and hence avoid this NOTE, but if you can not, see 
-      `?globalVariables` for how to suppress this NOTE.
-      
-    * You are not allowed to use `.Internal()` in a package. Either call 
-      the R wrapper function, or write your own C function. (If you copy and 
-      paste the C function from base R, make sure to maintain the copyright 
-      notice, use a GPL-2 compatible license, and list R-core in the `Author` 
-      field.)
+
+    * `.onAttach()`이 아니라 `.onLoad()`에 `library.dynam()`을 위치한다;
+      `.onLoad()`이 아니라 `.onAttach()`에 `packageStartupMessage()`을 위치하라.
+      `.onUnload()`에 `library.dynam.unload()`을 위치하라.
+      만약 이러한 함수 중에서 임의로 사용한다면, 올바른 장소에 위치했는지 확실히 한다.
     
-    * Similarly you are not allowed to use `:::` to access non-exported
-      functions from other packages. Either ask the package maintainer to
-      export the function you need, or write your own version of it using
-      exported functions. Alternatively, if the licenses are compatible you
-      can copy and paste the exported function into your own package. If
-      you do this, remember to update `Authors@R`.
 
-    * Don't use `assign()` to modify objects in the global environment. If 
-      you need to maintain state across function calls, create your own
-      environment with `e <- new.env(parent = emptyenv())` and set and 
-      get values in it:
+    * 본인에 귀속되지 않는 객체를 변경하는데 `unlockBinding()` 혹은 `assignInNamespace()`를 사용하지 않는다.
+
+    * `codetools::checkUsagePackage()`을 호출해서 작성한 함수가 존재하지 않는 변수를 사용하는지 검사한다.
+      종종 이것을 사용하면 `subset()` 혹은 `with()` 같은 비표준 평가(non-standard evaluation, NSE) 사용하는 함수에
+      거짓양성 반응이 생긴다. 일반적으로 저자 견해로는 팩키지 함수에 NSE 사용을 회피해야 된다.
+      그렇게 해서 이런 유의(NOTE) 사항을 회피한다.
+      만약 회피할 수 없다면, 해당 유의사항을 억제하는 방법에 대해 `?globalVariables`을 참조한다.
+
+    * 팩키지에서 `.Internal()` 함수를 사용하도록 허락되지 않는다.
+      R 포장함수(wrapper function)를 호출하거나 본인이 스스로 C 함수를 작성하라.
+      (만약 베이스 R에서 함수를 복사해서 붙여넣으면, 저작권 표시를 확실히 하고, 
+      GPL-2 호환 라이선스를 사용하고, `Author` 필드 R-core 목록에 올린다.)
+
+
+    * 유사하게, 다른 팩키지로부터 가져오지 않는 함수에 접근하는데 `:::`을 사용할 수 없다.
+      팩키지 유지관리담당자에게 필요한 함수를 가져오도록 요청하거나, 
+      본인 스스로 버젼을 작성해서 가져오는 함수를 사용한다.
+      대안으로, 만약 라이선스가 호환이 된다면, 가져오기한 함수를 본인 팩키지에 복사해서 붙여넣을 수 있다.
+      만약 복사해서 붙여넣기 했다면, `Authors@R` 갱신하는 것을 꼭 기억하라.
+      
+    * `assign()`을 사용해서 전역환경에 객체를 변경하지 마라.
+      만약 함수 호출에 걸쳐 상태를 유지보수할 필요가 있다면, `e <- new.env(parent = emptyenv())` 명령어로
+      본인만의 환경을 생성하고 해당 환경에 값을 설정하고 가져와라:
       
         ```{r}
         e <- new.env(parent = emptyenv())
@@ -386,39 +389,39 @@ tools:::.check_package_CRAN_incoming
         add_up(20)
         ```      
   
-    * Don't use `attach()` in your code. Instead refer to variables 
-      explicitly.
+    * 작성한 코드에 `attach()`를 사용하지 마라. 대신에 명시적으로 변수를 참조하라.
   
-    * Don't use `data()` without specifying the `envir` argument. Otherwise
-      the data will be loaded in the global environment.
-      
-    * Don't use deprecated or defunct functions. Update your code to use 
-      the latest versions.
-  
-    * You must use `TRUE` and `FALSE` in your code (and examples), not `T` and 
-      `F`.
+    * `envir` 인자를 명시하지 않고 `data()`를 사용하지 마라.
+      그렇지 않다면, 데이터가 전역환경에서 적재된다.
     
+
+    * 사라지거나(deprecated) 현존하지 않는(defunct) 함수는 사용하지 마라.
+      코드를 갱신해서 가장 최신 버젼을 사용하라.
+    
+
+    * 코드(그리고 예제)에 `T`와 `F`가 아닌 `TRUE` 와 `FALSE`를 사용하라.
+    
+
 <!-- https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L2209 -->
-* __Checking whether the package can be loaded__. R loads your package with
-  `library()`. Failure here typically indicates a problem with 
-  `.onLoad()` or `.onAttach()`.
+* __Checking whether the package can be loaded__. R은 `library()` 명령어로 작성한 팩키지를 적재한다.
+  해당 실패는 일반적으로 `.onLoad()` 혹은 `.onAttach()`에 문제가 있음을 나타낸다.
+
 
 <!-- https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L2247 -->
-* __Checking whether the package can be unloaded cleanly__. Loads with 
-  `library()` and then `detach()`es. If this fails, check `.onUnload()` and 
-  `.onDetach()`.
+* __Checking whether the package can be unloaded cleanly__. `library()`로 로드하고 나서 `detach()`를 수행한다.
+  만약 이것이 실패하면, `.onUnload()` 과  `.onDetach()`을 검사한다.
 
 <!-- https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L2279 -->
 * __Checking whether the namespace can be unloaded cleanly__.
-  Runs `loadNamespace("pkg"); unloadNamespace("pkg")`. Check `.onUnload()` for 
-  problems.
+  `loadNamespace("pkg"); unloadNamespace("pkg")`을 실행하라.
+  문제가 생기면 `.onUnload()`를 검사한다.
 
 <!-- https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L2300 -->
 * __Checking loading without being on the library search path__.
-  Calls `library(x, lib.loc = ...)`. Failure here indicates that you are 
-  making a false assumption in `.onLoad()` or `.onAttach()`.
+  `library(x, lib.loc = ...)`를 호출하라.
+  여기서 실패는 `.onLoad()` 혹은 `.onAttach()`에 틀린 가정을 하고 있음을 나타낸다.
 
-### Data
+### 데이터
 
 <!-- 
 https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L1782 
@@ -428,21 +431,21 @@ tools:::.check_package_compact_sysdata
 -->
 * __Checking contents of 'data' directory__.
 
-    * The data directory can only contain file types described in 
-      [exported data](#data-data).
+    * 데이터 디렉토리에는 [exported data](#data-data)에 기술된 파일 유형만 포함된다.
       
-    * Data files can only contain non-ASCII characters if the encoding is 
-      not correctly set. This usually shouldn't be a problem if you're saving
-      `.Rdata` files. If you do see this error, look at the `Encoding()` of
-      each column in the data frame, and ensure none are "unknown". (You'll 
-      typically need to fix this somewhere in the import process).
-      
-    * If you've compressed a data file with `bzip2` or `xz` you need to declare
-      at least `Depends: R (>= 2.10)` in your `DESCRIPTION`.
-      
-    * If you've used a sub-optiomal compression algorithm for your data, 
-      re-compress with the suggested algorithm.
+    * 만약 인코딩이 올바르게 설정되지 않으면, 데이터 파일이 비아스키(non-ASCII) 문자만 포함할 수 있다.
+      만약 `.Rdata` 파일을 저장한다면 대체로 이것이 문제가 되지는 않는다.
+      만약 해당 오류를 본다면, 데이터프레임에 각 칼럼 `Encoding()`을 살펴본다.
+      그리고 어떤 것도 "unknown"이 아님을 확인한다.
+      (일반적으로 가져오기 과정 어딘가에서 이것을 고칠 필요가 있다).
+    
 
+    * 만약 데이터 파일을 `bzip2` 혹은 `xz` 형식으로 압축했다면,
+      `DESCRIPTION` 파일에 최소한 `Depends: R (>= 2.10)` 선언을 할 필요가 있다.
+    
+    * 만약 작성한 데이터에 차선(sub-optimal) 알고리즘을 사용했다면,
+      추천된 알고리즘으로 재압축하라.
+    
 ### Documentation
 
 You can run the most common of these outside `devtools::check()` with `devtools::check_doc()` (which automatically calls `devtools::document()` for you). If you have documentation problems, it's best to iterate quickly with `check_doc()`, rather than running the full check each time. 
