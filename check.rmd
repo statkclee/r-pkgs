@@ -4,131 +4,139 @@ layout: default
 output: bookdown::html_chapter
 ---
 
-# Automated checking {#check}
+# 자동 검사(Automated checking) {#check}
 
-An important part of the package development process is `R CMD check`. `R CMD check` automatically checks your code for common problems. It's essential if you're planning on submitting to CRAN, but it's useful even if you're not because it automatically detects many commons problems that you'd otherwise discover the hard way.
+팩키지 개발 과정에 있어 중요한 부분이 `R CMD check`이다.
+`R CMD check`가 자동으로 흔한 문제에 대해 코드를 점검한다.
+CRAN에 제출 계획이 있다면 매우 중요하다.
+하지만, 그렇지 않다고 하더라도 유용한데 이유는 그렇지 않다면 어려운 방식으로 찾아낼 수 있는 많은 일반적인 문제를 자동으로 탐지해준다.
 
-`R CMD check` will be frustrating the first time you run it - you'll discover many problems that need to be fixed. The key to making `R CMD check` less frustrating is to actually run it more often: the sooner you find a problem, the easier it is to fix. The upper limit of this approach is to run `R CMD check` every time you make a change. If you use GitHub, you'll learn precisely how to do that with [Travis-CI](#travis).
+`R CMD check`를 처음 실행하면 정신적 공황을 준다 - 고칠 필요가 있는 너무나 많은 문제가 발견되기 때문이다.
+`R CMD check`가 덜 좌절을 주게 만드는 핵심방법은 좀더 자주 명령어를 실행하는 것이다: 문제를 좀더 일찍 발견하면 할수록, 버그를 고치기 더 쉽다. 이러한 접근법의 상한은 변경사항을 만들때마다 `R CMD check`를 실행하는 것이다. 만약 GitHub을 사용한다면, [Travis-CI](#travis)에서 정확하게 수행하는 방법을 학습할 것이다.
 
-## Workflow {#check-workflow}
+## 작업흐름 {#check-workflow}
 
-`R CMD check` is the name of the command you run from the terminal. I don't recommend calling it directly. Instead, run `devtools::check()`, or press Cmd + Shift + E in RStudio. In contrast to `R CMD check`, `devtools::check()`:
+`R CMD check`는 터미널에서 실행하는 명령어 명칭이다.
+저자는 이 명령어를 직접 호출하는 것을 추천하지는 않는다.
+대신에, `devtools::check()`을 실행하거나 RStudio에서 Cmd + Shift + E 단축키를 누른다. `R CMD check`와 대비해서, `devtools::check()`는 다음을 수행한다:
 
-* Ensures that the documentation is up-to-date by running 
-  `devtools::document()`.
 
-* Bundles the package before checking it. This is the best practice for checking 
-  packages because it makes sure the check starts with a clean slate: because a 
-  package bundle doesn't contain any of the temporary files that can accumulate 
-  in your source package, e.g. artifacts like `.so` and `.o` files which 
-  accompany compiled code, you can avoid the spurious warnings such files will 
-  generate.
+* 문서도 `devtools::document()` 명령을 실행해서 최신으로 갱신되게 확실히 한다.
+
+* 점검전에 팩키지를 번들로 묶는다. 이러한 접근법이 팩키지 점검에 모범사례가 되는데 
+  이유는 깨끗한 상태에서 점검 시작을 보장한다: 팩키지 번들은 소스 팩키지에 축적되는
+  예를 들어, 컴파일 코드와 동반되는 `.so`, `.o` 같은 어떤 임시 파일도 포함하지 않아서, 
+  임시 파일이 만들어 내는 거짓 경고를 피할 수 있다.
+
+* `NOT_CRAN` 환경변수를 `TRUE`로 설정한다. 이 설정을 통해서 CRAN 테스트를 선택적으로
+  건너뛸 수 있다 (자세한 사항은 `?testthat::skip_on_cran` 참조)
+
+팩키지를 점검하는 작업흐름은 단순하지만, 귀찮다:
+
+
+1. `devtools::check()` 명령어를 실행하거나, Ctrl/Cmd + Shift + E 단축키를 누른다.
+
+1. 첫번째 문제를 고친다.
+
+1. 더이상 어떤 문제가 없을 때까지 반복한다.
+
+`R CMD check` 실행하면 세가지 메시지 유형이 반환된다:
+
+  * 오류(`ERROR`): CRAN에 제출하든 제출하지 않든지 관계없이 고쳐야되는 심각한 문제.
+    
+  * 경고(`WARNING`): CRAN에 제출할 계획이 있다면 (계획이 없더라도 들여다보는 것은 좋은 생각이 되는) 
+    고쳐야만 되는 가능성 있는 문제.
   
-* Sets the `NOT_CRAN` environment variable to `TRUE`. This allows you to 
-  selectively skip tests on CRAN. (See `?testthat::skip_on_cran` for details.)
-
-The workflow for checking a package is simple, but tedious:
-
-1. Run `devtools::check()`, or press Ctrl/Cmd + Shift + E.
-
-1. Fix the first problem.
-
-1. Repeat until there are no more problems.
-
-`R CMD check` returns three types of messages:
-
-  * `ERROR`s: Severe problems that you should fix regardless of whether
-    or not you're submitting to CRAN.
     
-  * `WARNING`s: Likely problems that you must fix if you're planning to 
-    submit to CRAN (and a good idea to look into even if you're not).
-    
-  * `NOTE`s: Mild problems. If you are submitting to CRAN, you should strive to 
-    eliminate all NOTEs, even if they are false positives. If you have no NOTEs, 
-    human intervention is not required, and the package submission process will 
-    be easier. If it's not possible to eliminate a `NOTE`, you'll need describe 
-    why it's OK in your submission comments, as described in [release 
-    notes](#release-check). If you're not submitting to CRAN, carefully read 
-    each NOTE, but don't go out of your way to fix things that you don't think 
-    are problems.
+  * 유의(`NOTE`): 가벼운 문제. CRAN에 제출하려면, 설사 거짓양성이라고 하더라도 
+    모든 유의(NOTE)사항을 제거해야만 된다.
+    만약 유의(NOTE)사항이 하나도 없다면, 사람개입은 필요하지 않고,
+    팩키지 제출 과정이 더 쉬워진다.
+    만약 유의(NOTE)사항을 제거하는 것이 가능하지 않다면,
+    [release notes](#release-check)에 기술된 것 처럼 제출 주석에 왜 OK인지 사유를 기술할 필요가 있다.
+    만약 CRAN에 제출하지 않는다면, 주의깊이 각 유의(NOTE)사항을 읽을 필요는 있지만,
+    본인이 생각하기에 문제가 되지 않는 것을 굳이 고칠 필요는 없다.
+  
 
-## Checks {#check-checks}
+## 검사(Checks) {#check-checks}
 
-`R CMD check` is composed of over 50 individual checks, described in the following sections. For each check, I briefly describe what it does, what the most common problems are, and how to fix them. When you have a problem with `R CMD check` and can't understand how to fix it, use this list to help figure out what you need to do. To make it easier to understand how the checks fit together, I've organised them into sections roughly corresponding to the chapters in this book. This means they will be in a somewhat different order to what you'll see when you run `check()`.
+`R CMD check`는 50개가 넘는 개별 검사로 구성되어 있고, 다음 절에서 차례로 기술된다.
+각 검사에 대해서 무슨 검사를 수행하고, 가장 흔한 문제가 무엇이며, 고치는 방법을 간략하게 기술한다.
+`R CMD check` 검사에 문제가 있고, 고치는 방법을 이해하지 못한다면, 적절한 조치를 취하는데 도움을 받을 수 있도록 다음 목록을 사용하라. 검사가 어떻게 하면 잘 맞는지 이해하기 쉽도록, 검사방법을 이 책 장(chapter)에 맞춰 대략 절(section)로 재구성했다. 이것이 의미하는 바는 `check()` 명령어를 실행할 때 보는 것과 다소 순서가 다를 수 있다는 것이다.
 
-This list includes every check run in R 3.1.1. If you're using a more recent version, you may want to consult the most recent online version of this chapter: <http://r-pkgs.had.co.nz/check.html>. Please [let me know](mailto:hadley@rstudio.com) if you encounter a problem that this chapter doesn't help with.
+여기 목록에는 R 3.1.1 환경에서 실행한 모든 검사가 포함된다.
+좀더 최신 버젼을 사용한다면, 이 장에 대한 가장 최신 온라인 버젼을 참조해도 좋다: <http://r-pkgs.had.co.nz/check.html>.
+이 장으로도 해결되지 않는 문제에 봉착했다면, [저자에게 전자우편](mailto:hadley@rstudio.com)을 통해 연락을 주기 바란다.
 
-### Check metadata
+### 메타데이터 검사
 
-`R CMD check` always starts by describing your current environment. I'm running R 3.1.1 on OS X with a UTF-8 charset:
+`R CMD check`은 항상 현재 환경정보를 기술하면서 시작된다.
+저자는 UTF-8 문자집합을 갖고 맥 OS X에 R 3.1.1을 운영하고 있다:
 
 * __Using log directory__ ‘/Users/hadley/Documents/web/httr.Rcheck’
 * __Using R version__ 3.1.1 (2014-07-10)
 * __Using platform__: x86_64-apple-darwin13.1.0 (64-bit)
 * __Using session charset__: UTF-8
 
-Next the description is parsed and the package version is printed. Here I'm checking httr version 0.5.0.9000 (you'll learn more about that weird version number in [versioning](#version)).
+다음으로 기술된 정보가 파싱되고 팩키지 버젼이 출력된다.
+여기서 httr 버젼 0.5.0.9000 을 검사한다 ([versioning](#version)에서 이상한 버젼 숫자에 관해 좀더 학습할 것이다).
 
 <!-- https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L3459 -->
 * __Checking for file__ ‘httr/DESCRIPTION’
 * __This is package__ ‘httr’ __version__ ‘0.5.0.9000’
 
-### Package structure
+### 팩키지 구조
 
 <!-- https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L257 -->
-* __Checking package directory__. The directory you're checking must exist - 
-  `devtools::check()` protects you against this problem.
+* __Checking package directory__. 검사하는 디렉토리가 존재해야만 된다.
+  - `devtools::check()`은 이 문제에 대해 보호막을 제공한다.
 
 <!-- https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L3720 -->
-* __Checking if this is a source package__. You must check a source package, not 
-  a binary or installed package. This should never fail if you use  
-  `devtools::check()`.
+* __Checking if this is a source package__. 바이너리나 설치된 팩키지가 아닌 소스 팩키지를 
+  검사해야 된다. `devtools::check()`을 사용하면 결코 실패하지 않고 넘어간다.
 
 <!-- https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L3015 -->
-* __Checking for executable files__. You must not have executable files in
-  your package: they're not portable, they're not open source, and they are a
-  security risk. Delete any executable files from your package. 
-  (If you're not submitting to CRAN, you can silence this warning by listing 
-  each executable file in the `BinaryFiles` field in your `DESCRIPTION`.)
+* __Checking for executable files__. 팩키지에 절대 실행가능한 파일이 있으면 안된다:
+  이식성도 없고, 오픈 소프트웨어도 아니고, 보안위험도 있다. 팩키지에 모든 실행가능한 파일을 삭제하라.
+  (CRAN에 제출하지 않는다면, `DESCRIPTION` 파일에 `BinaryFiles` 필드에 실행가능 파일을 목록으로 올리면
+  이 경고 메시지를 침묵시킬 수 있다.)
+
 
 <!-- https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L3103 -->
-* __Checking for hidden files and directories__. On Linux and OS X, files with
-  a name starting with `.` are hidden by default, and you've probably included
-  them in your package by mistake. Either delete them, or if they are important, 
-  use `.Rbuildignore` to remove them from the package bundle. R automatically 
-  removes some common directories like `.git` and `.svn`.
+* __Checking for hidden files and directories__. 리눅스와 맥 OS X에서 `.`으로 시작되는 파일은
+  디폴트 기본설정으로 숨겨진다. 아마도 실수로 팩키지에 숨긴 파일이 포함될 수도 있다.
+  삭제하거나 만약 중요하다고 판단되면, `.Rbuildignore`를 사용해서 팩키지 번들에서 제거한다.
+  자동으로 R은 `.git`, `.svn` 같은 흔한 디렉토리는 제거한다.
 
 <!-- https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L381 -->
-* __Checking for portable file names__.  R packages must work on Windows, 
-  Linux and OS X, so you can only use file names that work on all platforms. 
-  The easiest way to do this is to stick to letters, numbers, underscores 
-  and dashes. Avoid non-English letters and spaces. Fix this check by renaming
-  the listed files.
+* __Checking for portable file names__. R 팩키지는 윈도우, 리눅스, 맥 OS X에서 동작되어야 된다.
+  그래서, 모든 플랫폼에서 동작되는 파일명칭만 사용될 수 있다.
+  가장 쉬운 방법은 문자, 숫자, 밑줄, 대쉬만 사용하면 된다.
+  비영어권 문자와 공백은 피한다.
+  목록에 등재된 파일을 다시 이름지어서 검사를 통과한다.
   
 <!-- https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L541 -->
-* __Checking for sufficient/correct file permissions__. If you can't read a 
-  file, you can't check it. This check detects the unlikely occurence that 
-  you have files in the package that you don't have permission to read. Fix this
-  problem by fixing the file permissions.
+* __Checking for sufficient/correct file permissions__. 파일을 읽어들일 수 없다면,
+  검사를 할 수 없다. 이 검사를 통해서 읽어들일 권한이 없는 파일이 팩키지에 포함되는 
+  일어날 것 같지 않는 사례를 탐지한다. 파일에 권한부여를 통해서 해당 문제를 해결한다.
 
 <!-- https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L3141 -->
-* __Checking whether package ‘XYZ’ can be installed__. `R CMD check` runs
-  `R CMD install` to make sure that it's possible to install your package. If 
-  this fails, you should run `devtools::install()` or RStudio's Build & Reload
-  and debug any problems before continuing.
+* __Checking whether package ‘XYZ’ can be installed__. `R CMD check`는 
+  `R CMD install` 명령을 실행해서 작성한 팩키지 설치가 가능한지 확실히 한다.
+  만약 이것이 실패하면, `devtools::install()` 혹은 RStudio Build & Reload 명령을 실행해서,
+  더 진행하기 전에 모든 문제를 디버그한다.
+
 
 <!-- https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L3459 -->
-* __Checking installed package size__. It's easy to accidentally include large
-  files that blow up the size of your package. This check ensures that the
-  whole package is less than 5 MB and each subdirectory is less than 1 MB. 
-  If you see this message, check that you haven't accidentally included a 
-  large file. 
+* __Checking installed package size__. 우연히 매우 큰 파일이 포함되어 팩키지 크기를 실제보다
+  부풀리기 쉽다. 이 검사를 통해서 전체 팩키지가 5MB보다 적고 각 디렉토리가 1MB 이하로 확실히 만든다.
+  이 메시지를 보게되면, 우연히 대용량 파일을 포함하지 않았는지 점검한다.
   
-    If submitting to CRAN, you'll need to justify the size of your package. 
-    First, make sure the package is as small as it possibly can be: try 
-    recompressing the data, [data CRAN notes](#data-cran); and minimising 
-    vignettes, [vignette CRAN notes](#vignette-cran).
-    If it's still too large, consider moving data into its own package.
+  CRAN에 제출한다면, 팩키지 크기를 정당화할 필요가 있다.
+  먼저 팩키지가 가능하면 작게 만들었는지 확실히 한다:
+  데이터를 다시 압축한다, [data CRAN notes](#data-cran); 
+  소품문(vignette)을 최소화한다, [vignette CRAN notes](#vignette-cran).
+  만약 그래도 여전히 크다면, 데이터를 원래 팩키지로 이동하는 것도 고려해보라.
 
 <!-- https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L746 -->
 * __Checking top-level files__. Only specified files and directories are 
