@@ -139,147 +139,137 @@ CRAN에 제출 계획이 있다면 매우 중요하다.
   만약 그래도 여전히 크다면, 데이터를 원래 팩키지로 이동하는 것도 고려해보라.
 
 <!-- https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L746 -->
-* __Checking top-level files__. Only specified files and directories are 
-  allowed at the top level of the package (e.g. `DESCRIPTION`, `R/`, `src/`). 
-  To include other files, you have two choices:
-  
-    * If they don't need to be installed (i.e. they're only used in the 
-      source package): add them to `.Rbuildignore` with 
-      `devtools::use_build_ignore()`.
-      
-    * If they need to be installed: move them into `inst/`. They'll be moved back to 
-      the top-level package directory when installed.
+* __Checking top-level files__. 지정한 파일과 디렉토리만 팩키지 최상단에 올릴 수 있다
+  (예를 들어, `DESCRIPTION`, `R/`, `src/`).
+  다른 파일을 포함시키려면, 두가지 선택지가 있다:
+
+
+    * 설치될 필요가 없다면 (즉, 소스 팩키지에만 사용된다면):
+      `devtools::use_build_ignore()` 명령어로 `.Rbuildignore` 파일에 해당 파일과 디렉토리를 추가한다.
+    
+    * 꼭 설치된다면: 파일과 디렉토리를 `inst/` 디렉토리로 옮긴다.
+      설치되고 나면, 최상위 팩키지 디렉토리로 다시 옮겨지게 된다.
 
 <!-- https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L924 -->
 * __Checking package subdirectories__. 
 
-    * Don't include any empty directories. These are usually removed 
-      automatically by `R CMD build` so you shouldn't see this error. If you do,
-      just delete the directory.
+    * 빈 어떤 디렉토리도 포함하지 마라.
+      `R CMD build` 명령어로 자동적으로 보통 삭제되서 이런 오류는 보이지 말아야 된다.
+      만약 이와 관련된 오류를 본다면, 해당 디렉토리만 삭제하라.
       
-    * The case of files and directories is important. All sub-directories 
-      should be lower-case, except for `R/`. A citation file, if present, 
-      should be in `inst/CITATION`. Rename as needed.
+    * 파일과 디렉토리가 중요한 경우. 모든 하위디렉토리는 `R/`을 제외하고 
+      모두 소문자로 표기되어야 된다. 만약 인용 파일이 존재한다면 
+      `inst/CITATION`에 위치해된다. 필요하면 이름을 다시 짓는다.
       
-    * The contents of `inst/` shouldn't clash with top-level contents 
-      of the package (like `build/`, `R/` etc). If they do, rename your 
-      files/directories.
+    * `inst/` 디렉토리 내용은 팩키지 최상위 내용과 충돌하지 말아야 된다
+      (`build/`, `R/`등과 같이). 만약 충돌이 발생하면, 파일/디렉토리 명칭을 다시 정한다.
 
 <!-- https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L859 -->
-* __Checking for left-over files__. Remove any files listed here. They've 
-  been included in your package by accident.
+* __Checking for left-over files__. 여기 목록에 올라온 파일은 모두 삭제한다.
+  우연히 작성한 팩키지에 포함된 파일이다.
 
-### Description
+### 기술(Description)
 
 <!-- https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L597 -->
 * __Checking DESCRIPTION meta-information__. 
 
-    * The `DESCRIPTION` must be valid. You are unlikely to see this error,
-      because `devtools::load_all()` runs the same check each time you re-load
-      the package.
+    * `DESCRIPTION`은 유효해야만 된다. 여기 오류를 볼 것 같지는 않다.
+      왜냐하면 팩키지를 다시 적재할 때마다 동일한 검사를 `devtools::load_all()`이 실행하기 때문이다.
     
-    * If you use any non-ASCII characters in the DESCRIPTION, you must also
-      specify an encoding. There are only three encodings that work on all
-      platforms: latin1, latin2 and UTF-8. I strongly recommend UTF-8:
+    * 만약 `DESCRIPTION` 파일에 어떤 비아스키(non-ASCII) 문자를 사용하게되면,
+      인코딩도 명세해야만 된다. 모든 플랫폼에 동작하는 인코딩은 단지 3가지만 존재한다:
+      latin1, latin2, UTF-8. 저자는 강력하게 UTF-8을 추천한다:
       `Encoding: UTF-8`.
     
-    * The `License` must refer to either a known license (a complete list can 
-      be found at <https://svn.r-project.org/R/trunk/share/licenses/license.db>),
-      or it must use `file LICENSE` and that file must exist. Errors here are 
-      most likely to be typos.
-      
-    * You should either provide `Authors@R` or `Authors` and `Maintainer`. 
-      You'll get an error if you've specified both, which you can fix by 
-      removing the one you didn't want.
+    * `License`는 이미 알려진 라이선스(전체 라이선스 목록은
+      <https://svn.r-project.org/R/trunk/share/licenses/license.db>
+      에서 확인)를 지칭하거나 `file LICENSE`을 사용해야 하고, 해당 파일은
+      함께 존재해야만 된다. 여기서 오류는 오탈자 때문일 가능성이 높다.
+    
+    * `Authors@R` 혹은 `Authors`와 `Maintainer` 정보를 제공해야 된다.
+      만약 양쪽 모두 명세해서 지정한다면 오류가 생긴다.
+      원치않는 한쪽을 제거하면 오류를 고칠 수 있다.
 
 <!-- https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L3683
 tools:::.check_package_depends -->
 * __Checking package dependencies__. 
 
-    * All packages listed in `Depends`, `Imports` and `LinkingTo` must be 
-      installed, and their version requirements must be met, otherwise your 
-      package can't be checked. An easy way to install any missing or outdated
-      dependencies is to run `devtools::install_deps(dependencies = TRUE)`.
+    * `Depends`, `Imports`, `LinkingTo` 목록에 올라간 모든 팩키지는 설치되어야 되고
+      버젼 요구사항은 충족되어야만 되는데, 그렇지 않으면 팩키지를 검사할 수 없다.
+      빠지거나 오래된 의존성을 설치하는 쉬운 방법은 `devtools::install_deps(dependencies = TRUE)` 
+      명령어를 실행하는 것이다.
   
-    * Packages listed in `Suggests` must be installed, unless you've set 
-      the environment variable `_R_CHECK_FORCE_SUGGESTS_` to a false value
-      (e.g. with `check(force_suggests = FALSE)`). This is useful if some of 
-      the suggested packages are not available on all platforms.
-    
-    * R packages can not have a cycle of dependencies: i.e. if package A 
-      requires B, then B can not require A (otherwise which one would you load
-      first?). If you see this error, you'll need to rethink the design of 
-      your package. One easy fix is to move the conflicting package from 
-      `Imports` or `Depends` to `Suggests`.
-
-    * Any packages used in the `NAMESPACE` must be listed in one of 
-      `Imports` (most commonly) or `Depends` (only in special cases).
-      See [search path](#search-path) for more details.
+    * `Suggests` 목록에 등재된 팩키지는 설치되어야만 한다.
+      만약 그렇지 않다면, 환경변수 `_R_CHECK_FORCE_SUGGESTS_`을 `false` 값으로 설정한다
+      (즉, `check(force_suggests = FALSE)`).
+      제안 팩키지가 모든 플랫폼에 이용가능하지 않은 경우에 이것을 유용하게 사용할 수 있다.
       
-    * Every package listed in `Depends` must also be imported in the 
-      `NAMESPACE` or accessed with `pkg::foo`. If you don't do this, your
-      package will work when attached to the search path (with 
-      `library(mypackage)`) but will not work when only loaded (e.g. 
-      `mypackage::foo()`)
+    * R 팩키지는 의존성 사이클을 갖을 수 없다: 즉, 만약 팩키지 A가 B를 요구하면,
+      팩키지 B는 A를 요구할 수 없다 (그렇지 않다면, 어느 팩키지를 먼저 적재할 것인가?).
+      만약 여기 오류를 보게 되면, 팩키지 설계를 다시 생각할 필요가 있다.
+      한가지 쉬운 수정방법은 충돌나는 팩키지를 `Imports` 혹은 `Depends`에서 
+      `Suggests`로 옮기는 것이다.
+      
+    * `NAMESPACE`에 사용되는 어떤 팩키지나 `Imports` (가장 흔한 경우) 혹은 `Depends` (특별한 경우에만) 중 
+      한곳에 등재되어야만 된다. 좀더 자세한 사항에 대해서는 [search path](#search-path)을 참조한다.
+
+    * `Depends`에 등재된 모든 팩키지는 `NAMESPACE`에 가져오거나 `pkg::foo` 명령으로 접근할 수 있어야 된다.
+      만약 이 작업을 수행하지 않으면, 검색경로에 (`library(mypackage)` 명령어로) 부착될 때만 
+      작성한 팩키지가 동작하고, 적재만 되면 동작하지 않게 된다 (예를 들어, `mypackage::foo()`)
 
 <!-- https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L3561 
 tools:::.check_package_CRAN_incoming
 -->
-* __Checking CRAN incoming feasibility__. These checks only apply if you're 
-  submitting to CRAN.
+* __Checking CRAN incoming feasibility__. 만약 CRAN에 제출하는 경우에만 해당 검사가 적용된다.
   
-    * If you're submitting a new package, you can't use the same name as an
-      existing package. You'll need to come up with a new name.
+    * 신규 팩키지를 제출하려면, 기존 팩키지와 동일한 명칭을 사용할 수 없다.
+      신규 명칭을 제안할 필요가 있다.
     
-    * If you're submitting an update, the version number must be higher 
-      than the current CRAN version. Update the `Version` field in 
-      `DESCRIPTION`.
-        
-    * If the maintainer of the package has changed (even if it's just a change 
-      in email address), the new maintainer should submit to CRAN, and the
-      old maintainer should send a confirmation email.
-
-    * You must use a standard open source license, as listed in 
-      <https://svn.r-project.org/R/trunk/share/licenses/license.db>.
-      You can not use a custom license as CRAN does not have the legal 
-      resources to review custom agreements.
-    
-    * The `Title` and `Description` must be free from spelling mistakes. The 
-      title of the package must be in title case. Neither title nor description
-      should include either the name of your package or the word "package".
-      Reword your title and description as needed.
-    
-    * If you're submitting a new package, you'll always get a `NOTE`. This 
-      reminds the CRAN maintainers to do some extra manual checks.
+    * 만약 갱신된 팩키지를 제출하면, 버젼숫자는 현재 CRAN 버젼 숫자보다 높아야만 된다.
+      `DESCRIPTION` 파일에 `Version` 필드를 갱신하라.
       
-    * Avoid submitting multiple versions of the same package in a short
-      period of time. CRAN prefers at most one submission per month. If you
-      need to fix a major bug, be apologetic.
+    * 팩키지 유지보수담당자가 변경되었다면 (전자우편주소에 변경만 있더라도),
+      신입 유지보수담당자가 CRAN에 제출해야 되고, 이전 유지보수담당자는 확인 전자우편을 전송해야 한다.
 
-### Namespace
+    * <https://svn.r-project.org/R/trunk/share/licenses/license.db>에 등재된 표준 공개 소프트웨어 라이선스를
+      사용해야만 한다. CRAN에는 사용자 정의 계약을 검토할 법적 자원이 없어서,
+      사용자 정의 라이선스를 사용할 수 없다.
+    
+    * `Title`과 `Description`에는 철자 오류가 없어야만 된다.
+      팩키지 제목은 각 제목 단어 첫자가 대문자로 표현되는 title case로 적는다.
+      제목과 기술 어디에도 작성한 팩키지 명칭과 "package" 단어가 포함되면 안된다.
+      필요하면 제목과 기술정보를 다시 작성한다.
+   
+    * 만약 신규 팩키지를 제출하려면, 항상 유의(`NOTE`) 사항을 받게된다.
+      CRAN 유지보수담당자에게 몇가지 부가적인 수작업 검사를 상기시켜준다.
+    
+    * 단기간에 동일한 팩키지를 다수 버젼으로 제출하는 것은 피하라
+      CRAN에서는 한달에 많아야 한번 제출된 것을 선호한다.
+      만약 주요 버그를 고칠 필요가 있다면, 사과하라.
+
+### 네임스페이스(Namespace)
 
 <!-- https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L4433 -->
-* __Checking if there is a namespace__. You must have a `NAMESPACE` file.
-  Roxygen2 will create this for you as described in [namespaces](#namespace).
+* __Checking if there is a namespace__. `NAMESPACE` 파일이 있어야만 된다.
+  Roxygen2가 [namespaces](#namespace)에 기술되듯이 개발자를 위해 해당 파일을 생성한다.
 
 <!-- https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L3620 -->
-* __Checking package namespace information__. The `NAMESPACE` should be 
-  parseable by `parseNamespaceFile()` and valid. If this check fails, it's
-  a bug in roxygen2.
+* __Checking package namespace information__. `NAMESPACE`는 `parseNamespaceFile()` 명령어로
+  파싱할 수 있어야 되고 유효해야 된다.
+  만약 해당 검사가 실패하면, roxygen2에 버그다.
 
 <!-- https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L2234 -->
 * __Checking whether the package can be loaded with stated dependencies__.
-  Runs `library(pkg)` with `R_DEFAULT_PACKAGES=NULL`, so the search path 
-  is empty (i.e. stats, graphics, grDevices, utils, datasets and methods are not
-  attached like usual). Failure here typically indicates that you're missing a 
-  dependency on one of those packages.
+  `R_DEFAULT_PACKAGES=NULL`로 `library(pkg)`를 실행하면, 검색경로에는 아무것도 없게 된다
+  (즉, stats, graphics, grDevices, utils, datasets, methods가 보통때처럼 부착되지는 않는다).
+  일반적으로 여기서 실패는 팩키지 중에 하나에서 의존성이 빠졌다는 것을 나타낸다.
 
 <!-- https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L2264 -->
 * __Checking whether the namespace can be loaded with stated dependencies__.
-  Runs `loadNamespace(pkg)` with `R_DEFAULT_PACKAGES=NULL`. Failure usually 
-  indicates a problem with the namespace.
+  `R_DEFAULT_PACKAGES=NULL`로 `loadNamespace(pkg)`을 실행한다.
+  일반적으로 여기서 실패는 네임스페이스에 문자가 있음을 나타낸다.
 
-### R code
+### R 코드
 
 <!-- https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L1226 -->
 * __Checking R files for non-ASCII characters__. For maximum portability (i.e.
