@@ -4,45 +4,60 @@ layout: default
 output: bookdown::html_chapter
 ---
 
-# Releasing a package {#release}
+# 팩키지 출시 {#release}
 
-If you want your package to have significant traction in the R community, you need to submit it to CRAN. Submitting to CRAN is a lot more work than just providing a version on github, but the vast majority of R users do not install packages from github, because CRAN provides discoverability, ease of installation and a stamp of authenticity. The CRAN submission process can be frustrating, but it's worthwhile, and this chapter will make it as painless as possible.
+만약 작성한 팩키지가 R 커뮤니티에 상당한 주목을 얻고자 한다면,
+CRAN에 팩키지를 제출할 필요가 있다.
+CRAN에 제출하는 것은 GitHub에 개발된 팩키지를 올리는 것보다 훨씬 더 많은 작업이 필요하다.
+하지만, 방대한 R 사용자는 GitHub에서 팩키지를 설치하지 않는데 이유는
+CRAN이 인증 도장을 찍어주고, 설치를 쉽게 하고, 발굴성도 제공하기 때문이다.
+CRAN 제출 프로세스는 당혹스러울 수 있지만, 그럴 가치가 충분히 있다.
+이번 장에서는 가능하면 고통이 없도록 이 과정을 만들어 본다.
 
-To get your package ready to release, follow these steps:
+작성한 팩키지를 출시 준비하려면, 다음 단계를 따른다:
 
-1. Pick a version number.
-1. Run and document `R CMD check`.
-1. Check that you're aligned with CRAN policies.
-1. Update `README.md` and `NEWS.md`.
-1. Submit the package to CRAN.
-1. Prepare for the next version by updating version numbers.
-1. Publicise the new version.
+1. 버젼 번호를 고른다.
+1. `R CMD check` 명령어를 실행하고 문서화한다.
+1. CRAN 정책에 맞췄는지 검사한다.
+1. `README.md` 와 `NEWS.md` 파일을 갱신한다.
+1. CRAN에 팩키지를 제출한다.
+1. 버젼 번호를 갱신해서 차기 버젼을 준비한다.
+1. 신규버젼을 출시한다.
 
-## Version number {#release-version}
 
-If you've been following the advice in [versioning](#version), the version number of your in-development package will have four components, `major.minor.patch.dev`, where `dev` is at least 9000. The number 9000 is arbitrary, but provides a strong visual signal there's something different about this version number. Released packages don't have a `dev` component, so now you need to drop that and pick a version number based on the changes you've made. For example, if the current version is `0.8.1.9000` will the next CRAN version be `0.8.2`, `0.9.0` or `1.0.0`? Use this advice to decide:
+## 버젼 번호 {#release-version}
+
+[versioning](#version)에 조언을 따른다면,
+개발중인 팩키지 버젼 번호는 4개 구성요소를 갖게된다, `주번호.소번호.패치번호.개발번호(
+major.minor.patch.dev)`, 여기서
+`dev`는 최소 9000 이다. 번호 9000은 작위적이지만,
+버젼번호와 다른 무언가 있다는 강력한 시각적 신호를 전달한다.
+출시된 팩키지에는 `dev` 구성요소가 없어서, 9000 을 떼고 변경한 내역에 기반해서 버젼 번호를 선택한다.
+예를 들어, 현재 버젼이 `0.8.1.9000`이면, 차기 CRAN 버젼은 `0.8.2`, `0.9.0` 혹은 `1.0.0`이 될 것인가?
+다음 조언을 사용해서 결정하라:
   
-  * Increment `patch`, e.g. `0.8.2` for a __patch__: you've fixed
-    bugs without adding any significant new features. I'll often do a patch 
-    release if, after release, I discover a show-stopping bug that needs to be
-    fixed ASAP. Most releases will have a patch number of 0.
-  
-  * Increment `minor`, e.g. `0.9.0`, for a __minor release__. A minor 
-    release can include bug fixes, new features and changes in backward
-    compatibility. This is the most common type of release. It's perfectly fine to 
-    have so many minor releases that you need to use two (or even three!) 
-    digits, e.g. `1.17.0`.
-  
-  * Increment `major`, e.g. `1.0.0`, for a __major release__. This is
-    best reserved for changes that are not backward compatible and that are 
-    likely to affect many users. Going from `0.b.c` to `1.0.0` typically 
-    indicates that your package is feature complete with a stable API.
+  * __패치(patch)__에 대해서는 예를 들어, `0.8.2`처럼 `패치(patch)`를 증가시킨다:
+    상당한 신규 기능을 추가하지 않고 버그를 수정했을 경우.
+    출시후에 가능하면 빠른시간 내에 고쳐질 필요가 있는 박수갈채를 받는 버그를 발견하였다면,
+    저자는 패치 출시 작업을 수행한다.
+    대부분 출시는 패치 번호 0을 갖는다.
     
-    In practice, backward compatibility is not an all-or-nothing threshold. For 
-    example, if you make an API-incompatible change to a rarely-used part of 
-    your code, it may not deserve a major number change. But if you fix a bug 
-    that many people depend on, it will feel like an API breaking change. Use 
-    your best judgement.
+
+  * __소번호 출시(minor release)__에 대해서는 예를 들어, `0.9.0`처럼 `소번호(minor)`를 증가시킨다:
+    소번호 출시는 버그 수정, 신규 기능, 이전 버젼과 호환성을 위한 변경이 포함된다.
+    이것이 가장 일반적인 출시 유형이다. 엄청 많은 소번호 출시를 취하는 것은 완전히 좋다.
+    두자리 (혹은 세자리) 번호도 사용할 수 있다, 예를 들어, `1.17.0`.
+  
+  * __대번호 출시(major release)__에 대새서는 예를 들어, `1.0.0` 처럼 `대번호(major)`를 증가시킨다:
+    이전 버젼과 호환되지 않거나, 많은 사용자에게 영향을 미칠 수 있는 변경사항을 위해 최대한 유보한다.
+    일반적으로 `0.b.c` 에서 `1.0.0`으로 옮겨가는 것은 
+    작성한 팩키지가 안정된 API로 완벽한 기능을 갖췄음을 나타낸다.
+  
+    실무에서, 이전 버젼과 호화성 제공은 모 아니면 도식의 임계값이 있는 것은 아니다.
+    예를 들어, 거의 사용되지 않는 코드 부분에 API와 호환되지 않는 변경을 했다면,
+    대번호 변경을 받지는 못할 것 같다. 하지만, 많은 사람이 의존성을 갖는 버그를 수정했다면,
+    API가 파괴되는 변화처럼 느껴질 것이다. 본인 스스로 최선의 판단을 하세요.
+    
     
 ## Backward compatibility
 
