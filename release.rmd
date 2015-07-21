@@ -59,18 +59,34 @@ major.minor.patch.dev)`, 여기서
     API가 파괴되는 변화처럼 느껴질 것이다. 본인 스스로 최선의 판단을 하세요.
     
     
-## Backward compatibility
+## 이전 버젼과 호환성 (Backward compatibility)
 
-The big difference between major and minor versions is whether or not the code is backward compatible. This difference is a bit academic in the R community because the way most people update packages is by running `update.packages()`, which always updates to the latest version of the package, even if the major version has changed, potentially breaking code. While more R users are becoming familiar with tools like [packrat](http://rstudio.github.io/packrat/), which capture package versions on a per-project basis, you do need to be a little cautious when making big backward incompatible changes, regardless of what you do with the version number. 
+대번호와 소번호 버젼 간에 큰 차이는 코드가 이전 버젼과 호환이 되는지 안되느냐에 달려있다.
+이러한 차이는 R 커뮤니티에서 다소 학술적인데
+이유는 대부분 사용자가 팩키지를 갱신하는 방식이 
+`update.packages()`를 실행해서 진행하기 때문이다. 이런 경우, 설사 대번호 버젼이 변경되어 잠재적으로 코드를 깨뜨릴 수 있음에도 불구하고, 팩키지 가장 최신 버젼으로 갱신한다.
+더 많은 R 사용자가 프로젝트 기반으로 팩키지 버젼을 관리하는 [packrat](http://rstudio.github.io/packrat/)같은 도구에 친숙해지는 동안에, 버젼번호를 가지고 무엇을 하든지 상관없이,
+매우 큰 이전 버젼과 호환되지 않는 변경을 할 때 주의를 기울일 필요가 있다. 
 
-The importance of backward compatibility is directly proportional to the number of people using your package: you are trading your time for your users' time. The harder you strive to maintain backward compatibility, the harder it is to develop new features or fix old mistakes. Backward compatible code also tends to be harder to read because of the need to maintain multiple paths to support functionality from previous versions. Be concerned about backward compatibility, but don't let it paralyse you. 
 
-There are good reasons to make backward incompatible changes - if you made a design mistake that makes your package harder to use it's better to fix it sooner rather than later. If you do need to make a backward incompatible change, it's best to do it gradually. Provide interim version(s) between where are you now and where you'd like to be, and provide advice about what's going to change. Depending on what you're changing, use one of the following techniques to let your users know what's happening:
+이전 버젼과 호환성의 중요성은 팩키지를 사용하는 사용자 숫자와 직접적으로 비례한다: 개발자의 시간과 팩키지 사용자 시간을 거래하는 것이다. 이전 버젼과 호환성을 더 강하게 유지하려고 하면 할수록,
+신규 기능을 개발하거나 오래된 실수를 고치는 것은 더 어려워진다.
+이전 버젼과 호환되는 코드는 또한 가독성도 더 떨어진다. 왜냐하면 이전 버젼으로부터 나온 기능을 지원하는데 필요한 다수 경로를 유지보수해야 되기 때문이다. 이전 버젼과 호환성에 관심을 가져야 되지만,
+개발자 본인을 마비시킬 정도까지 가지는 마라.
 
-  * Don't immediately remove a function. First deprecate it. For example, 
-    imagine your package is version `0.5.0` and you want to remove `fun()`. In 
-    version, `0.6.0`, you'd use `.Deprecated()` to display a warning message
-    whenever someone uses the function:
+이전 버젼과 비호환되는 변경을 할 좋은 사유도 있다 -
+만약 팩키지를 사용하기 어렵게 만드는 아키텍쳐 설계 오류를 저질렀다면, 늦게라도 빨리 버그를 고치는 것이 더 낫다.
+만약 이전 버젼과 비호환되는 변경을 취할 필요가 있다면,
+점진적으로 작업을 실행하는 것이 최선이다.
+지금 현재 위치와 향후 가려고 하는 위치 사이에 중간 버젼을 제공하고
+어떤 변경이 있을지에 관한 안내도 제공하라.
+무엇을 변경할지에 따라 다르겠지만,
+다음 기법 중 하나를 사용해서 팩키지 사용자가 무슨 일이 일어나고 있는지 알 수 있게 정보를 제공하라:
+
+
+  * 함수를 즉각 제거하지 않는다. 먼저 함수를 사라지게 만들어라(deprecate). 예를 들어, 현재 버젼이 `0.5.0` 이고,
+  `fun()` 함수를 제거하고 싶다고 가정하자.
+  버젼 `0.6.0` 에서, `.Deprecated()`를 사용해서 누군가 함수를 사용할 때마다 경고 메시지를 출력하게 한다:
   
     ```{r}
     # 0.1.0
@@ -82,11 +98,11 @@ There are good reasons to make backward incompatible changes - if you made a des
     fun(1, 2, 3)
     ```
     
-    Then, remove the function once you got to `0.7.0` (or if you are
-    being very strict, once you got to `1.0.0` since it's a backward 
-    incompatible change).
+    그리고 나서, `0.7.0` 버젼으로 올리게 되면 함수를 제거한다 
+    (혹은 만약 본인이 엄격한 편이라면, `1.0.0` 버젼으로 올리게 될 때 실행한다. 왜냐하면 이전 버젼과 호환되지 않는 변경사항이기 때문이다).
+    
 
-  * Similarly, if you're removing a function argument, first warn about it:
+  * 비슷하게, 만약 함수 인자를 제거한다면, 먼저 경고를 띄운다:
   
     ```{r}
     bar <- function(x, y, z) {
@@ -100,11 +116,13 @@ There are good reasons to make backward incompatible changes - if you made a des
     bar(1, 2, 3)
     ```
 
-  * If you're deprecating a lot of code, it can be useful to add a helper 
-    function. For example, ggplot2 has `gg_dep` which automatically
-    displays a message, warning or error, depending on how much the version
-    number has changed.
-    
+  * 만약 사라지게할 코드가 엄청 많다면,
+    도움말 함수를 추가하는 것이 도움이 될 수 있다.
+    예를 들어, `ggplot2` 는 `gg_dep`를 갖고 있어서 
+    버젼 번호가 얼마나 변경되었는지에 따라 자동으로 메시지,
+    경고 혹은 오류를 화면에 출력한다.
+  
+
     ```{r}
     gg_dep <- function(version, msg) {
       v <- as.package_version(version)
@@ -131,15 +149,14 @@ There are good reasons to make backward incompatible changes - if you made a des
     }
     ```
 
-  * Significant changes to an existing function requires planning, including 
-    making gradual changes over multiple versions. Try and develop a sequence
-    of transformations where each change can be accompanied by an informative
-    error message.
-
-  * If you want to use functionality in a new version of another package,
-    don't make it a hard install-time dependency in the `DESCRIPTION` (forcing 
-    your users to upgrade that package might break other code). Instead
-    check for the version at run-time:
+  * 기존 함수에 상당한 변화는 다수 버젼에 걸쳐 점진적인 변경을 포함한 계획이 요구된다. 
+  변경 각각에 대해 정보가 되는 오류 메시지를 동반하는 일련의 변경을 시도하고 개발해 보라.
+  
+  
+  * 만약 또다른 팩키지 신규 버젼의 기능을 사용한다면,
+  `DESCRIPTION` 파일에 경직된 설치시점 의존성은 만들지 마라.
+  (사용자가 팩키지를 갱신하게 강제해서 다른 코드를 망가뜨릴 수 있다).
+  대신에 실행시간 버젼에 대한 검사를 한다:
     
     ```{r, eval = FALSE}
     if (packageVersion("ggplot2") < "1.0.0") {
@@ -147,11 +164,7 @@ There are good reasons to make backward incompatible changes - if you made a des
     }
     ```
     
-    This is also useful if you're responding to changes in one of your
-    dependencies - you'll want to have a version that will work both before
-    and after the change. This will allow you to submit it to CRAN at any time, 
-    even before the other package. Doing this may generate some `R CMD check` 
-    notes. For example:
+    만약 팩키지 의존성 중 하나에 변경사항에 대응한다면 이렇게 하는 것도 유용할 수 있다 - 변경 전과 후에 모두 동작하는 버젼을 갖출 수 있다. 심지어 다른 팩키지 이전에도, CRAN에 아무때고 팩키지를 제출할 수 있게끔 한다. 이렇게 작업하면 일부 `R CMD check` 유의사항을 생성할 수도 있다. 예를 들어:
     
     ```{r, eval = FALSE}
     if (packageVersion("foo" > "1.0.0")) {
@@ -161,17 +174,24 @@ There are good reasons to make backward incompatible changes - if you made a des
     }
     ```
     
-    If `baz` doesn't exist in foo version 1.0.0, you'll get a note that
-    it doesn't exist in foo's namespace. Just explain that you're working 
-    around a difference between versions in your submission to CRAN.
+    만약 `baz` 함수가 foo 버젼 1.0.0 에 존재하지 않는다면,
+    foo 네임스페이스에 해당 함수가 존재하지 않는다는 유의사항이 발생된다. 
+    CRAN에 제출할 때 버젼사이 차이나는 사항에 대해 작업하고 있다고만 설명한다.
     
-## The submission process {#release-check}
+## 제출 프로세스 {#release-check}
 
-To manually submit your package to CRAN, you create a package bundle (with `devtools::build()`) then upload it to <http://cran.r-project.org/submit.html>, along with some comments which describe the process you followed. This section shows you how to make submission as easy as possible by providing a standard structure for those comments. Later, in [submission](#release-submission), you'll see how to actually submit the package with `devtools::release()`.
+수작업으로 작성한 팩키지를 CRAN에 제출하기 위해서,
+팩키지 번들을 생성하고 나서 <http://cran.r-project.org/submit.html> 웹사이트에 지켰던 프로세스를 기술하는 주석과 함께 업로드한다.
+이번절에서 표준 구조를 제공함으로써 가능하면 쉽게 제출하는 방법을 공개한다. 추후에 [submission](#release-submission)에서 
+`devtools::release()`를 사용해서 실제 팩키지를 제출하는 방법을 볼 것이다.
 
-When submitting to CRAN, remember that CRAN is staffed by volunteers, all of whom have other full-time jobs. In a typical week, there over 100 submissions and only three volunteers to process them all. The less work you make for them the more likely you are to have a pleasant submission experience.
+CRAN에 제출할 때, CRAN이 자원봉사자로 구성되어 있다는 것을 기억하라.
+구성원 모두 다른 정규 직업을 가지고 있다. 전형적인 한주는 100개가 넘는 팩키지 제출건수가 있고 단지 자원봉사자 3명만이 이들 모두를 처리한다.
+자원봉사자를 위해서 더 적은 일을 던진다면, 좀더 즐거운 팩키지 제출을 경험할 듯 하다.  
 
-I recommend that you store your submission comments in a file called `cran-comments.md`. `cran-comments.md` should be checked into git (so you can track it over time), and listed in `.Rbuildignore` (so it's not included in the package). As the extension suggests, I recommend using Markdown because it gives a standard way of laying out plain text. However, because the contents will never be rendered to another format, you don't need to worry about sticking to it too closely. Here are the `cran-comments.md` from a recent version of httr:
+`cran-comments.md`로 불리는 파일에 제출 주석(comment)을 저장하는 것을 저자는 추천한다. `cran-comments.md` 파일은 Git에 등록되어야만 하고 (그래서 시간에 따라 추적할 수 있다), `.Rbuildignore` 목록에 올라가야 된다 (그래서 팩키지에는 포함되지 않게 된다).
+`R 확장 작성`에서 추천하듯이, 마크다운 사용을 저자도 추천한다. 왜냐하면, 일반 텍스트를 보기 좋게 배치하는 표준 방식을 제공하기 때문이다. 하지만, 내용물이 또다른 형식으로 절대 렌더링되지 않기 때문에, 너무 특정 형식에 구속된다는 걱정을 할 필요는 없다.
+`httr` 최신 버젼으로부터 나온 `cran-comments.md` 파일이 다음에 나와 있다:
 
 ```md
 ## Test environments
