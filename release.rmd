@@ -512,34 +512,44 @@ GitHub에서 잘 지원되고 다른 형식으로 용도변경하기 쉽다.
 다음에 CRAN 유지보수담당자가 검사를 자체 실행하고 결과를 알려준다.
 보통 24시간 정도 소요되지만, 경우에 따라서는 5일까지 소요될 수 있다.
 
-### On failure
+### 실패한 경우
 
-If your package does not pass `R CMD check` or is in violation of CRAN policies, a CRAN maintainer will e-mail you and describe the problem(s). Failures are frustrating, and the feedback may be curt and may feel downright insulting. Arguing with CRAN maintainers will likely waste both your time and theirs. Instead:
+만약 작성한 팩키지가 `R CMD check` 검사를 통과하지 못하거나,
+CRAN 정책을 위반했다면, CRAN 유지관리담당자가 전자우편을 보내서 문제점을 기술해준다.
+실패는 당황스럽고 피드백은 퉁명스럽고 명백하게 모욕적으로 느껴질 수도 있다.
+CRAN 유지관리담당자에 따져보는 것은 본인과 담당자 시간 모두 낭비가 될 수 있다.
+대신에:
 
-* Breathe. A rejected CRAN package is not the end of the world. It happens to
-  everyone. Even members of R-core have to go through the same process and CRAN 
-  is no friendlier to them. I have had numerous packages rejected by CRAN.
-  I was banned from submitting to CRAN for two weeks because too many of 
-  my existing packages had minor problems.
 
-* If the response gets you really riled up, take a couple of days to cool down
-  before responding. Ignore any ad hominem attacks, and strive to respond only 
-  to technical issues.
+* 숨을 깊이 들이 마셔라. 거부된 CRAN 팩키지로 세상이 끝난 것은 아니다.
+  누구에게나 일어나다. 심지어 R 코어 회원도 동일한 프로세스를 겪고,
+  CRAN이 특별히 더 친절한 것은 아니다.
+  저자도 CRAN으로부터 거부된 팩키지가 많다.
+  너무 많은 기존 팩키지가 작은 문제를 갖고 있어서 2주 동안 CRAN에 제출하는 것이 금지되기도 경험을 저자는 갖고 있다.
 
-* If a devtools problem causes a CRAN maintainer to be annoyed with you, I 
-  am deeply sorry. If you forward me the message along with your address,
-  I'll send you a hand-written apology card.
 
-Unless you feel extremely strongly that discussion is merited, don't respond to the e-mail. Instead:
+* 만약 응답이 너무 짜증난다면, 대응하기 전에 몇일간 안정화 시간을 보내라.
+  어떤 인신공격도 무시하고 단지 기술적인 이슈에만 대응하려고 노력하라.
 
-  * Fix the identified problems and make recommended changes. Re-run
-    `devtools::check()` to make sure you didn't accidentally introduce any 
-    new problems.
+
+* 만약 devtools 문제 때문에 CRAN 유지관리담당자가 여러분을 짜증나게 했다면,
+  매우 유감이다. 주소와 함께 메시지를 저자에게 알려주면,
+  저자가 직접 자필로 쓴 사과 엽서를 보내줄 것이다.
+
+
+매우 강하게 토론할 가치가 있다고 느껴지지 않는다면, 전자우편으로 응답하지 마라. 
+대신에:
+
+
+
+  * 식별된 문제를 고치고 추천된 변경사항을 반영하라.
+    `devtools::check()`을 재실행해서 어떤 신규 문제도 도입되지 않음을 확실히 한다.
   
-  * Add a "Resubmission" section at the top of `cran-comments.md`. This should 
-    clearly identify that the package is a resubmission, and list the changes 
-    that you made.
+
+  * `cran-comments.md` 파일 상단에 "재제출(Resubmission)" 절을 추가하라.
+    이를 통해서 팩키지가 다시 재출된 사실과 변경한 목록을 명확하게 알아보게 한다.
     
+
     ```md
     ## Resubmission
     This is a resubmission. In this version I have:
@@ -550,52 +560,64 @@ Unless you feel extremely strongly that discussion is merited, don't respond to 
       and LICENSE files.
     ```
   
-  * If necessary, update the check results and downstream dependencies sections.
+  * 만약 필요하다면, 검사결과와 하류 의존성 부분을 갱신하라.
   
-  * Run `devtools::submit_cran()` to re-submit the package without working 
-    through all the `release()` questions a second time.
+  * `devtools::submit_cran()`을 실행해서 재차 모든 `release()` 질문에 대한 작업 없이
+    팩키지를 다시 재출한다.
 
-### Binary builds
+### 바이너리 빌드
 
-After the package has been accepted by CRAN it will be built for each platform. It's possible this may uncover further errors. Wait 48 hours until all the checks for all packages have been run, then go to the check results package for your package:
+팩키지가 CRAN에 승인된 후에, 팩키지는 각 플랫폼에 맞게 빌드된다.
+이 과정에서 오류가 드러날 수도 있다.
+모든 팩키지에 대한 모든 검사가 실행될 때까지 48시간을 기다려라.
+그리고 나서, 팩키지 검사결과(check results package)로 들어간다.
+
 
 ```{r, echo = FALSE}
 bookdown::embed_png("screenshots/cran-checks.png", dpi = 220)
 ```
 
-Prepare a patch release that fixes the problems and submit using the same process as above.
+문제를 고치는 패치 출시를 준비하고, 상기 기술된 동일한 과정을 사용해서 제출한다.
 
-## Prepare for next version {#post-release}
 
-Once your package has been accepted by CRAN, you have a couple of technical tasks to do:
+## 차기 버젼 준비 {#post-release}
 
-* If you use GitHub, go to the repository release page. Create a new release
-  with tag version `v1.2.3` (i.e. "v" followed by the version of your package).
-  Copy and paste the contents of the relevant `NEWS.md` section into the release 
-  notes.
+팩키지가 CRAN에 승인되면 즉시 수행해야 할 몇가지 기술적인 작업이 남아 있다:
+
+
+* GitHub을 사용한다면, 저장소 출시 페이지(release page)로 간다.
+  태그 버젼 `v1.2.3`(예를 들어, "v" 다음에 팩키지 버젼 번호)를 갖는 신규 출시(new release)를 생성하라 
+  관련된 `NEWS.md` 부분 내용을 복사해서 출시 노트(release note)에 붙여넣는다.
   
-* If you use git, but not GitHub, tag the release with `git tag -a v1.2.3`.
+* 만약 Git을 사용한다면, 하지만 GitHub은 사용하지 않으면, 출시정보를 `git tag -a v1.2.3`으로 태그하라.
 
-* Add the `.9000` suffix to the `Version` field in the DESCRIPTION to indicate
-  that this is a development version. Create a new heading in `NEWS.md` and commit the changes.
+* DESCRIPTION 파일 `Version` 필드에 `.9000` 접미사를 붙여서 개발버젼임을 나타낸다.
+  `NEWS.md` 파일에 새 제목을 생성하고 변경사항을 커밋한다.
 
-## Publicising your package {#promotion}
+## 팩키지 홍보 {#promotion}
 
-Now you're ready for the fun part: publicising your package. This is really important. No one will use your helpful new package if they don't know that it exists.
+이제 재밌는 부분을 준비한다: 팩키지를 홍보.
+이것이 정말 중요하다. 만약 팩키지 존재를 알지 못하면, 여러분이 개발한 도움이 되는 신규 팩키지를 누구도 사용하지 못한다.
 
-Start by writing a release announcement. This should be an R Markdown document that briefly describes what the package does (so people who haven't used it before can understand why they should care), and what's new in this version. Start with the contents of `NEWS.md`, but you'll need to modify it. The goal of `NEWS.md` is to be comprehensive; the goal of the release announcement is to highlight the most important changes. Include a link at the end of the announcement to the full release notes so people can see all the changes. Where possible, I recommend showing examples of new features: it's much easier to understand the benefit of a new feature if you can see it in action. 
+출시 발표문을 작성하면서 시작한다.
+R 마크다운 문서로 작성해서 간략하게 팩키지가 무엇을 수행하고(그래서 전에 사용하지 못한 사람이 왜 관심을 가져야 되는지 이해할 수 있다),
+이번 버젼에 새로운 것이 무엇인지 기술한다.
+`NEWS.md` 파일 내용으로 시작하지만 변형할 필요가 있다.
+`NEWS.md` 파일 목적은 포괄성에 있다; 출시 발표 목적은 가장 중요한 변경사항을 부각시키는데 있다.
+발표문 말미에 링크를 전체 출시 노트에 걸어서 사람들이 변경사항 모두를 볼 수 있게한다.
+가능하면, 신규 기능에 대한 예제를 보여주는 것을 추천한다: 동작하는 것을 볼 수 있게 되면
+신규 기능에 대한 혜택을 이해하기가 훨씬 더 쉬워진다.
 
-There are a number of places you can include the announcement:
+출시 발표문을 게시할 수 있는 장소가 몇군데 있다:
 
-* If you have a blog, publish it there. I now publish all package release
-  announcements on the [RStudio blog](http://blog.rstudio.org/author/hadleywickham/).
 
-* If you use Twitter, tweet about it with the #rstats hashtag.
+* 만약 블로그를 갖고 있다면, 그곳에 게시하라. 
+  저자는 [RStudio blog](http://blog.rstudio.org/author/hadleywickham/)에 모든 팩키지 출시 발표를 게시한다.
 
-* Send it to the 
-  [r-packages mailing list](https://stat.ethz.ch/mailman/listinfo/r-packages).
-  Messages sent to this list are automatically forwarded to the R-help mailing 
-  list.
+* 만약 트위터를 사용한다면, #rstats 해쉬태그로 관련사항을 트윗하라.
+
+* [r-packages 메일링 리스트(mailing list)](https://stat.ethz.ch/mailman/listinfo/r-packages)에 관련사항을 보내라.
+  메일링 리스트에 전송된 메시지는 자동으로 R-help 메일링 리스트에 전달된다.
 
 # 축하합니다!
 
