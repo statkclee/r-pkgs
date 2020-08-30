@@ -1,7 +1,10 @@
 ---
-layout: default
-title: Welcome
-output: bookdown::html_chapter
+title: "R Package"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+output: bookdown::gitbook
+documentclass: book
+link-citations: yes
 ---
 
 # R 팩키지 
